@@ -1,14 +1,17 @@
-// import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 
-// class Home extends StatefulWidget {
-//   const Home({super.key});
+class Home extends StatefulWidget {
+  const Home({super.key});
 
-//   // creating new instance of [home/beranda]
+  @override
+  State<Home> createState() => _HomeState();
+}
 
-//   @override
-//   State<Home> createState() {
-//     return HomeState();
-//   }
-// }
-
-// class _HomeState extends State<Home> {}
+class _HomeState extends State<Home> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(child: Text('Halo!', style: TextStyle(fontSize: 24))),
+    );
+  }
+}
