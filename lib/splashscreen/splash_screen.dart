@@ -5,6 +5,8 @@ import 'package:experimental/onboarding/onboarding.dart';
 // Pointing to App Splash Screen
 
 class SplashScreen extends StatefulWidget {
+  const SplashScreen({super.key});
+
   @override
   Splash createState() => Splash();
 }

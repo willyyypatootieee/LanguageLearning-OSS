@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:experimental/main/home/home.dart';
 import 'package:experimental/splashscreen/splash_screen.dart';
 
 class Onboarding extends StatelessWidget {
-  const Onboarding({Key? key}) : super(key: key);
+  const Onboarding({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -19,9 +20,6 @@ class Onboarding extends StatelessWidget {
               height: 400,
             ),
             DefaultTextStyle(
-              child: Text(
-                'The free, fun, and effective way to learn a language',
-              ),
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 20,
@@ -29,24 +27,70 @@ class Onboarding extends StatelessWidget {
                 fontFamily: 'Feather',
                 color: const Color.fromARGB(255, 140, 140, 140),
               ),
-            ),
-            const SizedBox(height: 20),
-            FilledButton.icon(
-              onPressed: () {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => SplashScreen()),
-                );
-              },
-              style: FilledButton.styleFrom(
-                backgroundColor: const Color.fromARGB(255, 255, 255, 255),
-                foregroundColor: const Color.fromARGB(255, 0, 0, 0),
+              child: Text(
+                'The free, fun, and effective way to learn a language',
               ),
-              // onPressed: () => Navigator.of(context).pushNamed('/questions'),
-              icon: const Icon(Icons.stars),
-              label: const Text(
-                'Start Quiz!',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 16),
+            // "I ALREADY HAVE AN ACCOUNT" button (outlined)
+            SizedBox(
+              width: 320,
+              height: 56,
+
+              child: FilledButton(
+                onPressed: () {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (context) => const Home()),
+                  );
+                },
+                style: FilledButton.styleFrom(
+                  foregroundColor: Colors.white,
+                  backgroundColor: const Color(0xFF7ED321),
+                  side: const BorderSide(color: Color(0xFF7ED321), width: 4),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  textStyle: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                child: const Text(
+                  'I ALREADY HAVE AN ACCOUNT',
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            // "I ALREADY HAVE AN ACCOUNT" button (outlined)
+            SizedBox(
+              width: 320,
+              height: 56,
+
+              child: FilledButton(
+                onPressed: () {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (context) => const Home()),
+                  );
+                },
+                style: FilledButton.styleFrom(
+                  foregroundColor: Colors.white,
+                  backgroundColor: const Color(0xFF7ED321),
+                  side: const BorderSide(color: Color(0xFF7ED321), width: 4),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  textStyle: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                child: const Text(
+                  'I ALREADY HAVE AN ACCOUNT',
+                  textAlign: TextAlign.center,
+                ),
               ),
             ),
           ],
