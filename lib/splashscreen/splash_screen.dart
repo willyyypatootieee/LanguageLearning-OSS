@@ -42,6 +42,7 @@ class Splash extends State<SplashScreen> {
               const SizedBox(height: 40),
             ],
           ),
+          
         ),
       ),
     );
