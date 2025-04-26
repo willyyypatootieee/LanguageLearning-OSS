@@ -18,11 +18,13 @@ class Onboarding extends StatelessWidget {
               width: 400,
               height: 400,
             ),
-            Text(
-              'The free, fun, and effective way to learn a language',
+            DefaultTextStyle(
+              child: Text(
+                'The free, fun, and effective way to learn a language',
+              ),
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 14,
+                fontSize: 20,
                 fontWeight: FontWeight.bold,
                 fontFamily: 'Feather',
                 color: const Color.fromARGB(255, 140, 140, 140),
