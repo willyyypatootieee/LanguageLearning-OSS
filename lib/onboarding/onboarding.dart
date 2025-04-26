@@ -21,20 +21,31 @@ class Onboarding extends StatelessWidget {
             Text(
               'The free, fun, and effective way to learn a language',
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                fontFamily: 'Feather',
+                color: const Color.fromARGB(255, 140, 140, 140),
+              ),
             ),
-          const SizedBox(height: 20),
-          FilledButton.icon(
-            onPressed: SplashScreen,
-            style: FilledButton.styleFrom(
-              backgroundColor: const Color.fromARGB(255, 255, 255, 255),
-              foregroundColor: const Color.fromARGB(255, 0, 0, 0),
-            ),
-            // onPressed: () => Navigator.of(context).pushNamed('/questions'),
-            icon: const Icon(Icons.stars),
-            label: const Text(
-              'Start Quiz!',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            const SizedBox(height: 20),
+            FilledButton.icon(
+              onPressed: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => SplashScreen()),
+                );
+              },
+              style: FilledButton.styleFrom(
+                backgroundColor: const Color.fromARGB(255, 255, 255, 255),
+                foregroundColor: const Color.fromARGB(255, 0, 0, 0),
+              ),
+              // onPressed: () => Navigator.of(context).pushNamed('/questions'),
+              icon: const Icon(Icons.stars),
+              label: const Text(
+                'Start Quiz!',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
             ),
           ],
         ),
