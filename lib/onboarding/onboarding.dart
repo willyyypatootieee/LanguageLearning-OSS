@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:experimental/main/home/home.dart';
-import 'package:experimental/splashscreen/splash_screen.dart';
 
 class Onboarding extends StatelessWidget {
   const Onboarding({super.key});
@@ -56,10 +55,7 @@ class Onboarding extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                child: const Text(
-                  'I ALREADY HAVE AN ACCOUNT',
-                  textAlign: TextAlign.center,
-                ),
+                child: const Text('GET STARTED', textAlign: TextAlign.center),
               ),
             ),
             const SizedBox(height: 16),
@@ -76,8 +72,8 @@ class Onboarding extends StatelessWidget {
                   );
                 },
                 style: FilledButton.styleFrom(
-                  foregroundColor: Colors.white,
-                  backgroundColor: const Color(0xFF7ED321),
+                  foregroundColor: Color(0xFF7ED321),
+                  backgroundColor: Colors.white,
                   side: const BorderSide(color: Color(0xFF7ED321), width: 4),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
