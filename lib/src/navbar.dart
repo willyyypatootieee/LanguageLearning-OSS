@@ -27,7 +27,7 @@ class Navbar extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            // Home
+            // Beranda
             GestureDetector(
               onTap: () {
                 if (selectedIndex != 0) {
@@ -54,21 +54,21 @@ class Navbar extends StatelessWidget {
                 ),
               ),
             ),
-            // Chest
+            // Peti Hadiah
             Icon(Icons.deck, color: const Color(0xFFF4B400), size: 32),
-            // Steps
+            // Langkah
             Icon(
               Icons.directions_walk_rounded,
               color: const Color(0xFF40C4FF),
               size: 32,
             ),
-            // Trophy
+            // Trofi
             Icon(
               Icons.emoji_events_rounded,
               color: const Color(0xFFFFC107),
               size: 32,
             ),
-            // Profile
+            // Profil
             GestureDetector(
               onTap: () {
                 if (selectedIndex != 4) {
@@ -98,7 +98,7 @@ class Navbar extends StatelessWidget {
                 ),
               ),
             ),
-            // More
+            // Lainnya
             Icon(
               Icons.more_horiz_rounded,
               color: const Color(0xFFB39DDB),

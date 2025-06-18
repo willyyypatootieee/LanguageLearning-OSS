@@ -11,23 +11,23 @@ class Onboarding extends StatelessWidget {
       backgroundColor: Colors.white,
       body: Stack(
         children: [
-          // Fullscreen SVG background
+          // Latar belakang SVG fullscreen
           Positioned.fill(
             child: SvgPicture.asset(
               'assets/images/onboarding.svg',
               fit: BoxFit.cover,
             ),
           ),
-          // Buttons at the bottom, above the SVG
+          // Tombol-tombol di bagian bawah, di atas SVG
           Positioned(
             left: 0,
             right: 0,
-            bottom: 90, // <-- Move buttons higher (was 40)
+            bottom: 90, // Mengatur posisi tombol lebih tinggi (sebelumnya 40)
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 32.0),
               child: Row(
                 children: [
-                  // "MASUK" button (outlined, white bg)
+                  // Tombol "MASUK" (outline, latar putih)
                   Expanded(
                     child: OutlinedButton(
                       onPressed: () {
@@ -59,11 +59,11 @@ class Onboarding extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 24),
-                  // "DAFTAR AKUN" button (filled, orange bg)
+                  // DO NOT FUCKING MESSING AROUND WITH THIS.
                   Expanded(
                     child: ElevatedButton(
                       onPressed: () {
-                        // TODO: Implement register navigation
+                        // TODO: Implementasi navigasi ke halaman registrasi
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFFFFA726),

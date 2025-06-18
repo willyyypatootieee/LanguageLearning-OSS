@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:experimental/onboarding/onboarding.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-// Pointing to App Splash Screen
+// Mengarahkan ke Splash Screen aplikasi
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -34,18 +34,16 @@ class Splash extends State<SplashScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
-
             children: [
-              // Show logo.svg
-              // Requires flutter_svg package
-              // import 'package:flutter_svg/flutter_svg.dart'; at the top if not already
+              // Menampilkan logo.svg
+              // Membutuhkan package flutter_svg
               SvgPicture.asset(
                 'assets/images/logo.svg',
                 width: 200,
                 height: 200,
               ),
               const SizedBox(height: 20),
-              // Show text.svg under the logo
+              // Menampilkan text.svg di bawah logo
               SvgPicture.asset(
                 'assets/images/text.svg',
                 width: 180,

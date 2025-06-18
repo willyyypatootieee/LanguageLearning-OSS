@@ -12,17 +12,19 @@ class Home extends StatelessWidget {
       backgroundColor: Colors.white,
       body: Stack(
         children: [
-          // Fullscreen SVG background
+          // Latar belakang SVG fullscreen
           Positioned.fill(
             child: Image.asset('assets/images/home.png', fit: BoxFit.cover),
           ),
-          // PNG button at the same position and scale
+          // Tombol PNG pada posisi dan skala tertentu
           Positioned(
-            top: 40, // Adjust this value to match the checkmark position
-            left: MediaQuery.of(context).size.width * 0.62, // Adjust as needed
+            top: 40, // Atur nilai ini agar sesuai dengan posisi checkmark
+            left:
+                MediaQuery.of(context).size.width *
+                0.62, // Sesuaikan sesuai kebutuhan
             child: GestureDetector(
               onTap: () {
-                // TODO: Add your action here
+                // TODO: Tambahkan aksi di sini
               },
               child: Image.asset(
                 'assets/images/button.png',
@@ -31,16 +33,16 @@ class Home extends StatelessWidget {
               ),
             ),
           ),
-          // Buttons at the bottom, above the SVG
+          // Tombol-tombol di bagian bawah, di atas SVG
           Positioned(
             left: 0,
             right: 0,
-            bottom: 90, // Move buttons higher
+            bottom: 90, // Mengatur posisi tombol lebih tinggi
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 32.0),
               child: Row(
                 children: [
-                  // ...add your buttons here...
+                  // ...tambahkan tombol di sini...
                 ],
               ),
             ),

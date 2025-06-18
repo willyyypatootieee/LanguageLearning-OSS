@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:rive/rive.dart';
-import 'package:flutter/services.dart';
 import '../src/navbar.dart';
 import '../main/home/home.dart';
 
@@ -11,39 +10,41 @@ class ProfileScreen extends StatefulWidget {
   State<ProfileScreen> createState() => _ProfileScreenState();
 }
 
-class _ProfileScreenState extends State<ProfileScreen> {
-  StateMachineController? _stateMachineController;
-  Artboard? _artboard;
+// FUCKING PISS OF SHIT RIVE ANIMATION NIGGA
 
-  @override
-  void initState() {
-    super.initState();
-    rootBundle.load('assets/images/personalised_character.riv').then((
-      data,
-    ) async {
-      final file = RiveFile.import(data);
-      final artboard = file.mainArtboard;
-      final controller = StateMachineController.fromArtboard(
-        artboard,
-        'state machine', // Use your state machine name
-      );
-      if (controller != null) {
-        artboard.addController(controller);
-      }
+class _ProfileScreenState extends State<ProfileScreen> {
+  StateMachineController? _controller;
+  SMIInput<bool>? _tapInput;
+  String? _currentState;
+
+  // Inisialisasi Rive dan kontrol state machine
+  void _onRiveInit(Artboard artboard) {
+    final controller = StateMachineController.fromArtboard(
+      artboard,
+      'state machine',
+      onStateChange: _onStateChange,
+    );
+    if (controller != null) {
+      artboard.addController(controller);
       setState(() {
-        _artboard = artboard;
-        _stateMachineController = controller;
+        _controller = controller;
+        _tapInput = controller.findInput<bool>('tap');
       });
-    });
+    }
   }
 
+  // Callback saat terjadi perubahan state pada state machine
+  void _onStateChange(String stateMachineName, String stateName) {
+    setState(() {
+      _currentState = stateName;
+    });
+    // Bisa digunakan untuk aksi tambahan saat state berubah
+    // print('State berubah di $stateMachineName menjadi $stateName');
+  }
+
+  // Fungsi untuk trigger input 'tap' pada Rive
   void _onTap() {
-    // Example: If your state machine has a trigger input named 'tap'
-    final trigger = _stateMachineController?.findInput<bool>('tap');
-    if (trigger != null) {
-      trigger.value = true;
-    }
-    // Add more logic if your state machine uses other input types
+    _tapInput?.value = true;
   }
 
   @override
@@ -53,10 +54,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
       body: GestureDetector(
         onTap: _onTap,
         child: SizedBox.expand(
-          child:
-              _artboard == null
-                  ? const SizedBox.shrink()
-                  : Rive(artboard: _artboard!, fit: BoxFit.cover),
+          child: RiveAnimation.asset(
+            'assets/images/personalised_character.riv',
+            fit: BoxFit.cover,
+            stateMachines: const ['state machine'],
+            onInit: _onRiveInit,
+          ),
         ),
       ),
       bottomNavigationBar: Navbar(
