@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:experimental/main/home/home.dart';
 
 class Onboarding extends StatelessWidget {
   const Onboarding({super.key});
@@ -30,7 +31,10 @@ class Onboarding extends StatelessWidget {
                   Expanded(
                     child: OutlinedButton(
                       onPressed: () {
-                        // TODO: Implement login navigation
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(builder: (context) => const Home()),
+                        );
                       },
                       style: OutlinedButton.styleFrom(
                         backgroundColor: const Color(0xFFFFF3ED),
