@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:experimental/onboarding/onboarding.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 // Pointing to App Splash Screen
 
@@ -28,23 +29,31 @@ class Splash extends State<SplashScreen> {
     return Directionality(
       textDirection: TextDirection.ltr,
       child: Scaffold(
-        backgroundColor: Color.fromARGB(255, 137, 223, 0),
+        backgroundColor: Color(0xFFFE8B00),
         body: Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
 
             children: [
-              Image.asset(
-                'assets/images/splashscreen.png',
+              // Show logo.svg
+              // Requires flutter_svg package
+              // import 'package:flutter_svg/flutter_svg.dart'; at the top if not already
+              SvgPicture.asset(
+                'assets/images/logo.svg',
                 width: 200,
                 height: 200,
               ),
-
+              const SizedBox(height: 20),
+              // Show text.svg under the logo
+              SvgPicture.asset(
+                'assets/images/text.svg',
+                width: 180,
+                height: 60,
+              ),
               const SizedBox(height: 40),
             ],
           ),
-          
         ),
       ),
     );

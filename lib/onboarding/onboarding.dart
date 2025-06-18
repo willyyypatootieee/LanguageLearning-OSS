@@ -1,96 +1,90 @@
 import 'package:flutter/material.dart';
-import 'package:experimental/main/home/home.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class Onboarding extends StatelessWidget {
   const Onboarding({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: Colors.white, // Set the background color to white
-      child: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Image.asset(
-              'assets/images/onboarding.png',
-              width: 400,
-              height: 400,
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: Stack(
+        children: [
+          // Fullscreen SVG background
+          Positioned.fill(
+            child: SvgPicture.asset(
+              'assets/images/onboarding.svg',
+              fit: BoxFit.cover,
             ),
-            DefaultTextStyle(
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                fontFamily: 'Feather',
-                color: const Color.fromARGB(255, 140, 140, 140),
-              ),
-              child: Text(
-                'The free, fun, and effective way to learn a language',
-              ),
-            ),
-            const SizedBox(height: 16),
-            // "I ALREADY HAVE AN ACCOUNT" button (outlined)
-            SizedBox(
-              width: 320,
-              height: 56,
-
-              child: FilledButton(
-                onPressed: () {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (context) => const Home()),
-                  );
-                },
-                style: FilledButton.styleFrom(
-                  foregroundColor: Colors.white,
-                  backgroundColor: const Color(0xFF7ED321),
-                  side: const BorderSide(color: Color(0xFF7ED321), width: 4),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+          ),
+          // Buttons at the bottom, above the SVG
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 90, // <-- Move buttons higher (was 40)
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32.0),
+              child: Row(
+                children: [
+                  // "MASUK" button (outlined, white bg)
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () {
+                        // TODO: Implement login navigation
+                      },
+                      style: OutlinedButton.styleFrom(
+                        backgroundColor: const Color(0xFFFFF3ED),
+                        side: const BorderSide(
+                          color: Color(0xFFFFA726),
+                          width: 2,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                      ),
+                      child: const Text(
+                        'MASUK',
+                        style: TextStyle(
+                          color: Color(0xFFFFA726),
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                          letterSpacing: 1.2,
+                        ),
+                      ),
+                    ),
                   ),
-                  textStyle: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+                  const SizedBox(width: 24),
+                  // "DAFTAR AKUN" button (filled, orange bg)
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        // TODO: Implement register navigation
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFFFA726),
+                        elevation: 2,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                      ),
+                      child: const Text(
+                        'DAFTAR AKUN',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                          letterSpacing: 1.2,
+                        ),
+                      ),
+                    ),
                   ),
-                ),
-                child: const Text('GET STARTED', textAlign: TextAlign.center),
-              ),
-            ),
-            const SizedBox(height: 16),
-            // "I ALREADY HAVE AN ACCOUNT" button (outlined)
-            SizedBox(
-              width: 320,
-              height: 56,
-
-              child: FilledButton(
-                onPressed: () {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (context) => const Home()),
-                  );
-                },
-                style: FilledButton.styleFrom(
-                  foregroundColor: Color(0xFF7ED321),
-                  backgroundColor: Colors.white,
-                  side: const BorderSide(color: Color(0xFF7ED321), width: 4),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  textStyle: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                child: const Text(
-                  'I ALREADY HAVE AN ACCOUNT',
-                  textAlign: TextAlign.center,
-                ),
+                ],
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
