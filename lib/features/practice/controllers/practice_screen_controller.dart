@@ -18,7 +18,7 @@ class PracticeScreenController {
     } else if (index == 3) {
       // Already on Practice screen
     } else if (index == 4) {
-      AppRouter.navigateWithFade(context, const ProfileScreen());
+      AppRouter.navigateWithFade(context, const ProfileScreenFactory());
     }
   }
 }

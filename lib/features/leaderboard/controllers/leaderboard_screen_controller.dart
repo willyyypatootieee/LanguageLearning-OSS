@@ -18,7 +18,7 @@ class LeaderboardScreenController {
     } else if (index == 3) {
       AppRouter.navigateWithFade(context, const PracticeScreen());
     } else if (index == 4) {
-      AppRouter.navigateWithFade(context, const ProfileScreen());
+      AppRouter.navigateWithFade(context, const ProfileScreenFactory());
     }
   }
 }

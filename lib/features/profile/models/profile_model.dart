@@ -57,17 +57,8 @@ class BadgeInfo {
   final BadgeType type;
   final bool isEarned;
 
-  const BadgeInfo({
-    required this.type,
-    required this.isEarned,
-  });
+  const BadgeInfo({required this.type, required this.isEarned});
 }
 
 /// Types of badges available in the application
-enum BadgeType {
-  celebration,
-  star,
-  medal,
-  trophy,
-  unknown,
-}
+enum BadgeType { celebration, star, medal, trophy, unknown }
