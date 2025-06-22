@@ -44,8 +44,7 @@ class Navbar extends StatelessWidget {
           child: LayoutBuilder(
             builder: (context, constraints) {
               final itemWidth = constraints.maxWidth / navItems.length;
-              final indicatorSize =
-                  48.0; // Slightly bigger indicator for larger icons
+              final indicatorSize = 52.0; // Larger indicator
               return Stack(
                 alignment: Alignment.center,
                 children: [
@@ -102,8 +101,8 @@ class Navbar extends StatelessWidget {
         child: Center(
           child: SvgPicture.asset(
             svgPath,
-            width: 30, // Increased icon size
-            height: 30, // Increased icon size
+            width: 34, // Much bigger icon size
+            height: 34, // Much bigger icon size
           ),
         ),
       ),
