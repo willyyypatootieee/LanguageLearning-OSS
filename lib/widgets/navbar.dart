@@ -17,111 +17,203 @@ class Navbar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // SafeArea agar tidak tertutup notch atau sistem UI
+    final navItems = [
+      _buildNavItem(Icons.home, 0, 'Home'),
+      _buildNavItem(Icons.search, 1, 'Search'),
+      _buildNavItem(Icons.add_circle_rounded, 2, 'Add'),
+      _buildNavItem(Icons.notifications, 3, 'Notif'),
+    ];
+    final profileItem = _buildProfileNavItem(Icons.person, 4, 'Profile');
+
     return SafeArea(
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(24),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
-          child: Container(
-            padding: const EdgeInsets.symmetric(
-              vertical: 4,
-              horizontal: 4,
-            ), // tighter padding
-            decoration: BoxDecoration(
-              color: Colors.white.withAlpha(46), // 0.18 * 255 ≈ 46
-              borderRadius: BorderRadius.circular(24),
-              border: Border.all(color: Colors.white.withAlpha(89), width: 1.5),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        child: Row(
+          children: [
+            Expanded(
+              child: Stack(
+                alignment: Alignment.centerLeft,
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(
+                      32,
+                    ), // More rounded corners
+                    child: BackdropFilter(
+                      filter: ImageFilter.blur(
+                        sigmaX: 25,
+                        sigmaY: 25,
+                      ), // Stronger blur
+                      child: Container(
+                        height: 64,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withAlpha(35), // More transparent
+                          borderRadius: BorderRadius.circular(32),
+                          border: Border.all(
+                            color: Colors.white.withAlpha(65),
+                            width: 1.5,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 30,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: LayoutBuilder(
+                          builder: (context, constraints) {
+                            final itemWidth =
+                                constraints.maxWidth / navItems.length;
+                            // Calculate indicator size and position to match icon
+                            final indicatorSize =
+                                48.0; // Slightly larger than icon
+                            return Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                // Liquid indicator
+                                AnimatedPositioned(
+                                  duration: const Duration(milliseconds: 600),
+                                  curve: Curves.elasticOut,
+                                  left:
+                                      selectedIndex < 4
+                                          ? selectedIndex * itemWidth +
+                                              (itemWidth - indicatorSize) / 2
+                                          : 0,
+                                  top:
+                                      (64 - indicatorSize) /
+                                      2, // Center vertically in container
+                                  width: selectedIndex < 4 ? indicatorSize : 0,
+                                  height: indicatorSize,
+                                  child:
+                                      selectedIndex < 4
+                                          ? TweenAnimationBuilder<double>(
+                                            tween: Tween(begin: 0.8, end: 1.0),
+                                            duration: const Duration(
+                                              milliseconds: 500,
+                                            ),
+                                            curve: Curves.easeOutCubic,
+                                            builder: (context, value, child) {
+                                              return Transform.scale(
+                                                scale: value,
+                                                child: Container(
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.white
+                                                        .withAlpha(75),
+                                                    shape: BoxShape.circle,
+                                                    boxShadow: [
+                                                      BoxShadow(
+                                                        color: selectedColor
+                                                            .withAlpha(30),
+                                                        blurRadius: 20,
+                                                        spreadRadius: 2,
+                                                        offset: const Offset(
+                                                          0,
+                                                          4,
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              );
+                                            },
+                                          )
+                                          : const SizedBox.shrink(),
+                                ),
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceEvenly,
+                                  children: navItems,
+                                ),
+                              ],
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                // Tombol Home
-                _buildNavItem(Icons.home, 0, 'Home'),
-                // Tombol Search
-                _buildNavItem(Icons.search, 1, 'Search'),
-                // Tombol Add
-                _buildNavItem(Icons.add_circle_rounded, 2, 'Add'),
-                // Tombol Notifications
-                _buildNavItem(Icons.notifications, 3, 'Notif'),
-                // Tombol Profile
-                _buildNavItem(Icons.person, 4, 'Profile'),
-              ],
-            ),
-          ),
+            const SizedBox(width: 8),
+            profileItem,
+          ],
         ),
       ),
     );
   }
 
-  // Widget untuk setiap item navbar
+  // Helper to determine if background is light or dark for contrast
+  Color _getReadableColor(BuildContext context, {bool isSelected = false}) {
+    // Try to get the background color behind the navbar
+    // If the background is light, use black; if dark, use white
+    // For glassmorphism, we assume a light background if luminance > 0.5
+    final bgColor = Theme.of(context).scaffoldBackgroundColor;
+    final isLight = bgColor.computeLuminance() > 0.5;
+    return isSelected
+        ? (isLight ? Colors.black : Colors.white)
+        : (isLight ? Colors.black54 : Colors.white70);
+  }
+
+  // Widget untuk setiap item navbar (Home, Search, Add, Notif)
   Widget _buildNavItem(IconData icon, int index, String label) {
-    final isSelected = selectedIndex == index;
-    return Expanded(
-      child: GestureDetector(
-        onTap: () => onTap?.call(index), // Aksi saat item ditekan
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeOutExpo,
-          padding: const EdgeInsets.symmetric(vertical: 4), // tighter
-          decoration: BoxDecoration(
-            color:
-                isSelected
-                    ? Colors.white.withAlpha(71)
-                    : Colors.transparent, // 0.28 * 255 ≈ 71
-            borderRadius: BorderRadius.circular(16),
-            boxShadow:
-                isSelected
-                    ? [
-                      BoxShadow(
-                        color: selectedColor.withAlpha(46), // 0.18 * 255 ≈ 46
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
-                      ),
-                    ]
-                    : [],
+    return Builder(
+      builder: (context) {
+        final isSelected = selectedIndex == index;
+        final readableColor = _getReadableColor(
+          context,
+          isSelected: isSelected,
+        );
+        return Expanded(
+          child: GestureDetector(
+            onTap: () => onTap?.call(index),
+            child: SizedBox(
+              height: 52,
+              child: Center(child: Icon(icon, size: 24, color: readableColor)),
+            ),
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ShaderMask(
-                shaderCallback: (Rect bounds) {
-                  return isSelected
-                      ? LinearGradient(
-                        colors: [
-                          selectedColor.withAlpha(230), // 0.9 * 255 ≈ 230
-                          Colors.white.withAlpha(179), // 0.7 * 255 ≈ 179
-                        ],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ).createShader(bounds)
-                      : LinearGradient(
-                        colors: [unselectedColor, Colors.white],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ).createShader(bounds);
-                },
-                blendMode: BlendMode.srcATop,
-                child: Icon(
-                  icon,
-                  size: isSelected ? 28 : 24, // smaller icon
-                  color: isSelected ? selectedColor : unselectedColor,
-                ),
-              ),
-              const SizedBox(height: 2), // tighter spacing
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 12, // smaller font
-                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-                  color: isSelected ? selectedColor : unselectedColor,
-                  letterSpacing: 0.1,
-                ),
-              ),
-            ],
+        );
+      },
+    );
+  }
+
+  // Widget khusus untuk Profile (sendiri di lingkaran)
+  Widget _buildProfileNavItem(IconData icon, int index, String label) {
+    return Builder(
+      builder: (context) {
+        final isSelected = selectedIndex == index;
+        final readableColor = _getReadableColor(
+          context,
+          isSelected: isSelected,
+        );
+        return GestureDetector(
+          onTap: () => onTap?.call(index),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 500),
+            curve: Curves.elasticOut,
+            width: 56,
+            height: 64,
+            decoration: BoxDecoration(
+              color:
+                  isSelected
+                      ? Colors.white.withAlpha(90)
+                      : Colors.white.withAlpha(46),
+              shape: BoxShape.circle,
+              boxShadow:
+                  isSelected
+                      ? [
+                        BoxShadow(
+                          color: selectedColor.withAlpha(46),
+                          blurRadius: 16,
+                          offset: const Offset(0, 4),
+                        ),
+                      ]
+                      : [],
+              border: Border.all(color: Colors.white.withAlpha(89), width: 1.5),
+            ),
+            child: Center(child: Icon(icon, size: 24, color: readableColor)),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }
