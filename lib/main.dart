@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'app.dart';
+import 'features/splash/screens/splash_screen.dart';
 
 void main() {
   runApp(const BeLingApp());

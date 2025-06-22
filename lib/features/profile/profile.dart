@@ -1,3 +1,6 @@
 // Export all profile feature components
-export 'controllers/profile_screen_controller.dart';
-export 'screens/profile_screen.dart';
+export 'controllers/controllers.dart';
+export 'models/models.dart';
+export 'screens/screens.dart';
+export 'services/services.dart';
+export 'widgets/widgets.dart';
