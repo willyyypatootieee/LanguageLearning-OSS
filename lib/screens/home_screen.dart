@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import '../widgets/navbar.dart';
+import 'book_screen.dart';
+import 'leaderboard_screen.dart';
+import 'practice_screen.dart';
 import 'profile_screen.dart';
-import 'search_screen.dart';
-import 'add_screen.dart';
-import 'notif_screen.dart';
 
 /// Halaman utama dengan latar belakang dan tombol di posisi tertentu.
 class HomeScreen extends StatelessWidget {
@@ -12,41 +12,10 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white, // Warna latar belakang
+      appBar: AppBar(title: const Text('Home')),
       body: Stack(
         children: [
-          // Latar belakang gambar home
-          Positioned.fill(
-            child: Image.asset('assets/images/home.png', fit: BoxFit.cover),
-          ),
-          // Tombol gambar di posisi tertentu
-          Positioned(
-            top: 40,
-            left: MediaQuery.of(context).size.width * 0.62,
-            child: GestureDetector(
-              onTap: () {}, // Aksi saat tombol ditekan
-              child: Image.asset(
-                'assets/images/button.png',
-                width: 64,
-                height: 64,
-              ),
-            ),
-          ),
-          // Area untuk tombol tambahan di bagian bawah
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 90,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 32.0),
-              child: Row(
-                children: [
-                  // Tambahkan tombol lain di sini jika diperlukan
-                ],
-              ),
-            ),
-          ),
-          // Navbar mengambang di bagian bawah
+          const Center(child: Text('Home Screen')),
           Positioned(
             left: 24,
             right: 24,
@@ -54,18 +23,14 @@ class HomeScreen extends StatelessWidget {
             child: Navbar(
               selectedIndex: 0,
               onTap: (index) {
-                if (index == 0) return; // Already on Home
-                if (index == 1) {
+                if (index == 0) {
+                  // Already on Home
+                } else if (index == 1) {
                   Navigator.of(context).pushReplacement(
                     PageRouteBuilder(
-                      pageBuilder: (_, __, ___) => const SearchScreen(),
+                      pageBuilder: (_, __, ___) => const BookScreen(),
                       transitionDuration: const Duration(milliseconds: 220),
-                      transitionsBuilder: (
-                        context,
-                        animation,
-                        secondaryAnimation,
-                        child,
-                      ) {
+                      transitionsBuilder: (context, animation, _, child) {
                         return FadeTransition(opacity: animation, child: child);
                       },
                     ),
@@ -73,14 +38,9 @@ class HomeScreen extends StatelessWidget {
                 } else if (index == 2) {
                   Navigator.of(context).pushReplacement(
                     PageRouteBuilder(
-                      pageBuilder: (_, __, ___) => const AddScreen(),
+                      pageBuilder: (_, __, ___) => const LeaderboardScreen(),
                       transitionDuration: const Duration(milliseconds: 220),
-                      transitionsBuilder: (
-                        context,
-                        animation,
-                        secondaryAnimation,
-                        child,
-                      ) {
+                      transitionsBuilder: (context, animation, _, child) {
                         return FadeTransition(opacity: animation, child: child);
                       },
                     ),
@@ -88,14 +48,9 @@ class HomeScreen extends StatelessWidget {
                 } else if (index == 3) {
                   Navigator.of(context).pushReplacement(
                     PageRouteBuilder(
-                      pageBuilder: (_, __, ___) => const NotifScreen(),
+                      pageBuilder: (_, __, ___) => const PracticeScreen(),
                       transitionDuration: const Duration(milliseconds: 220),
-                      transitionsBuilder: (
-                        context,
-                        animation,
-                        secondaryAnimation,
-                        child,
-                      ) {
+                      transitionsBuilder: (context, animation, _, child) {
                         return FadeTransition(opacity: animation, child: child);
                       },
                     ),
@@ -105,12 +60,7 @@ class HomeScreen extends StatelessWidget {
                     PageRouteBuilder(
                       pageBuilder: (_, __, ___) => const ProfileScreen(),
                       transitionDuration: const Duration(milliseconds: 220),
-                      transitionsBuilder: (
-                        context,
-                        animation,
-                        secondaryAnimation,
-                        child,
-                      ) {
+                      transitionsBuilder: (context, animation, _, child) {
                         return FadeTransition(opacity: animation, child: child);
                       },
                     ),
