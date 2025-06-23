@@ -37,7 +37,7 @@ class BadgesSection extends StatelessWidget {
           Container(
             height: 120,
             decoration: BoxDecoration(
-              color: Colors.grey.withOpacity(0.1),
+              color: Colors.grey.withAlpha(26), // Approx 10% opacity
               borderRadius: BorderRadius.circular(16),
             ),
             child: Center(

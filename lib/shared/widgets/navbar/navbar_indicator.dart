@@ -23,7 +23,7 @@ class NavbarIndicator extends StatelessWidget {
         width: AppConstants.navbarIndicatorSize,
         height: AppConstants.navbarIndicatorSize,
         decoration: BoxDecoration(
-          color: AppTheme.selectedColor.withOpacity(0.15),
+          color: AppTheme.selectedColor.withAlpha(38), // Approx 15% opacity
           shape: BoxShape.circle,
         ),
       ),

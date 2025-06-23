@@ -37,14 +37,19 @@ class OverviewSection extends StatelessWidget {
                 ),
                 dayStreak,
                 'Hari beruntun',
-                Colors.grey.withOpacity(0.1),
+                Colors.grey.withAlpha(26), // Approx 10% opacity
               ),
               const SizedBox(width: 16),
               _buildOverviewCard(
                 const Icon(Icons.bolt, color: Color(0xFFFCB900), size: 40),
                 totalXP,
                 'Total XP',
-                const Color(0xFFFCB900).withOpacity(0.1),
+                const Color.fromRGBO(
+                  252,
+                  185,
+                  0,
+                  0.1,
+                ), // Using fromRGBO instead of withOpacity
               ),
             ],
           ),
@@ -59,7 +64,12 @@ class OverviewSection extends StatelessWidget {
                 ),
                 currentLeague,
                 'Liga saat ini',
-                const Color(0xFFFFD700).withOpacity(0.1),
+                const Color.fromRGBO(
+                  255,
+                  215,
+                  0,
+                  0.1,
+                ), // Using fromRGBO instead of withOpacity
               ),
               const SizedBox(width: 16),
               _buildOverviewCard(
@@ -83,7 +93,7 @@ class OverviewSection extends StatelessWidget {
                 ),
                 languageScore,
                 'Skor Bahasa Inggris',
-                Colors.red.withOpacity(0.1),
+                Colors.red.withAlpha(26), // Approx 10% opacity
               ),
             ],
           ),

@@ -13,24 +13,35 @@ class OnboardingButton extends StatelessWidget {
       bottom: 90,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 32.0),
-        child: Row(
+        child: Column(
           children: [
-            // Sign in button
-            Expanded(
-              child: OutlinedButton(
+            Text(
+              'Mulai petualangan pembelajaran bahasa Anda sekarang!',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.grey[800],
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: 24),
+            // Mulai button
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
                 onPressed:
                     () => OnboardingScreenController.navigateToHome(context),
-                style: OutlinedButton.styleFrom(
-                  backgroundColor: const Color(0xFFFFF3ED),
-                  side: const BorderSide(color: Color(0xFFFFA726), width: 2),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFFFA726),
+                  foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
                   ),
                   padding: const EdgeInsets.symmetric(vertical: 16),
                 ),
                 child: const Text(
-                  'MASUK',
-                  style: TextStyle(color: Color(0xFFFFA726)),
+                  'MULAI',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
               ),
             ),

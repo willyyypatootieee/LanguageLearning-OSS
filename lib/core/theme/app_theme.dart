@@ -8,7 +8,7 @@ class AppTheme {
 
   // Shadow
   static BoxShadow defaultShadow = BoxShadow(
-    color: Colors.black.withOpacity(0.08),
+    color: Colors.black.withAlpha(20), // Approx 8% opacity
     blurRadius: 15,
     offset: const Offset(0, 3),
   );

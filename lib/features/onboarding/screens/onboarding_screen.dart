@@ -3,6 +3,8 @@ import '../widgets/onboarding_background.dart';
 import '../widgets/onboarding_button.dart';
 
 class OnboardingScreen extends StatelessWidget {
+  static const routeName = '/onboarding';
+
   const OnboardingScreen({super.key});
 
   @override

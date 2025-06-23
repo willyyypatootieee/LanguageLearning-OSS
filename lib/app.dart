@@ -10,3 +10,4 @@ export 'features/book/book.dart';
 export 'features/leaderboard/leaderboard.dart';
 export 'features/practice/practice.dart';
 export 'features/profile/profile.dart';
+export 'features/auth/auth.dart';

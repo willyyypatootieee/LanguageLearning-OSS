@@ -5,6 +5,8 @@ import '../widgets/home_background.dart';
 import '../widgets/home_button.dart';
 
 class HomeScreen extends StatelessWidget {
+  static const routeName = '/home';
+
   const HomeScreen({super.key});
 
   @override

@@ -35,7 +35,7 @@ class Navbar extends StatelessWidget {
             borderRadius: BorderRadius.circular(32),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.08),
+                color: Colors.black.withAlpha(20), // Approx 8% opacity
                 blurRadius: 15,
                 offset: const Offset(0, 3),
               ),
@@ -69,7 +69,9 @@ class Navbar extends StatelessWidget {
                           width: indicatorSize,
                           height: indicatorSize,
                           decoration: BoxDecoration(
-                            color: selectedColor.withOpacity(0.15),
+                            color: selectedColor.withAlpha(
+                              38,
+                            ), // Approx 15% opacity
                             shape: BoxShape.circle,
                           ),
                         ),
