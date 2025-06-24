@@ -4,6 +4,8 @@ This module contains all components related to the user profile feature in the B
 
 ## Structure
 
+## biar ijo
+
 The module follows a clean, modular architecture with the following components:
 
 ### Constants

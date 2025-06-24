@@ -25,8 +25,9 @@ class SplashScreenController {
 
       // Periksa status mounted setelah operasi async
       // Check mounted status after async operation
-      if (!currentContext.mounted)
+      if (!currentContext.mounted) {
         return; // Jika sudah login, navigasi ke halaman beranda
+      }
       // If already logged in, navigate to home screen
       if (isLoggedIn) {
         Navigator.pushReplacementNamed(currentContext, HomeScreen.routeName);
@@ -39,8 +40,9 @@ class SplashScreenController {
 
       // Periksa status mounted lagi setelah operasi async kedua
       // Check mounted status again after second async operation
-      if (!currentContext.mounted)
+      if (!currentContext.mounted) {
         return; // Navigasi berdasarkan status first time
+      }
       // Navigate based on first time status
       if (isFirstTime) {
         // Jika pertama kali, tampilkan onboarding

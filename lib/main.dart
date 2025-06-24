@@ -1,12 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'app.dart'; // This import already includes all the necessary exports
-import 'features/auth/viewmodels/auth_viewmodel.dart';
-import 'features/auth/screens/login_screen.dart';
-import 'features/auth/screens/register_screen.dart';
-import 'features/home/screens/home_screen.dart';
-import 'features/splash/screens/splash_screen.dart';
-import 'features/onboarding/screens/onboarding_screen.dart';
 
 void main() {
   runApp(
