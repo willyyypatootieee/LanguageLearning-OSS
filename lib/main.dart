@@ -2,9 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'dart:io' show Platform;
 import 'package:provider/provider.dart';
+import 'core/providers/api_service_provider.dart'; // Add this import
 import 'app.dart'; // This import already includes all the necessary exports
 
 void main() {
+  // Ensure Flutter is initialized
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize ApiServiceProvider
+  ApiServiceProvider(); // This initializes the singleton
+
   runApp(
     MultiProvider(
       providers: [

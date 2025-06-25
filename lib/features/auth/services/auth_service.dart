@@ -1,31 +1,16 @@
 import 'dart:convert';
-import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../core/providers/api_service_provider.dart';
+import '../../../core/services/api_client.dart';
 import '../constants/constants.dart';
 import '../models/models.dart';
 
 // Service untuk mengelola autentikasi dengan API
 // Service to manage authentication with API
 class AuthService {
-  // URL API
-  final String baseUrl = AuthConstants.baseUrl;
-
-  // Header untuk request HTTP
-  Map<String, String> _headers() {
-    return {'Content-Type': 'application/json', 'Accept': 'application/json'};
-  }
-
-  // Menambahkan token ke header jika tersedia
-  // Add token to header if available
-  Future<Map<String, String>> _authHeaders() async {
-    final headers = _headers();
-    final token = await getToken();
-    if (token != null) {
-      headers['Authorization'] = 'Bearer $token';
-    }
-    return headers;
-  }
+  // API client from the centralized provider
+  final ApiClient _apiClient = ApiServiceProvider().apiClient;
 
   // Mendaftarkan pengguna baru
   // Register a new user
@@ -36,19 +21,19 @@ class AuthService {
     required DateTime birthDate,
   }) async {
     try {
-      final response = await http.post(
-        Uri.parse('$baseUrl${AuthConstants.registerEndpoint}'),
-        headers: _headers(),
-        body: jsonEncode({
-          'username': username,
-          'email': email,
-          'password': password,
-          'birthDate':
-              birthDate.toIso8601String().split('T')[0], // Format as YYYY-MM-DD
-        }),
+      final requestBody = {
+        'username': username,
+        'email': email,
+        'password': password,
+        'birthDate':
+            birthDate.toIso8601String().split('T')[0], // Format as YYYY-MM-DD
+      };
+
+      final responseData = await _apiClient.post(
+        AuthConstants.registerEndpoint,
+        body: requestBody,
       );
 
-      final responseData = jsonDecode(response.body);
       final authResponse = AuthResponseModel.fromJson(responseData);
 
       // Simpan token dan data pengguna jika berhasil
@@ -85,13 +70,11 @@ class AuthService {
       if (email != null) requestBody['email'] = email;
       if (username != null) requestBody['username'] = username;
 
-      final response = await http.post(
-        Uri.parse('$baseUrl${AuthConstants.loginEndpoint}'),
-        headers: _headers(),
-        body: jsonEncode(requestBody),
+      final responseData = await _apiClient.post(
+        AuthConstants.loginEndpoint,
+        body: requestBody,
       );
 
-      final responseData = jsonDecode(response.body);
       final authResponse = AuthResponseModel.fromJson(responseData);
 
       // Simpan token dan data pengguna jika berhasil
@@ -174,15 +157,15 @@ class AuthService {
         );
       }
 
-      final headers = await _authHeaders();
+      final token = await getToken();
+      final endpoint = '${AuthConstants.userEndpoint}/$userId';
 
-      final response = await http.put(
-        Uri.parse('$baseUrl/api/users/$userId'),
-        headers: headers,
-        body: jsonEncode(updateData),
+      final responseData = await _apiClient.put(
+        endpoint,
+        body: updateData,
+        token: token,
       );
 
-      final responseData = jsonDecode(response.body);
       return AuthResponseModel.fromJson(responseData);
     } catch (e) {
       return AuthResponseModel(
@@ -196,20 +179,14 @@ class AuthService {
   // Delete user account
   Future<AuthResponseModel> deleteAccount(String userId) async {
     try {
-      final headers = await _authHeaders();
+      final token = await getToken();
+      final endpoint = '${AuthConstants.userEndpoint}/$userId';
 
-      final response = await http.delete(
-        Uri.parse('$baseUrl/api/users/$userId'),
-        headers: headers,
-      );
-
-      final responseData = jsonDecode(response.body);
+      final responseData = await _apiClient.delete(endpoint, token: token);
 
       // Hapus data lokal jika berhasil
       // Delete local data if successful
-      if (response.statusCode == 200) {
-        await logout();
-      }
+      await logout();
 
       return AuthResponseModel.fromJson(responseData);
     } catch (e) {
@@ -218,5 +195,10 @@ class AuthService {
         message: 'Terjadi kesalahan: $e',
       );
     }
+  }
+
+  // Dispose resources when not needed
+  void dispose() {
+    _apiClient.dispose();
   }
 }
