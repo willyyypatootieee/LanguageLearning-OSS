@@ -15,15 +15,6 @@ class OnboardingButton extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 32.0),
         child: Column(
           children: [
-            Text(
-              'Mulai petualangan pembelajaran bahasa Anda sekarang!',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey[800],
-                fontWeight: FontWeight.w500,
-              ),
-            ),
             const SizedBox(height: 24),
             // Mulai button
             SizedBox(

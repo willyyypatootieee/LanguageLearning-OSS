@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'dart:io' show Platform;
 import 'package:provider/provider.dart';
 import 'app.dart'; // This import already includes all the necessary exports
 
@@ -18,9 +20,19 @@ void main() {
 class BeLingApp extends StatelessWidget {
   const BeLingApp({super.key});
 
+  bool _isDesktopOrWeb() {
+    // Check if the app is running on web or desktop platforms
+    if (kIsWeb) return true;
+    try {
+      return Platform.isWindows || Platform.isLinux || Platform.isMacOS;
+    } catch (_) {
+      return false;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    final appContent = MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'BeLing App',
       theme: ThemeData(primarySwatch: Colors.blue, fontFamily: 'Roboto'),
@@ -34,5 +46,30 @@ class BeLingApp extends StatelessWidget {
         // Add other routes here
       },
     );
+
+    // Apply fixed size constraint for web and desktop platforms
+    if (_isDesktopOrWeb()) {
+      // Galaxy S20 dimensions: 384 x 854
+      return Center(
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.black12,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black26,
+                blurRadius: 10.0,
+                spreadRadius: 1.0,
+              ),
+            ],
+          ),
+          width: 384,
+          height: 854,
+          child: appContent,
+        ),
+      );
+    }
+
+    // Return default app for mobile platforms
+    return appContent;
   }
 }
