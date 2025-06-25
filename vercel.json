@@ -10,6 +10,5 @@
         }
     ],
     "buildCommand": "flutter/bin/flutter build web --release",
-    "outputDirectory": "build/web",
-    "framework": "flutter"
+    "outputDirectory": "build/web"
 }
