@@ -2,6 +2,7 @@ import '../../domain/models/auth_request.dart';
 import '../../domain/models/auth_response.dart';
 import '../../domain/models/user.dart';
 import '../../domain/repositories/auth_repository.dart';
+import '../../../featureOnBoarding/data/datasources/onboarding_local_datasource.dart';
 import '../datasources/auth_local_datasource.dart';
 import '../datasources/auth_remote_datasource.dart';
 
@@ -61,6 +62,14 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<void> clearAuthData() async {
     await _localDataSource.clearAuthData();
+
+    // Also clear onboarding login status to keep systems in sync
+    try {
+      final onboardingLocalDataSource = OnboardingLocalDataSource();
+      await onboardingLocalDataSource.setUserLoggedIn(false);
+    } catch (e) {
+      // Handle silently - onboarding data clearing is secondary
+    }
   }
 
   @override

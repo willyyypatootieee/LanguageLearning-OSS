@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/constants/app_constants.dart';
+import '../../../core/di/service_locator.dart';
 import '../../../router/router_exports.dart';
 import '../../data/constants/auth_constants.dart';
 import '../../data/datasources/auth_local_datasource.dart';
@@ -104,9 +105,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
       );
 
       final response = await _authRepository.register(registerRequest);
-
       if (mounted) {
         if (response.success) {
+          // Also update onboarding status to keep systems in sync
+          final onboardingRepository =
+              ServiceLocator.instance.onboardingRepository;
+          await onboardingRepository.setUserLoggedIn(true);
+
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(response.message),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../core/core.dart';
 import '../featureOnBoarding/presentation/screens/onboarding_screen.dart';
+import '../featureWelcome/presentation/screens/welcome_screen.dart';
 import '../featureHomeScreen/presentation/screens/home_screen.dart';
 import '../featureAuthentication/presentation/screens/login_screen.dart';
 import '../featureAuthentication/presentation/screens/register_screen.dart';
@@ -23,13 +24,18 @@ class GlobalRouter {
           path: AppRoutes.root,
           name: AppRoutes.rootName,
           builder: (context, state) => const _RootScreen(),
-        ),
-
-        // Onboarding route
+        ), // Onboarding route
         GoRoute(
           path: AppRoutes.onboarding,
           name: AppRoutes.onboardingName,
           builder: (context, state) => const OnboardingScreen(),
+        ),
+
+        // Welcome route
+        GoRoute(
+          path: AppRoutes.welcome,
+          name: AppRoutes.welcomeName,
+          builder: (context, state) => const WelcomeScreen(),
         ), // Home route
         GoRoute(
           path: AppRoutes.home,
@@ -96,6 +102,9 @@ class GlobalRouter {
   /// Navigate to onboarding screen
   void goToOnboarding() => _router.go(AppRoutes.onboarding);
 
+  /// Navigate to welcome screen
+  void goToWelcome() => _router.go(AppRoutes.welcome);
+
   /// Navigate to home screen
   void goToHome() => _router.go(AppRoutes.home);
 
@@ -154,20 +163,22 @@ class _RootScreen extends StatelessWidget {
   }
 
   Future<String> _determineInitialRoute() async {
-    final repository = ServiceLocator.instance.onboardingRepository;
+    final onboardingRepository = ServiceLocator.instance.onboardingRepository;
+    final authRepository = ServiceLocator.instance.authRepository;
 
     // Check user status
-    final hasCompletedOnboarding = await repository.hasCompletedOnboarding();
-    final isLoggedIn = await repository.isUserLoggedIn();
+    final hasCompletedOnboarding =
+        await onboardingRepository.hasCompletedOnboarding();
+    final isLoggedIn = await authRepository.isLoggedIn();
 
     // Route logic:
     // 1. If user is logged in -> go to home
-    // 2. If user completed onboarding but not logged in -> go to login
+    // 2. If user completed onboarding but not logged in -> go to welcome
     // 3. If user hasn't completed onboarding -> go to onboarding
     if (isLoggedIn) {
       return AppRoutes.home;
     } else if (hasCompletedOnboarding) {
-      return AppRoutes.login;
+      return AppRoutes.welcome;
     } else {
       return AppRoutes.onboarding;
     }
@@ -178,6 +189,9 @@ class _RootScreen extends StatelessWidget {
 extension AppRouterExtension on BuildContext {
   /// Navigate to onboarding screen
   void goToOnboarding() => go(AppRoutes.onboarding);
+
+  /// Navigate to welcome screen
+  void goToWelcome() => go(AppRoutes.welcome);
 
   /// Navigate to home screen
   void goToHome() => go(AppRoutes.home);

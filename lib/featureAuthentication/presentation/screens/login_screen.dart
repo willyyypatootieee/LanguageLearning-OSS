@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/constants/app_constants.dart';
+import '../../../core/di/service_locator.dart';
 import '../../../router/router_exports.dart';
 import '../../data/constants/auth_constants.dart';
 import '../../data/datasources/auth_local_datasource.dart';
@@ -21,12 +22,12 @@ class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _loginController = TextEditingController();
   final _passwordController = TextEditingController();
-  
+
   bool _isLoading = false;
   bool _obscurePassword = true;
   bool _isEmailMode = true;
   String? _errorMessage;
-  
+
   late final AuthRepository _authRepository;
 
   @override
@@ -64,6 +65,11 @@ class _LoginScreenState extends State<LoginScreen> {
 
       if (mounted) {
         if (response.success) {
+          // Also update onboarding status to keep systems in sync
+          final onboardingRepository =
+              ServiceLocator.instance.onboardingRepository;
+          await onboardingRepository.setUserLoggedIn(true);
+
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(response.message),
@@ -123,29 +129,31 @@ class _LoginScreenState extends State<LoginScreen> {
                   title: 'Ayo lanjutkan ke akunmu!',
                   subtitle: 'BeLing Login Akun',
                 ),
-                
+
                 AuthLoginOption(
                   isEmailMode: _isEmailMode,
                   onToggle: _toggleLoginMode,
                   controller: _loginController,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return _isEmailMode 
-                        ? AuthConstants.emailRequiredError
-                        : AuthConstants.usernameRequiredError;
+                      return _isEmailMode
+                          ? AuthConstants.emailRequiredError
+                          : AuthConstants.usernameRequiredError;
                     }
-                    if (_isEmailMode && !AuthConstants.emailPattern.hasMatch(value)) {
+                    if (_isEmailMode &&
+                        !AuthConstants.emailPattern.hasMatch(value)) {
                       return AuthConstants.emailInvalidError;
                     }
-                    if (!_isEmailMode && !AuthConstants.usernamePattern.hasMatch(value)) {
+                    if (!_isEmailMode &&
+                        !AuthConstants.usernamePattern.hasMatch(value)) {
                       return AuthConstants.usernameInvalidError;
                     }
                     return null;
                   },
                 ),
-                
+
                 const SizedBox(height: AppConstants.spacingL),
-                
+
                 AuthInputField(
                   controller: _passwordController,
                   labelText: 'Kata Sandi',
@@ -153,7 +161,9 @@ class _LoginScreenState extends State<LoginScreen> {
                   obscureText: _obscurePassword,
                   suffixIcon: IconButton(
                     icon: Icon(
-                      _obscurePassword ? Icons.visibility : Icons.visibility_off,
+                      _obscurePassword
+                          ? Icons.visibility
+                          : Icons.visibility_off,
                       color: AppColors.gray400,
                     ),
                     onPressed: () {
@@ -169,9 +179,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     return null;
                   },
                 ),
-                
+
                 const SizedBox(height: AppConstants.spacingM),
-                
+
                 Align(
                   alignment: Alignment.centerRight,
                   child: TextButton(
@@ -184,23 +194,23 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                 ),
-                
+
                 const SizedBox(height: AppConstants.spacingL),
-                
+
                 AuthErrorMessage(errorMessage: _errorMessage),
-                
+
                 AuthButton(
                   onPressed: _isLoading ? null : _login,
                   isLoading: _isLoading,
                   text: 'Masuk',
                 ),
-                
+
                 const SizedBox(height: AppConstants.spacingL),
                 const AuthDivider(text: 'Atau Login Dengan'),
                 const SizedBox(height: AppConstants.spacingL),
                 const AuthSocialButtons(),
                 const SizedBox(height: AppConstants.spacingXxl),
-                
+
                 AuthFooterText(
                   text: 'Belum memiliki akun? ',
                   linkText: 'Daftar',
