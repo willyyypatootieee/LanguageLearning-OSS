@@ -3,7 +3,7 @@ class ProfileConstants {
   // Private constructor to prevent instantiation
   ProfileConstants._();
   // API endpoints
-  static const String baseUrl = 'http://beling-4ef8e653eda6.herokuapp.com';
+  static const String baseUrl = 'https://beling-4ef8e653eda6.herokuapp.com';
   static const String usersEndpoint = '/api/users';
 
   // Build user specific endpoint
