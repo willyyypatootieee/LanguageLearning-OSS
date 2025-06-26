@@ -66,42 +66,29 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return Scaffold(
       extendBody: true,
-      appBar: AppBar(
-        title: const Text('BeLing'),
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
-        actions: [
-          IconButton(
-            onPressed: () => _logout(context),
-            icon: const Icon(Icons.logout),
-            tooltip: 'Logout',
+      body: Stack(
+        children: [
+          // Fullscreen background image
+          Positioned.fill(
+            child: Image.asset('assets/images/home.png', fit: BoxFit.cover),
+          ),
+          // Logout button positioned at top right
+          Positioned(
+            top: MediaQuery.of(context).padding.top + 16,
+            right: 16,
+            child: IconButton(
+              onPressed: () => _logout(context),
+              icon: const Icon(Icons.logout),
+              tooltip: 'Logout',
+              style: IconButton.styleFrom(
+                backgroundColor: Colors.white.withOpacity(0.8),
+                foregroundColor: AppColors.primary,
+              ),
+            ),
           ),
         ],
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.apps, size: 64, color: AppColors.primary),
-            SizedBox(height: AppConstants.spacingM),
-            Text(
-              'BeLing App',
-              style: theme.textTheme.headlineSmall?.copyWith(
-                color: AppColors.primary,
-              ),
-            ),
-            SizedBox(height: AppConstants.spacingS),
-            Text(
-              'Welcome to your language learning journey!',
-              style: theme.textTheme.bodyLarge?.copyWith(
-                color: AppColors.gray600,
-              ),
-            ),
-          ],
-        ),
       ),
       bottomNavigationBar: MainNavbar(
         currentIndex: _currentNavIndex,
