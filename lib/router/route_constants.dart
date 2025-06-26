@@ -2,16 +2,19 @@
 class AppRoutes {
   // Private constructor to prevent instantiation
   AppRoutes._();
-
   // Route paths
   static const String root = '/';
   static const String onboarding = '/onboarding';
   static const String home = '/home';
+  static const String login = '/login';
+  static const String register = '/register';
 
   // Route names (for named navigation)
   static const String rootName = 'root';
   static const String onboardingName = 'onboarding';
   static const String homeName = 'home';
+  static const String loginName = 'login';
+  static const String registerName = 'register';
 
   // Future routes (add as you develop more features)
   // static const String profile = '/profile';

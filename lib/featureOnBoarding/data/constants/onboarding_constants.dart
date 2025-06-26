@@ -12,7 +12,7 @@ class OnboardingConstants {
       backgroundColor: AppColors.primary,
     ),
     OnboardingPage(
-      image: 'assets/images/home.png',
+      image: 'assets/images/onboarding.png',
       title: 'Interaktif dan Nggak Bikin Bosan',
       description:
           'Latihan-latihan ringan, ilustrasi menarik, dan fitur interaktif bikin proses belajar terasa seperti bermain. Belajar jadi nggak terasa berat.',
@@ -24,13 +24,6 @@ class OnboardingConstants {
       description:
           'Belling mengenali kemampuanmu dan menyesuaikan materi agar kamu bisa berkembang dengan kecepatan sendiri.Tiap orang beda cara belajarnya, Belling ngerti itu.',
       backgroundColor: AppColors.accent,
-    ),
-    OnboardingPage(
-      image: 'assets/images/home.png',
-      title: 'Ready to Begin?',
-      description:
-          'Join millions of learners worldwide and start your language learning adventure today!',
-      backgroundColor: AppColors.success,
     ),
   ];
 

@@ -37,7 +37,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   Future<void> _completeOnboarding() async {
     await _repository.completeOnboarding();
     if (mounted) {
-      appRouter.goToHome();
+      appRouter.goToLogin();
     }
   }
 
