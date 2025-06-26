@@ -1,21 +1,65 @@
 import 'package:flutter/material.dart';
+import '../constants/app_constants.dart';
 
-/// A class to hold app theme data.
+/// Application theme configuration
 class AppTheme {
-  // Primary colors
-  static const Color selectedColor = Color(0xFFFCB900);
-  static const Color unselectedColor = Color(0xFFB3D8FF);
+  static ThemeData get lightTheme {
+    return ThemeData(
+      primarySwatch: Colors.blue,
+      fontFamily: AppTypography.bodyFont,
+      visualDensity: VisualDensity.adaptivePlatformDensity,
 
-  // Shadow
-  static BoxShadow defaultShadow = BoxShadow(
-    color: Colors.black.withAlpha(20), // Approx 8% opacity
-    blurRadius: 15,
-    offset: const Offset(0, 3),
-  );
+      textTheme: const TextTheme(
+        headlineLarge: TextStyle(
+          fontFamily: AppTypography.headerFont,
+          fontSize: 32,
+          fontWeight: FontWeight.bold,
+          color: AppColors.gray800,
+        ),
+        headlineMedium: TextStyle(
+          fontFamily: AppTypography.headerFont,
+          fontSize: 28,
+          fontWeight: FontWeight.bold,
+          color: AppColors.gray800,
+        ),
+        headlineSmall: TextStyle(
+          fontFamily: AppTypography.headerFont,
+          fontSize: 24,
+          fontWeight: FontWeight.bold,
+          color: AppColors.gray800,
+        ),
+        bodyLarge: TextStyle(
+          fontFamily: AppTypography.bodyFont,
+          fontSize: 16,
+          fontWeight: FontWeight.w400,
+          color: AppColors.gray700,
+          height: 1.5,
+        ),
+        bodyMedium: TextStyle(
+          fontFamily: AppTypography.bodyFont,
+          fontSize: 14,
+          fontWeight: FontWeight.w400,
+          color: AppColors.gray700,
+          height: 1.5,
+        ),
+        labelLarge: TextStyle(
+          fontFamily: AppTypography.bodyFont,
+          fontSize: 16,
+          fontWeight: FontWeight.w600,
+          color: AppColors.gray700,
+        ),
+      ),
 
-  static BoxShadow largeShadow = BoxShadow(
-    color: Colors.black26,
-    blurRadius: 16,
-    offset: const Offset(0, 8),
-  );
+      colorScheme: const ColorScheme.light(
+        primary: AppColors.primary,
+        secondary: AppColors.secondary,
+        surface: Colors.white,
+        error: AppColors.error,
+        onPrimary: Colors.white,
+        onSecondary: Colors.white,
+        onSurface: AppColors.gray800,
+        onError: Colors.white,
+      ),
+    );
+  }
 }

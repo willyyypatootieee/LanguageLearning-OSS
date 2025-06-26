@@ -34,6 +34,7 @@ dependencies:
     sdk: flutter
   flutter_floating_bottom_bar: ^1.3.0
   flutter_svg: ^2.2.0
+  go_router: ^14.6.2
   http: ^1.4.0
   provider: ^6.1.1
   rive: ^0.13.20
@@ -69,9 +70,28 @@ flutter:
   # list giving the asset and other descriptors for the font. For
   # example:
   fonts:
-    - family: Feather
+    - family: PlusJakartaSans
       fonts:
-        - asset: fonts/bold/feather-bold.ttf
+        - asset: fonts/plusjakartasans/PlusJakartaSans-Regular.ttf
+        - asset: fonts/plusjakartasans/PlusJakartaSans-Medium.ttf
+          weight: 500
+        - asset: fonts/plusjakartasans/PlusJakartaSans-SemiBold.ttf
+          weight: 600
+        - asset: fonts/plusjakartasans/PlusJakartaSans-Bold.ttf
+          weight: 700
+        - asset: fonts/plusjakartasans/PlusJakartaSans-ExtraBold.ttf
+          weight: 800
+    - family: Nunito
+      fonts:
+        - asset: fonts/nunito/Nunito-Regular.ttf
+        - asset: fonts/nunito/Nunito-Light.ttf
+          weight: 300
+        - asset: fonts/nunito/Nunito-Medium.ttf
+          weight: 500
+        - asset: fonts/nunito/Nunito-SemiBold.ttf
+          weight: 600
+        - asset: fonts/nunito/Nunito-Bold.ttf
+          weight: 700
     # - family: Trajan Pro
     #   fonts:
     #     - asset: fonts/TrajanPro.ttf
