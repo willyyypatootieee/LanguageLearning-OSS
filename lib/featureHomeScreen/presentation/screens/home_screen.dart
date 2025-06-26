@@ -2,11 +2,18 @@ import 'package:flutter/material.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/di/service_locator.dart';
 import '../../../router/router_exports.dart';
+import '../../../shared/shared_exports.dart';
 
 /// Main home screen of the application
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  int _currentNavIndex = 0;
   Future<void> _logout(BuildContext context) async {
     try {
       final authRepository = ServiceLocator.instance.authRepository;
@@ -28,11 +35,40 @@ class HomeScreen extends StatelessWidget {
     }
   }
 
+  void _onNavTap(int index) {
+    setState(() {
+      _currentNavIndex = index;
+    });
+
+    // Handle navigation based on index
+    switch (index) {
+      case 0:
+        // Already on home - do nothing
+        break;
+      case 1:
+        // Navigate to learning section
+        // TODO: Implement navigation to learning screen
+        break;
+      case 2:
+        // Navigate to practice section
+        // TODO: Implement navigation to practice screen
+        break;
+      case 3:
+        // Navigate to leaderboard
+        // TODO: Implement navigation to leaderboard screen
+        break;
+      case 4:
+        // Navigate to profile
+        // TODO: Implement navigation to profile screen
+        break;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-
     return Scaffold(
+      extendBody: true,
       appBar: AppBar(
         title: const Text('BeLing'),
         backgroundColor: AppColors.primary,
@@ -66,6 +102,10 @@ class HomeScreen extends StatelessWidget {
             ),
           ],
         ),
+      ),
+      bottomNavigationBar: MainNavbar(
+        currentIndex: _currentNavIndex,
+        onTap: _onNavTap,
       ),
     );
   }
