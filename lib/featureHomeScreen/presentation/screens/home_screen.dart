@@ -44,22 +44,30 @@ class _HomeScreenState extends State<HomeScreen> {
     switch (index) {
       case 0:
         // Already on home - do nothing
-        break;
-      case 1:
+        break;      case 1:
         // Navigate to learning section
-        // TODO: Implement navigation to learning screen
+        // Learning feature coming soon
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Learning feature coming soon!')),
+        );
         break;
       case 2:
         // Navigate to practice section
-        // TODO: Implement navigation to practice screen
+        // Practice feature coming soon
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Practice feature coming soon!')),
+        );
         break;
       case 3:
         // Navigate to leaderboard
-        // TODO: Implement navigation to leaderboard screen
+        // Leaderboard feature coming soon
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Leaderboard feature coming soon!')),
+        );
         break;
       case 4:
         // Navigate to profile
-        // TODO: Implement navigation to profile screen
+        appRouter.goToProfile();
         break;
     }
   }
@@ -81,9 +89,8 @@ class _HomeScreenState extends State<HomeScreen> {
             child: IconButton(
               onPressed: () => _logout(context),
               icon: const Icon(Icons.logout),
-              tooltip: 'Logout',
-              style: IconButton.styleFrom(
-                backgroundColor: Colors.white.withOpacity(0.8),
+              tooltip: 'Logout',              style: IconButton.styleFrom(
+                backgroundColor: Colors.white.withValues(alpha: 0.8),
                 foregroundColor: AppColors.primary,
               ),
             ),

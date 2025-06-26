@@ -6,6 +6,7 @@ import '../featureWelcome/presentation/screens/welcome_screen.dart';
 import '../featureHomeScreen/presentation/screens/home_screen.dart';
 import '../featureAuthentication/presentation/screens/login_screen.dart';
 import '../featureAuthentication/presentation/screens/register_screen.dart';
+import '../featureProfile/presentation/screens/profile_screen.dart';
 import 'route_constants.dart';
 
 /// Global router instance that can be accessed throughout the app
@@ -49,20 +50,20 @@ class GlobalRouter {
           name: AppRoutes.loginName,
           builder: (context, state) => const LoginScreen(),
         ),
-
         GoRoute(
           path: AppRoutes.register,
           name: AppRoutes.registerName,
           builder: (context, state) => const RegisterScreen(),
         ),
 
+        // Profile route
+        GoRoute(
+          path: AppRoutes.profile,
+          name: AppRoutes.profileName,
+          builder: (context, state) => const ProfileScreen(),
+        ),
+
         // Add more routes here as you develop more features
-        // Example:
-        // GoRoute(
-        //   path: '/profile',
-        //   name: 'profile',
-        //   builder: (context, state) => const ProfileScreen(),
-        // ),
       ],
 
       // Error page
@@ -113,6 +114,9 @@ class GlobalRouter {
 
   /// Navigate to register screen
   void goToRegister() => _router.go(AppRoutes.register);
+
+  /// Navigate to profile screen
+  void goToProfile() => _router.go(AppRoutes.profile);
 
   /// Navigate to root and let it decide the route
   void goToRoot() => _router.go(AppRoutes.root);
@@ -201,6 +205,9 @@ extension AppRouterExtension on BuildContext {
 
   /// Navigate to register screen
   void goToRegister() => go(AppRoutes.register);
+
+  /// Navigate to profile screen
+  void goToProfile() => go(AppRoutes.profile);
 
   /// Navigate to root and let it decide the route
   void goToRoot() => go(AppRoutes.root);

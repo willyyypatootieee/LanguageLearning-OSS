@@ -8,6 +8,7 @@ class AppRoutes {
   static const String home = '/home';
   static const String login = '/login';
   static const String register = '/register';
+  static const String profile = '/profile';
 
   // Route names (for named navigation)
   static const String rootName = 'root';
@@ -16,9 +17,9 @@ class AppRoutes {
   static const String homeName = 'home';
   static const String loginName = 'login';
   static const String registerName = 'register';
+  static const String profileName = 'profile';
 
   // Future routes (add as you develop more features)
-  // static const String profile = '/profile';
   // static const String settings = '/settings';
   // static const String lessons = '/lessons';
 }
