@@ -5,7 +5,7 @@ For education purposes only.
 
 ## Deployment with Vercel
 
-This project is configured to be deployed on Vercel as a web app.
+This project is configured to be deployed on Vercel.
 
 ### Deployment Steps
 
