@@ -48,7 +48,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       profileRepository,
     );
 
-    _profileCubit = ProfileCubit(getCurrentProfileUseCase);
+    _profileCubit = ProfileCubit(getCurrentProfileUseCase, profileRepository);
   }
 
   Future<void> _loadProfile() async {
@@ -92,7 +92,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
         child: ListenableBuilder(
           listenable: _profileCubit,
           builder: (context, child) {
-            if (_profileCubit.isLoading && _profileCubit.user == null) {
+            // Only show loading spinner if there is no user data at all
+            if (_profileCubit.user == null && _profileCubit.isLoading) {
               return const Center(
                 child: CircularProgressIndicator(
                   valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
