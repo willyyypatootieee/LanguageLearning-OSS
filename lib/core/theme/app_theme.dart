@@ -5,10 +5,9 @@ import '../constants/app_constants.dart';
 class AppTheme {
   static ThemeData get lightTheme {
     return ThemeData(
-      primarySwatch: Colors.blue,
+      primarySwatch: Colors.orange,
       fontFamily: AppTypography.bodyFont,
       visualDensity: VisualDensity.adaptivePlatformDensity,
-
       textTheme: const TextTheme(
         headlineLarge: TextStyle(
           fontFamily: AppTypography.headerFont,

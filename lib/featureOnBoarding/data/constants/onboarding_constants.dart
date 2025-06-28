@@ -5,25 +5,25 @@ import '../../domain/models/onboarding_page.dart';
 class OnboardingConstants {
   static const List<OnboardingPage> pages = [
     OnboardingPage(
-      image: 'assets/images/onboarding.png',
+      image: 'assets/images/onboarding/onboarding3.png',
       title: 'Belajar Inggris dengan Gaya yang Baru!',
       description:
           'Belling hadir untuk bantu kamu memahami Bahasa Inggris dengan cara yang mudah, seru, dan menyenangkan.Yuk mulai perjalanan belajarmu hari ini!',
       backgroundColor: AppColors.primary,
     ),
     OnboardingPage(
-      image: 'assets/images/onboarding.png',
+      image: 'assets/images/onboarding/onboarding2.png',
       title: 'Interaktif dan Nggak Bikin Bosan',
       description:
           'Latihan-latihan ringan, ilustrasi menarik, dan fitur interaktif bikin proses belajar terasa seperti bermain. Belajar jadi nggak terasa berat.',
-      backgroundColor: AppColors.secondary,
+      backgroundColor: AppColors.primary,
     ),
     OnboardingPage(
-      image: 'assets/images/onboarding.png',
+      image: 'assets/images/onboarding/onboarding.png',
       title: 'Disesuaikan dengan Kemampuanmu!',
       description:
           'Belling mengenali kemampuanmu dan menyesuaikan materi agar kamu bisa berkembang dengan kecepatan sendiri.Tiap orang beda cara belajarnya, Belling ngerti itu.',
-      backgroundColor: AppColors.accent,
+      backgroundColor: AppColors.primary,
     ),
   ];
 
