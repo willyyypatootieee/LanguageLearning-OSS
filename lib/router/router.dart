@@ -7,6 +7,7 @@ import '../featureHomeScreen/presentation/screens/home_screen.dart';
 import '../featureAuthentication/presentation/screens/login_screen.dart';
 import '../featureAuthentication/presentation/screens/register_screen.dart';
 import '../featureProfile/presentation/screens/profile_screen.dart';
+import '../featureDictionary/screens/ipa_chart_screen.dart';
 import 'route_constants.dart';
 
 /// Global router instance that can be accessed throughout the app
@@ -62,7 +63,12 @@ class GlobalRouter {
           name: AppRoutes.profileName,
           builder: (context, state) => const ProfileScreen(),
         ),
-
+        // Dictionary route
+        GoRoute(
+          path: AppRoutes.dictionary,
+          name: AppRoutes.dictionaryName,
+          builder: (context, state) => const IPAChartScreen(),
+        ),
         // Add more routes here as you develop more features
       ],
 
@@ -117,6 +123,9 @@ class GlobalRouter {
 
   /// Navigate to profile screen
   void goToProfile() => _router.go(AppRoutes.profile);
+
+  /// Navigate to dictionary screen
+  void goToDictionary() => _router.go(AppRoutes.dictionary);
 
   /// Navigate to root and let it decide the route
   void goToRoot() => _router.go(AppRoutes.root);
