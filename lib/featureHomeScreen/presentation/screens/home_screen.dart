@@ -3,6 +3,7 @@ import '../../../core/constants/app_constants.dart';
 import '../../../core/di/service_locator.dart';
 import '../../../router/router_exports.dart';
 import '../../../shared/shared_exports.dart';
+import '../../../featureLeaderboard/presentation/widgets/leaderboard_provider.dart';
 
 /// Main home screen of the application
 class HomeScreen extends StatefulWidget {
@@ -57,8 +58,17 @@ class _HomeScreenState extends State<HomeScreen> {
         break;
       case 3:
         // Navigate to leaderboard
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Leaderboard feature coming soon!')),
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder:
+                (context) => LeaderboardProvider(
+                  currentIndex: _currentNavIndex,
+                  onNavTap: (int idx) {
+                    Navigator.of(context).pop();
+                    _onNavTap(idx);
+                  },
+                ),
+          ),
         );
         break;
       case 4:

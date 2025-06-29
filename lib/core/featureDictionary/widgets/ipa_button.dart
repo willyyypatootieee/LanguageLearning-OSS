@@ -6,11 +6,11 @@ class IPASymbolButton extends StatelessWidget {
   final String example;
 
   const IPASymbolButton({
-    Key? key,
+    super.key,
     required this.symbol,
     required this.label,
     required this.example,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

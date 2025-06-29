@@ -105,25 +105,25 @@ class _RegisterScreenState extends State<RegisterScreen> {
       );
 
       final response = await _authRepository.register(registerRequest);
-      if (mounted) {
-        if (response.success) {
-          // Also update onboarding status to keep systems in sync
-          final onboardingRepository =
-              ServiceLocator.instance.onboardingRepository;
-          await onboardingRepository.setUserLoggedIn(true);
+      // ignore: use_build_context_synchronously
+      if (!mounted) return;
+      if (response.success) {
+        // Also update onboarding status to keep systems in sync
+        final onboardingRepository =
+            ServiceLocator.instance.onboardingRepository;
+        await onboardingRepository.setUserLoggedIn(true);
 
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(response.message),
-              backgroundColor: AppColors.success,
-            ),
-          );
-          appRouter.goToHome();
-        } else {
-          setState(() {
-            _errorMessage = response.message;
-          });
-        }
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(response.message),
+            backgroundColor: AppColors.success,
+          ),
+        );
+        appRouter.goToHome();
+      } else {
+        setState(() {
+          _errorMessage = response.message;
+        });
       }
     } catch (e) {
       if (mounted) {

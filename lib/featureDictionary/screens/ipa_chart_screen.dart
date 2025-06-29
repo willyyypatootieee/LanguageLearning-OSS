@@ -4,6 +4,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/constants/app_constants.dart';
 import '../widgets/ipa_button.dart';
 import '../../../shared/shared_exports.dart';
+import '../../../featureLeaderboard/presentation/widgets/leaderboard_provider.dart';
 
 // Dummy IPA data singkat untuk vowels dan konsonan
 final List<Map<String, String>> vowelIPA = [
@@ -28,10 +29,10 @@ class IPAChartScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.lightTheme.colorScheme.background,
+      backgroundColor: AppTheme.lightTheme.colorScheme.surface,
       appBar: AppBar(
         title: const Text('IPA Chart'),
-        backgroundColor: AppTheme.lightTheme.colorScheme.background,
+        backgroundColor: AppTheme.lightTheme.colorScheme.surface,
         elevation: 0,
         foregroundColor: Colors.black,
         leading: IconButton(
@@ -69,18 +70,35 @@ class IPAChartScreen extends StatelessWidget {
       ),
       bottomNavigationBar: MainNavbar(
         currentIndex: 1,
-        onTap:
-            (index) => context.go(
-              index == 0
-                  ? '/home'
-                  : index == 1
-                  ? '/dictionary'
-                  : index == 2
-                  ? '/practice'
-                  : index == 3
-                  ? '/leaderboard'
-                  : '/profile',
-            ),
+        onTap: (index) {
+          if (index == 3) {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder:
+                    (context) => LeaderboardProvider(
+                      currentIndex: index,
+                      onNavTap: (int idx) {
+                        Navigator.of(context).pop();
+                        if (idx != 1) {
+                          // Only switch if not already on dictionary
+                          if (idx == 0) context.go('/home');
+                          if (idx == 2) context.go('/practice');
+                          if (idx == 4) context.go('/profile');
+                        }
+                      },
+                    ),
+              ),
+            );
+          } else if (index == 0) {
+            context.go('/home');
+          } else if (index == 1) {
+            context.go('/dictionary');
+          } else if (index == 2) {
+            context.go('/practice');
+          } else if (index == 4) {
+            context.go('/profile');
+          }
+        },
       ),
     );
   }
