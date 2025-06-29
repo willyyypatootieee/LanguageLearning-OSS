@@ -8,6 +8,8 @@ class ProfileCubit extends ChangeNotifier {
   final GetCurrentProfileUseCase _getCurrentProfileUseCase;
   final ProfileRepository _repository;
 
+  bool _isDisposed = false;
+
   ProfileCubit(this._getCurrentProfileUseCase, this._repository);
 
   ProfileUser? _user;
@@ -18,6 +20,18 @@ class ProfileCubit extends ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get error => _error;
 
+  @override
+  void dispose() {
+    _isDisposed = true;
+    super.dispose();
+  }
+
+  void _safeNotifyListeners() {
+    if (!_isDisposed) {
+      notifyListeners();
+    }
+  }
+
   /// Load cached profile instantly, then update with remote data in background
   Future<void> loadProfile() async {
     _setError(null);
@@ -25,7 +39,7 @@ class ProfileCubit extends ChangeNotifier {
     final cached = await _repository.getCachedProfile();
     if (cached != null) {
       _user = cached;
-      notifyListeners();
+      _safeNotifyListeners();
     } else {
       _setLoading(true);
     }
@@ -37,9 +51,13 @@ class ProfileCubit extends ChangeNotifier {
         _setError('Failed to load profile');
       }
     } catch (e) {
-      _setError('An error occurred while loading profile: $e');
+      if (!_isDisposed) {
+        _setError('An error occurred while loading profile: $e');
+      }
     } finally {
-      _setLoading(false);
+      if (!_isDisposed) {
+        _setLoading(false);
+      }
     }
   }
 
@@ -54,9 +72,13 @@ class ProfileCubit extends ChangeNotifier {
         _setError('Failed to load profile');
       }
     } catch (e) {
-      _setError('An error occurred while loading profile: $e');
+      if (!_isDisposed) {
+        _setError('An error occurred while loading profile: $e');
+      }
     } finally {
-      _setLoading(false);
+      if (!_isDisposed) {
+        _setLoading(false);
+      }
     }
   }
 
@@ -64,16 +86,16 @@ class ProfileCubit extends ChangeNotifier {
   void clearProfile() {
     _user = null;
     _error = null;
-    notifyListeners();
+    _safeNotifyListeners();
   }
 
   void _setLoading(bool loading) {
     _isLoading = loading;
-    notifyListeners();
+    _safeNotifyListeners();
   }
 
   void _setError(String? error) {
     _error = error;
-    notifyListeners();
+    _safeNotifyListeners();
   }
 }

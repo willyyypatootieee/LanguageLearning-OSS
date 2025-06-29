@@ -230,7 +230,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
       ),
       bottomNavigationBar: MainNavbar(
-        currentIndex: 5, // Profile tab index
+        currentIndex: 4, // Profile tab index
         onTap: (index) {
           // Handle navigation based on index
           switch (index) {
