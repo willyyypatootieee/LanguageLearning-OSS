@@ -7,7 +7,12 @@ import 'package:experimental/featureLeaderboard/data/datasources/leaderboard_rem
 import 'package:experimental/featureLeaderboard/data/repositories/leaderboard_repository_impl.dart';
 import 'package:experimental/featureLeaderboard/domain/usecases/get_leaderboard_users_usecase.dart';
 
-class LeaderboardProvider extends StatelessWidget {
+LeaderboardCubit? _leaderboardCubit;
+LeaderboardRepositoryImpl? _leaderboardRepository;
+LeaderboardRemoteDataSourceImpl? _leaderboardRemoteDataSource;
+Dio? _dio;
+
+class LeaderboardProvider extends StatefulWidget {
   final int currentIndex;
   final Function(int) onNavTap;
   const LeaderboardProvider({
@@ -17,20 +22,38 @@ class LeaderboardProvider extends StatelessWidget {
   });
 
   @override
+  State<LeaderboardProvider> createState() => _LeaderboardProviderState();
+}
+
+class _LeaderboardProviderState extends State<LeaderboardProvider>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
+  void dispose() {
+    // Do not dispose cubit/repository to keep cache
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return RepositoryProvider(
-      create: (_) => Dio(),
-      child: BlocProvider(
-        create: (context) {
-          final dio = RepositoryProvider.of<Dio>(context);
-          final remoteDataSource = LeaderboardRemoteDataSourceImpl(dio);
-          final repository = LeaderboardRepositoryImpl(remoteDataSource);
-          final usecase = GetLeaderboardUsersUseCase(repository);
-          return LeaderboardCubit(usecase)..fetchLeaderboard();
-        },
+    super.build(context);
+    _dio ??= Dio();
+    _leaderboardRemoteDataSource ??= LeaderboardRemoteDataSourceImpl(_dio!);
+    _leaderboardRepository ??= LeaderboardRepositoryImpl(
+      _leaderboardRemoteDataSource!,
+    );
+    _leaderboardCubit ??= LeaderboardCubit(
+      GetLeaderboardUsersUseCase(_leaderboardRepository!),
+    );
+    return RepositoryProvider.value(
+      value: _dio!,
+      child: BlocProvider.value(
+        value: _leaderboardCubit!..fetchLeaderboard(),
         child: LeaderboardScreen(
-          currentIndex: currentIndex,
-          onNavTap: onNavTap,
+          currentIndex: widget.currentIndex,
+          onNavTap: widget.onNavTap,
         ),
       ),
     );

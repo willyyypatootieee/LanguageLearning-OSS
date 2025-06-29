@@ -11,6 +11,7 @@ import '../../data/repositories/profile_repository_impl.dart';
 import '../../domain/usecases/get_current_profile_usecase.dart';
 import '../cubit/profile_cubit.dart';
 import '../widgets/profile_widgets.dart';
+import '../../../featureLeaderboard/presentation/widgets/leaderboard_provider.dart';
 
 /// Profile screen showing user information and statistics
 class ProfileScreen extends StatefulWidget {
@@ -232,20 +233,42 @@ class _ProfileScreenState extends State<ProfileScreen> {
       bottomNavigationBar: MainNavbar(
         currentIndex: 4, // Profile tab index
         onTap: (index) {
-          // Handle navigation based on index
           switch (index) {
             case 0:
-              // Navigate to home
               appRouter.goToHome();
               break;
             case 1:
-              // Navigate to learning section (TODO)
+              appRouter.goToDictionary();
               break;
             case 2:
-              // Navigate to practice section (TODO)
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Practice feature coming soon!')),
+              );
               break;
             case 3:
-              // Navigate to leaderboard (TODO)
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder:
+                      (context) => LeaderboardProvider(
+                        currentIndex: index,
+                        onNavTap: (int idx) {
+                          Navigator.of(context).pop();
+                          if (idx != 4) {
+                            if (idx == 0) appRouter.goToHome();
+                            if (idx == 1) appRouter.goToDictionary();
+                            if (idx == 2)
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                    'Practice feature coming soon!',
+                                  ),
+                                ),
+                              );
+                          }
+                        },
+                      ),
+                ),
+              );
               break;
             case 4:
               // Already on profile - do nothing
