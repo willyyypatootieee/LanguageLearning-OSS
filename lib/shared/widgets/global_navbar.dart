@@ -24,11 +24,12 @@ class GlobalNavbar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const navItems = [
-      NavItem(svgPath: 'assets/navbar/home.svg'),
-      NavItem(svgPath: 'assets/navbar/book.svg'),
-      NavItem(svgPath: 'assets/navbar/mouth.svg'),
-      NavItem(svgPath: 'assets/navbar/leaderboard.svg'),
-      NavItem(svgPath: 'assets/navbar/profile.svg'),
+      NavItem(svgPath: 'assets/navbar/home.svg'), // 0
+      NavItem(svgPath: 'assets/navbar/book.svg'), // 1
+      NavItem(svgPath: 'assets/navbar/mouth.svg'), // 2
+      NavItem(svgPath: 'assets/navbar/leaderboard.svg'), // 3
+      NavItem(svgPath: 'assets/navbar/love.svg'), // 4
+      NavItem(svgPath: 'assets/navbar/profile.svg'), // 5
     ];
     return Container(
       margin: const EdgeInsets.all(32),
