@@ -9,21 +9,35 @@ import '../../featureHomeScreen/presentation/screens/home_screen.dart';
 import '../../featureProfile/presentation/screens/profile_screen.dart';
 import '../../../router/router_exports.dart';
 
-// Dummy IPA data singkat untuk vowels dan konsonan
+// IPA Vowels (matching screenshot)
 final List<Map<String, String>> vowelIPA = [
-  {'symbol': 'a', 'label': 'kucing', 'example': 'kucing'},
-  {'symbol': 'i', 'label': 'ikan', 'example': 'ikan'},
-  {'symbol': 'u', 'label': 'ular', 'example': 'ular'},
-  {'symbol': 'e', 'label': 'elang', 'example': 'elang'},
-  {'symbol': 'o', 'label': 'orang', 'example': 'orang'},
+  {'symbol': 'i', 'label': 'minim', 'example': 'sheep'},
+  {'symbol': 'ɪ', 'label': 'tipis', 'example': 'ship'},
+  {'symbol': 'e', 'label': 'es', 'example': 'bed'},
+  {'symbol': 'æ', 'label': 'emas', 'example': 'cat'},
+  {'symbol': 'ʌ', 'label': 'abang', 'example': 'cup'},
+  {'symbol': 'ɑ', 'label': 'ayah', 'example': 'car'},
+  {'symbol': 'ɒ', 'label': 'obat', 'example': 'hot'},
+  {'symbol': 'ɔ', 'label': 'obrol', 'example': 'law'},
+  {'symbol': 'ʊ', 'label': 'ular', 'example': 'put'},
+  {'symbol': 'u', 'label': 'urut', 'example': 'boot'},
+  {'symbol': 'ə', 'label': 'sebentar', 'example': 'about'},
 ];
 
+// IPA Consonants (matching screenshot)
 final List<Map<String, String>> consonantIPA = [
-  {'symbol': 'k', 'label': 'kambing', 'example': 'kambing'},
-  {'symbol': 'g', 'label': 'gajah', 'example': 'gajah'},
-  {'symbol': 'm', 'label': 'monyet', 'example': 'monyet'},
-  {'symbol': 'n', 'label': 'naga', 'example': 'naga'},
-  {'symbol': 's', 'label': 'sapi', 'example': 'sapi'},
+  {'symbol': 'p', 'label': 'pintu', 'example': 'pen'},
+  {'symbol': 'b', 'label': 'bola', 'example': 'bat'},
+  {'symbol': 't', 'label': 'topi', 'example': 'ten'},
+  {'symbol': 'd', 'label': 'dompet', 'example': 'dog'},
+  {'symbol': 'k', 'label': 'kaki', 'example': 'cat'},
+  {'symbol': 'g', 'label': 'gigi', 'example': 'go'},
+  {'symbol': 'f', 'label': 'fokus', 'example': 'fish'},
+  {'symbol': 'v', 'label': 'vas', 'example': 'van'},
+  {'symbol': 's', 'label': 'sapi', 'example': 'sun'},
+  {'symbol': 'z', 'label': 'zebra', 'example': 'zoo'},
+  {'symbol': 'm', 'label': 'mata', 'example': 'man'},
+  {'symbol': 'n', 'label': 'nasi', 'example': 'net'},
 ];
 
 class IPAChartScreen extends StatelessWidget {

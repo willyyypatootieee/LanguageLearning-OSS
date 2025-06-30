@@ -23,13 +23,15 @@ class IPASymbolButton extends StatelessWidget {
         onTap: () {}, // Placeholder for future interaction
         child: Container(
           width: 80,
-          height: 80,
+          // Removed fixed height to allow content to determine height
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
             border: Border.all(color: Colors.grey.shade300),
           ),
           child: Column(
+            mainAxisSize:
+                MainAxisSize.min, // Prevent overflow by using min size
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
