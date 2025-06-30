@@ -4,6 +4,8 @@ import '../../../core/di/service_locator.dart';
 import '../../../router/router_exports.dart';
 import '../../../shared/shared_exports.dart';
 import '../../../featureLeaderboard/presentation/widgets/leaderboard_provider.dart';
+import '../../../featureProfile/presentation/screens/profile_screen.dart';
+import '../../../featureDictionary/screens/ipa_chart_screen.dart';
 
 /// Main home screen of the application
 class HomeScreen extends StatefulWidget {
@@ -37,17 +39,12 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _onNavTap(int index) {
-    setState(() {
-      _currentNavIndex = index;
-    });
-
-    // Handle navigation based on index
+    if (index == _currentNavIndex) return;
     switch (index) {
       case 0:
-        // Already on home - do nothing
+        appRouter.goToHome();
         break;
       case 1:
-        // Navigate to dictionary feature
         appRouter.goToDictionary();
         break;
       case 2:
@@ -57,25 +54,15 @@ class _HomeScreenState extends State<HomeScreen> {
         );
         break;
       case 3:
-        // Navigate to leaderboard
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder:
-                (context) => LeaderboardProvider(
-                  currentIndex: _currentNavIndex,
-                  onNavTap: (int idx) {
-                    Navigator.of(context).pop();
-                    _onNavTap(idx);
-                  },
-                ),
-          ),
-        );
+        appRouter.goToLeaderboard();
         break;
       case 4:
-        // Navigate to profile
         appRouter.goToProfile();
         break;
     }
+    setState(() {
+      _currentNavIndex = index;
+    });
   }
 
   @override

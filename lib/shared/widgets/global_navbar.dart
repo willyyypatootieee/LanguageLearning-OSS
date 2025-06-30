@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:awesome_bottom_bar/awesome_bottom_bar.dart';
 import '../../core/constants/app_constants.dart';
 
 /// Navigation item data model
@@ -24,68 +25,21 @@ class GlobalNavbar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const navItems = [
-      NavItem(svgPath: 'assets/navbar/home.svg'), // 0
-      NavItem(svgPath: 'assets/navbar/book.svg'), // 1
-      NavItem(svgPath: 'assets/navbar/mouth.svg'), // 2
-      NavItem(svgPath: 'assets/navbar/leaderboard.svg'), // 3
-      NavItem(svgPath: 'assets/navbar/profile.svg'), // 4
+      TabItem(icon: Icons.home, title: 'Home'),
+      TabItem(icon: Icons.book, title: 'Dictionary'),
+      TabItem(icon: Icons.mic, title: 'Practice'),
+      TabItem(icon: Icons.leaderboard, title: 'Leaderboard'),
+      TabItem(icon: Icons.person, title: 'Profile'),
     ];
-    return Container(
-      margin: const EdgeInsets.all(32),
-      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.gray300.withValues(alpha: 0.3),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
-            spreadRadius: 0,
-          ),
-        ],
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children:
-            navItems.asMap().entries.map((entry) {
-              final index = entry.key;
-              final item = entry.value;
-              final isSelected = index == selectedIndex;
-
-              return Expanded(
-                child: GestureDetector(
-                  onTap: () => onTap(index),
-                  behavior: HitTestBehavior.opaque,
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 300),
-                    curve: Curves.easeInOut,
-                    padding: const EdgeInsets.symmetric(vertical: 4),
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 300),
-                      curve: Curves.easeInOut,
-                      width: isSelected ? 56 : 48,
-                      height: isSelected ? 56 : 48,
-                      padding: EdgeInsets.all(isSelected ? 8 : 6),
-                      decoration: BoxDecoration(
-                        color:
-                            isSelected
-                                ? const Color.fromARGB(
-                                  255,
-                                  218,
-                                  98,
-                                  30,
-                                ).withValues(alpha: 0.15)
-                                : Colors.transparent,
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: SvgPicture.asset(item.svgPath),
-                    ),
-                  ),
-                ),
-              );
-            }).toList(),
-      ),
+    return BottomBarDefault(
+      items: navItems,
+      backgroundColor: Colors.white,
+      color: AppColors.gray300,
+      colorSelected: AppColors.primary,
+      indexSelected: selectedIndex,
+      onTap: onTap,
+      animated: true,
+      iconSize: 28,
     );
   }
 }

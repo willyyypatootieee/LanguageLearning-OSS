@@ -8,6 +8,8 @@ import '../featureAuthentication/presentation/screens/login_screen.dart';
 import '../featureAuthentication/presentation/screens/register_screen.dart';
 import '../featureProfile/presentation/screens/profile_screen.dart';
 import '../featureDictionary/screens/ipa_chart_screen.dart';
+import '../featureLeaderboard/presentation/screens/leaderboard_screen.dart';
+import '../featureLeaderboard/presentation/widgets/leaderboard_provider.dart';
 import 'route_constants.dart';
 
 /// Global router instance that can be accessed throughout the app
@@ -69,6 +71,14 @@ class GlobalRouter {
           name: AppRoutes.dictionaryName,
           builder: (context, state) => const IPAChartScreen(),
         ),
+        // Leaderboard route
+        GoRoute(
+          path: AppRoutes.leaderboard,
+          name: AppRoutes.leaderboardName,
+          builder:
+              (context, state) =>
+                  LeaderboardProvider(currentIndex: 3, onNavTap: (int idx) {}),
+        ),
         // Add more routes here as you develop more features
       ],
 
@@ -126,6 +136,9 @@ class GlobalRouter {
 
   /// Navigate to dictionary screen
   void goToDictionary() => _router.go(AppRoutes.dictionary);
+
+  /// Navigate to leaderboard screen
+  void goToLeaderboard() => _router.go(AppRoutes.leaderboard);
 
   /// Navigate to root and let it decide the route
   void goToRoot() => _router.go(AppRoutes.root);

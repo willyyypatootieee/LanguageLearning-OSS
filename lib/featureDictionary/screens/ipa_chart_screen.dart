@@ -5,6 +5,9 @@ import '../../../core/constants/app_constants.dart';
 import '../widgets/ipa_button.dart';
 import '../../../shared/shared_exports.dart';
 import '../../../featureLeaderboard/presentation/widgets/leaderboard_provider.dart';
+import '../../featureHomeScreen/presentation/screens/home_screen.dart';
+import '../../featureProfile/presentation/screens/profile_screen.dart';
+import '../../../router/router_exports.dart';
 
 // Dummy IPA data singkat untuk vowels dan konsonan
 final List<Map<String, String>> vowelIPA = [
@@ -71,32 +74,22 @@ class IPAChartScreen extends StatelessWidget {
       bottomNavigationBar: MainNavbar(
         currentIndex: 1,
         onTap: (index) {
-          if (index == 3) {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder:
-                    (context) => LeaderboardProvider(
-                      currentIndex: index,
-                      onNavTap: (int idx) {
-                        Navigator.of(context).pop();
-                        if (idx != 1) {
-                          // Only switch if not already on dictionary
-                          if (idx == 0) context.go('/home');
-                          if (idx == 2) context.go('/practice');
-                          if (idx == 4) context.go('/profile');
-                        }
-                      },
-                    ),
-              ),
-            );
-          } else if (index == 0) {
-            context.go('/home');
-          } else if (index == 1) {
-            context.go('/dictionary');
-          } else if (index == 2) {
-            context.go('/practice');
-          } else if (index == 4) {
-            context.go('/profile');
+          if (index == 1) return;
+          switch (index) {
+            case 0:
+              appRouter.goToHome();
+              break;
+            case 2:
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Practice feature coming soon!')),
+              );
+              break;
+            case 3:
+              appRouter.goToLeaderboard();
+              break;
+            case 4:
+              appRouter.goToProfile();
+              break;
           }
         },
       ),

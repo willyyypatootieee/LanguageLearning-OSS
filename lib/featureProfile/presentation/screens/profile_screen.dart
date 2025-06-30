@@ -12,6 +12,8 @@ import '../../domain/usecases/get_current_profile_usecase.dart';
 import '../cubit/profile_cubit.dart';
 import '../widgets/profile_widgets.dart';
 import '../../../featureLeaderboard/presentation/widgets/leaderboard_provider.dart';
+import '../../../featureHomeScreen/presentation/screens/home_screen.dart';
+import '../../../featureDictionary/screens/ipa_chart_screen.dart';
 
 /// Profile screen showing user information and statistics
 class ProfileScreen extends StatefulWidget {
@@ -233,6 +235,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       bottomNavigationBar: MainNavbar(
         currentIndex: 4, // Profile tab index
         onTap: (index) {
+          if (index == 4) return;
           switch (index) {
             case 0:
               appRouter.goToHome();
@@ -246,32 +249,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               );
               break;
             case 3:
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder:
-                      (context) => LeaderboardProvider(
-                        currentIndex: index,
-                        onNavTap: (int idx) {
-                          Navigator.of(context).pop();
-                          if (idx != 4) {
-                            if (idx == 0) appRouter.goToHome();
-                            if (idx == 1) appRouter.goToDictionary();
-                            if (idx == 2)
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text(
-                                    'Practice feature coming soon!',
-                                  ),
-                                ),
-                              );
-                          }
-                        },
-                      ),
-                ),
-              );
-              break;
-            case 4:
-              // Already on profile - do nothing
+              appRouter.goToLeaderboard();
               break;
           }
         },

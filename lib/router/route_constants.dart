@@ -10,6 +10,7 @@ class AppRoutes {
   static const String register = '/register';
   static const String profile = '/profile';
   static const String dictionary = '/dictionary';
+  static const String leaderboard = '/leaderboard';
 
   // Route names (for named navigation)
   static const String rootName = 'root';
@@ -20,6 +21,7 @@ class AppRoutes {
   static const String registerName = 'register';
   static const String profileName = 'profile';
   static const String dictionaryName = 'dictionary';
+  static const String leaderboardName = 'leaderboard';
 
   // Future routes (add as you develop more features)
   // static const String settings = '/settings';

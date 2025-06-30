@@ -4,6 +4,10 @@ import '../cubit/leaderboard_cubit.dart';
 import '../../domain/models/leaderboard_user.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../shared/shared_exports.dart';
+import '../../../featureHomeScreen/presentation/screens/home_screen.dart';
+import '../../../featureDictionary/screens/ipa_chart_screen.dart';
+import '../../../featureProfile/presentation/screens/profile_screen.dart';
+import '../../../router/router_exports.dart';
 
 class LeaderboardScreen extends StatelessWidget {
   final int currentIndex;
@@ -445,7 +449,25 @@ class LeaderboardScreen extends StatelessWidget {
       ),
       bottomNavigationBar: MainNavbar(
         currentIndex: currentIndex,
-        onTap: onNavTap,
+        onTap: (index) {
+          if (index == currentIndex) return;
+          switch (index) {
+            case 0:
+              appRouter.goToHome();
+              break;
+            case 1:
+              appRouter.goToDictionary();
+              break;
+            case 2:
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Practice feature coming soon!')),
+              );
+              break;
+            case 4:
+              appRouter.goToProfile();
+              break;
+          }
+        },
       ),
     );
   }
