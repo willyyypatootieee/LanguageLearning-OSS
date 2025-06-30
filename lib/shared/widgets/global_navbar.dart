@@ -14,7 +14,7 @@ class NavItem {
 /// Used across all screens that need bottom navigation
 class GlobalNavbar extends StatelessWidget {
   final int selectedIndex;
-  final Function(int) onTap;
+  final Function(int) onTap;  
 
   const GlobalNavbar({
     super.key,

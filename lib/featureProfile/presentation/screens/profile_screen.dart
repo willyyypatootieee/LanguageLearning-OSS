@@ -81,6 +81,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
+  Future<void> _logout(BuildContext context) async {
+    try {
+      // Use the same logic as HomeScreen for logout
+      final authRepository = AuthRepositoryImpl(
+        AuthRemoteDataSource(),
+        AuthLocalDataSource(),
+      );
+      await authRepository.clearAuthData();
+      if (context.mounted) {
+        appRouter.goToRoot();
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error logging out: $e'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    }
+  }
+
   @override
   void dispose() {
     _profileCubit.dispose();
@@ -92,144 +115,175 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Scaffold(
       backgroundColor: AppColors.gray50,
       body: SafeArea(
-        child: ListenableBuilder(
-          listenable: _profileCubit,
-          builder: (context, child) {
-            // Only show loading spinner if there is no user data at all
-            if (_profileCubit.user == null && _profileCubit.isLoading) {
-              return const Center(
-                child: CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
-                ),
-              );
-            }
-
-            if (_profileCubit.error != null && _profileCubit.user == null) {
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.error_outline, size: 64, color: AppColors.error),
-                    const SizedBox(height: AppConstants.spacingL),
-                    Text(
-                      _profileCubit.error!,
-                      style: Theme.of(
-                        context,
-                      ).textTheme.bodyLarge?.copyWith(color: AppColors.gray600),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: AppConstants.spacingL),
-                    ElevatedButton(
-                      onPressed: _loadProfile,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        foregroundColor: Colors.white,
-                      ),
-                      child: const Text('Retry'),
-                    ),
-                  ],
-                ),
-              );
-            }
-
-            final user = _profileCubit.user;
-            if (user == null) {
-              return const Center(child: Text('No profile data available'));
-            }
-
-            return RefreshIndicator(
-              onRefresh: _refreshProfile,
-              color: AppColors.primary,
-              child: SingleChildScrollView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                child: Column(
-                  children: [
-                    // Header section
-                    Padding(
-                      padding: const EdgeInsets.all(AppConstants.spacingL),
-                      child: ProfileHeader(
-                        username: user.username,
-                        rank: user.currentRank,
-                        onEditPressed: _onEditProfile,
-                      ),
-                    ),
-
-                    // Overview section
-                    ProfileSection(
-                      title: 'Overview',
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: AppConstants.spacingL,
-                        ),
-                        child: Column(
-                          children: [
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: ProfileStatCard(
-                                    icon: Icons.local_fire_department,
-                                    label: 'Day Streak',
-                                    value: user.streakDay.toString(),
-                                    iconColor: Colors.orange,
-                                    backgroundColor: Colors.orange.withValues(
-                                      alpha: 0.1,
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: AppConstants.spacingM),
-                                Expanded(
-                                  child: ProfileStatCard(
-                                    icon: Icons.bolt,
-                                    label: 'Total Xp',
-                                    value: user.totalXp.toString(),
-                                    iconColor: Colors.purple,
-                                    backgroundColor: Colors.purple.withValues(
-                                      alpha: 0.1,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: AppConstants.spacingM),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: ProfileStatCard(
-                                    icon: Icons.emoji_events,
-                                    label: 'Current League',
-                                    value: user.currentRank,
-                                    iconColor: Colors.amber,
-                                    backgroundColor: Colors.amber.withValues(
-                                      alpha: 0.1,
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: AppConstants.spacingM),
-                                Expanded(
-                                  child: ProfileStatCard(
-                                    icon: Icons.flag,
-                                    label: 'English Score',
-                                    value: user.scoreEnglish.toString(),
-                                    iconColor: Colors.red,
-                                    backgroundColor: Colors.red.withValues(
-                                      alpha: 0.1,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
+        child: Stack(
+          children: [
+            // Main profile content
+            Positioned.fill(
+              child: ListenableBuilder(
+                listenable: _profileCubit,
+                builder: (context, child) {
+                  // Only show loading spinner if there is no user data at all
+                  if (_profileCubit.user == null && _profileCubit.isLoading) {
+                    return const Center(
+                      child: CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          AppColors.primary,
                         ),
                       ),
-                    ),
+                    );
+                  }
 
-                    // Additional spacing for navbar
-                    const SizedBox(height: 120),
-                  ],
+                  if (_profileCubit.error != null &&
+                      _profileCubit.user == null) {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.error_outline,
+                            size: 64,
+                            color: AppColors.error,
+                          ),
+                          const SizedBox(height: AppConstants.spacingL),
+                          Text(
+                            _profileCubit.error!,
+                            style: Theme.of(context).textTheme.bodyLarge
+                                ?.copyWith(color: AppColors.gray600),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: AppConstants.spacingL),
+                          ElevatedButton(
+                            onPressed: _loadProfile,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.primary,
+                              foregroundColor: Colors.white,
+                            ),
+                            child: const Text('Retry'),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+
+                  final user = _profileCubit.user;
+                  if (user == null) {
+                    return const Center(
+                      child: Text('No profile data available'),
+                    );
+                  }
+
+                  return RefreshIndicator(
+                    onRefresh: _refreshProfile,
+                    color: AppColors.primary,
+                    child: SingleChildScrollView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      child: Column(
+                        children: [
+                          // Header section
+                          Padding(
+                            padding: const EdgeInsets.all(
+                              AppConstants.spacingL,
+                            ),
+                            child: ProfileHeader(
+                              username: user.username,
+                              rank: user.currentRank,
+                              onEditPressed: _onEditProfile,
+                            ),
+                          ),
+
+                          // Overview section
+                          ProfileSection(
+                            title: 'Overview',
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: AppConstants.spacingL,
+                              ),
+                              child: Column(
+                                children: [
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: ProfileStatCard(
+                                          icon: Icons.local_fire_department,
+                                          label: 'Day Streak',
+                                          value: user.streakDay.toString(),
+                                          iconColor: Colors.orange,
+                                          backgroundColor: Colors.orange
+                                              .withValues(alpha: 0.1),
+                                        ),
+                                      ),
+                                      const SizedBox(
+                                        width: AppConstants.spacingM,
+                                      ),
+                                      Expanded(
+                                        child: ProfileStatCard(
+                                          icon: Icons.bolt,
+                                          label: 'Total Xp',
+                                          value: user.totalXp.toString(),
+                                          iconColor: Colors.purple,
+                                          backgroundColor: Colors.purple
+                                              .withValues(alpha: 0.1),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: AppConstants.spacingM),
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: ProfileStatCard(
+                                          icon: Icons.emoji_events,
+                                          label: 'Current League',
+                                          value: user.currentRank,
+                                          iconColor: Colors.amber,
+                                          backgroundColor: Colors.amber
+                                              .withValues(alpha: 0.1),
+                                        ),
+                                      ),
+                                      const SizedBox(
+                                        width: AppConstants.spacingM,
+                                      ),
+                                      Expanded(
+                                        child: ProfileStatCard(
+                                          icon: Icons.flag,
+                                          label: 'English Score',
+                                          value: user.scoreEnglish.toString(),
+                                          iconColor: Colors.red,
+                                          backgroundColor: Colors.red
+                                              .withValues(alpha: 0.1),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+
+                          // Additional spacing for navbar
+                          const SizedBox(height: 120),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+            // Logout button at top right
+            Positioned(
+              top: MediaQuery.of(context).padding.top + 16,
+              right: 16,
+              child: IconButton(
+                onPressed: () => _logout(context),
+                icon: const Icon(Icons.logout),
+                tooltip: 'Logout',
+                style: IconButton.styleFrom(
+                  backgroundColor: Colors.white.withOpacity(0.8),
+                  foregroundColor: AppColors.primary,
                 ),
               ),
-            );
-          },
+            ),
+          ],
         ),
       ),
       bottomNavigationBar: MainNavbar(
