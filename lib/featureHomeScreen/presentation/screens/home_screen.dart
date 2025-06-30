@@ -50,6 +50,16 @@ class _HomeScreenState extends State<HomeScreen> {
           Positioned.fill(
             child: Image.asset('assets/images/home.png', fit: BoxFit.cover),
           ),
+          // Start button overlay (approximate position, adjust as needed)
+          Positioned(
+            top: MediaQuery.of(context).size.height * 0.14, // adjust as needed
+            right: MediaQuery.of(context).size.width * 0.03, // adjust as needed
+            child: Image.asset(
+              'assets/images/start.png',
+              width: 70, // adjust size as needed
+              height: 70,
+            ),
+          ),
         ],
       ),
       bottomNavigationBar: MainNavbar(
