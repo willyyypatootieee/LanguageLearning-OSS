@@ -6,43 +6,43 @@ class AppTheme {
   static ThemeData get lightTheme {
     return ThemeData(
       primarySwatch: Colors.orange,
-      fontFamily: AppTypography.bodyFont,
+      fontFamily: 'Nunito', // Set Nunito as the default body font
       visualDensity: VisualDensity.adaptivePlatformDensity,
       textTheme: const TextTheme(
         headlineLarge: TextStyle(
-          fontFamily: AppTypography.headerFont,
+          fontFamily: 'PlusJakartaSans',
           fontSize: 32,
           fontWeight: FontWeight.bold,
           color: AppColors.gray800,
         ),
         headlineMedium: TextStyle(
-          fontFamily: AppTypography.headerFont,
+          fontFamily: 'PlusJakartaSans',
           fontSize: 28,
           fontWeight: FontWeight.bold,
           color: AppColors.gray800,
         ),
         headlineSmall: TextStyle(
-          fontFamily: AppTypography.headerFont,
+          fontFamily: 'PlusJakartaSans',
           fontSize: 24,
           fontWeight: FontWeight.bold,
           color: AppColors.gray800,
         ),
         bodyLarge: TextStyle(
-          fontFamily: AppTypography.bodyFont,
+          fontFamily: 'Nunito',
           fontSize: 16,
           fontWeight: FontWeight.w400,
           color: AppColors.gray700,
           height: 1.5,
         ),
         bodyMedium: TextStyle(
-          fontFamily: AppTypography.bodyFont,
+          fontFamily: 'Nunito',
           fontSize: 14,
           fontWeight: FontWeight.w400,
           color: AppColors.gray700,
           height: 1.5,
         ),
         labelLarge: TextStyle(
-          fontFamily: AppTypography.bodyFont,
+          fontFamily: 'Nunito',
           fontSize: 16,
           fontWeight: FontWeight.w600,
           color: AppColors.gray700,
