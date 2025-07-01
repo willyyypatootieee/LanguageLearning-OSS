@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../../router/router_exports.dart';
 import '../../../shared/shared_exports.dart';
+import '../../../featurePractice/data/datasources/practice_local_datasource.dart';
+import '../../../featurePractice/data/repositories/practice_repository_impl.dart';
 
 /// Main home screen of the application
 class HomeScreen extends StatefulWidget {
@@ -23,10 +25,8 @@ class _HomeScreenState extends State<HomeScreen> {
         appRouter.goToDictionary();
         break;
       case 2:
-        // Navigate to practice section
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Practice feature coming soon!')),
-        );
+        // Navigate to practice section - check if onboarding is needed
+        _navigateToPractice();
         break;
       case 3:
         appRouter.goToLeaderboard();
@@ -38,6 +38,23 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {
       _currentNavIndex = index;
     });
+  }
+
+  Future<void> _navigateToPractice() async {
+    try {
+      final repository = PracticeRepositoryImpl(PracticeLocalDataSource());
+      final hasCompletedOnboarding =
+          await repository.isPracticeOnboardingCompleted();
+
+      if (hasCompletedOnboarding) {
+        appRouter.goToPractice();
+      } else {
+        appRouter.goToPracticeOnboarding();
+      }
+    } catch (e) {
+      // If there's an error, go to onboarding
+      appRouter.goToPracticeOnboarding();
+    }
   }
 
   @override

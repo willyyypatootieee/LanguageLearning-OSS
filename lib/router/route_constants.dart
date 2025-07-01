@@ -11,6 +11,8 @@ class AppRoutes {
   static const String profile = '/profile';
   static const String dictionary = '/dictionary';
   static const String leaderboard = '/leaderboard';
+  static const String practice = '/practice';
+  static const String practiceOnboarding = '/practice/onboarding';
 
   // Route names (for named navigation)
   static const String rootName = 'root';
@@ -22,6 +24,8 @@ class AppRoutes {
   static const String profileName = 'profile';
   static const String dictionaryName = 'dictionary';
   static const String leaderboardName = 'leaderboard';
+  static const String practiceName = 'practice';
+  static const String practiceOnboardingName = 'practiceOnboarding';
 
   // Future routes (add as you develop more features)
   // static const String settings = '/settings';

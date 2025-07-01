@@ -9,6 +9,8 @@ import '../featureAuthentication/presentation/screens/register_screen.dart';
 import '../featureProfile/presentation/screens/profile_screen.dart';
 import '../featureDictionary/screens/ipa_chart_screen.dart';
 import '../featureLeaderboard/presentation/widgets/leaderboard_provider.dart';
+import '../featurePractice/presentation/screens/practice_screen.dart';
+import '../featurePractice/presentation/screens/practice_onboarding_screen.dart';
 import 'route_constants.dart';
 
 /// Global router instance that can be accessed throughout the app
@@ -115,6 +117,25 @@ class GlobalRouter {
                 ),
               ),
         ),
+        // Practice routes
+        GoRoute(
+          path: AppRoutes.practice,
+          name: AppRoutes.practiceName,
+          pageBuilder:
+              (context, state) => NoTransitionPage(
+                key: state.pageKey,
+                child: const PracticeScreen(),
+              ),
+        ),
+        GoRoute(
+          path: AppRoutes.practiceOnboarding,
+          name: AppRoutes.practiceOnboardingName,
+          pageBuilder:
+              (context, state) => NoTransitionPage(
+                key: state.pageKey,
+                child: const PracticeOnboardingScreen(),
+              ),
+        ),
         // Add more routes here as you develop more features
       ],
 
@@ -175,6 +196,12 @@ class GlobalRouter {
 
   /// Navigate to leaderboard screen
   void goToLeaderboard() => _router.go(AppRoutes.leaderboard);
+
+  /// Navigate to practice screen
+  void goToPractice() => _router.go(AppRoutes.practice);
+
+  /// Navigate to practice onboarding screen
+  void goToPracticeOnboarding() => _router.go(AppRoutes.practiceOnboarding);
 
   /// Navigate to root and let it decide the route
   void goToRoot() => _router.go(AppRoutes.root);
