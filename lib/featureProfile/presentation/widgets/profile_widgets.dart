@@ -183,20 +183,66 @@ class _ProfileHeaderState extends State<ProfileHeader> {
             ),
           ),
         ),
-        // Avatar animation (clickable, no circular container)
+        // Avatar animation card (clickable, wrapped in card matching ProfileInfoCard style)
         Positioned.fill(
-          child: GestureDetector(
-            onTap: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (_) => const FullscreenAvatarPage(interactive: true),
+          child: Center(
+            child: Container(
+              width: double.infinity,
+              height: 340,
+              margin: const EdgeInsets.only(
+                left: 16,
+                right: 16,
+                top: 40,
+                bottom: 24,
+              ),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(AppConstants.radiusXl),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.00),
+                    blurRadius: 20,
+                    offset: const Offset(0, 8),
+                  ),
+                  BoxShadow(
+                    color: AppColors.primary.withOpacity(0.1),
+                    blurRadius: 40,
+                    offset: const Offset(0, 16),
+                  ),
+                ],
+              ),
+              child: Padding(
+                padding: const EdgeInsets.only(
+                  left: 8,
+                  right: 8,
+                  top: 20,
+                  bottom: 8,
                 ),
-              );
-            },
-            child:
-                _artboard == null
-                    ? const Center(child: CircularProgressIndicator())
-                    : rive.Rive(artboard: _artboard!, fit: BoxFit.cover),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(
+                    AppConstants.radiusXl - 8,
+                  ),
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder:
+                              (_) =>
+                                  const FullscreenAvatarPage(interactive: true),
+                        ),
+                      );
+                    },
+                    child:
+                        _artboard == null
+                            ? const Center(child: CircularProgressIndicator())
+                            : rive.Rive(
+                              artboard: _artboard!,
+                              fit: BoxFit.cover,
+                            ),
+                  ),
+                ),
+              ),
+            ),
           ),
         ),
         // Action buttons with modern design
@@ -349,42 +395,9 @@ class ProfileInfoCard extends StatelessWidget {
                 ],
               ),
             ),
-            const SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                _buildStatItem(context, 'Following', following.toString()),
-                Container(height: 40, width: 1, color: AppColors.gray200),
-                _buildStatItem(context, 'Followers', followers.toString()),
-                Container(height: 40, width: 1, color: AppColors.gray200),
-                _buildStatItem(context, 'Country', countryLabel),
-              ],
-            ),
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildStatItem(BuildContext context, String label, String value) {
-    return Column(
-      children: [
-        Text(
-          value,
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.w800,
-            color: AppColors.gray900,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          label,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: AppColors.gray600,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-      ],
     );
   }
 }
@@ -458,7 +471,7 @@ class ProfileActionButtons extends StatelessWidget {
               child: ElevatedButton.icon(
                 onPressed: onShare,
                 icon: const Icon(Icons.share_rounded, size: 20),
-                label: const Text('Share Profile'),
+                label: const Text('Bagikan Akun'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.transparent,
                   foregroundColor: Colors.white,
