@@ -133,7 +133,7 @@ class _IPASymbolButtonState extends State<IPASymbolButton>
                                   size: 20,
                                 ),
                                 const SizedBox(width: 8),
-                                Text('Speaking: ${widget.example}'),
+                                Text('Pronouns: ${widget.example}'),
                               ],
                             ),
                             backgroundColor: _gradientColor,

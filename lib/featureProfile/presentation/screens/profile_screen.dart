@@ -21,7 +21,7 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  late final ProfileCubit _profileCubit;
+  ProfileCubit? _profileCubit;
 
   @override
   void initState() {
@@ -31,27 +31,34 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _initializeCubit() {
-    // Initialize repositories and use cases
-    final authRepository = AuthRepositoryImpl(
-      AuthRemoteDataSource(),
-      AuthLocalDataSource(),
-    );
+    try {
+      // Initialize repositories and use cases
+      final authRepository = AuthRepositoryImpl(
+        AuthRemoteDataSource(),
+        AuthLocalDataSource(),
+      );
 
-    final profileRepository = ProfileRepositoryImpl(
-      ProfileRemoteDataSource(),
-      ProfileLocalDataSource(),
-      authRepository,
-    );
+      final profileRepository = ProfileRepositoryImpl(
+        ProfileRemoteDataSource(),
+        ProfileLocalDataSource(),
+        authRepository,
+      );
 
-    final getCurrentProfileUseCase = GetCurrentProfileUseCase(
-      profileRepository,
-    );
+      final getCurrentProfileUseCase = GetCurrentProfileUseCase(
+        profileRepository,
+      );
 
-    _profileCubit = ProfileCubit(getCurrentProfileUseCase, profileRepository);
+      _profileCubit = ProfileCubit(getCurrentProfileUseCase, profileRepository);
+    } catch (e) {
+      print('Error initializing ProfileCubit: $e');
+      // Set a fallback cubit or handle the error appropriately
+    }
   }
 
   Future<void> _loadProfile() async {
-    await _profileCubit.loadProfile();
+    if (_profileCubit != null) {
+      await _profileCubit!.loadProfile();
+    }
   }
 
   Future<void> _logout(BuildContext context) async {
@@ -79,7 +86,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   void dispose() {
-    _profileCubit.dispose();
+    _profileCubit?.dispose();
     super.dispose();
   }
 
@@ -103,6 +110,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (_profileCubit == null) {
+      return Scaffold(
+        body: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [AppColors.gray50, Colors.white, AppColors.gray50],
+              stops: const [0.0, 0.3, 1.0],
+            ),
+          ),
+          child: const Center(
+            child: Text(
+              'Failed to initialize profile. Please restart the app.',
+            ),
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
       extendBody: true,
       body: Container(
@@ -115,14 +142,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
         ),
         child: ListenableBuilder(
-          listenable: _profileCubit,
+          listenable: _profileCubit!,
           builder: (context, child) {
-            final user = _profileCubit.user;
-            if (_profileCubit.user == null && _profileCubit.isLoading) {
+            final user = _profileCubit!.user;
+            if (_profileCubit!.user == null && _profileCubit!.isLoading) {
               return const Center(child: CircularProgressIndicator());
             }
-            if (_profileCubit.error != null && user == null) {
-              return Center(child: Text(_profileCubit.error!));
+            if (_profileCubit!.error != null && user == null) {
+              return Center(child: Text(_profileCubit!.error!));
             }
             if (user == null) {
               return const Center(child: Text('No profile data available'));

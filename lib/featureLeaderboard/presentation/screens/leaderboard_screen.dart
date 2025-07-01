@@ -29,7 +29,7 @@ class LeaderboardScreen extends StatefulWidget {
 }
 
 class _LeaderboardScreenState extends State<LeaderboardScreen> {
-  late final ProfileCubit _profileCubit;
+  ProfileCubit? _profileCubit;
   String _currentUsername = '';
 
   @override
@@ -40,37 +40,44 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
   }
 
   void _initializeCubit() {
-    // Initialize repositories and use cases
-    final authRepository = AuthRepositoryImpl(
-      AuthRemoteDataSource(),
-      AuthLocalDataSource(),
-    );
+    try {
+      // Initialize repositories and use cases
+      final authRepository = AuthRepositoryImpl(
+        AuthRemoteDataSource(),
+        AuthLocalDataSource(),
+      );
 
-    final profileRepository = ProfileRepositoryImpl(
-      ProfileRemoteDataSource(),
-      ProfileLocalDataSource(),
-      authRepository,
-    );
+      final profileRepository = ProfileRepositoryImpl(
+        ProfileRemoteDataSource(),
+        ProfileLocalDataSource(),
+        authRepository,
+      );
 
-    final getCurrentProfileUseCase = GetCurrentProfileUseCase(
-      profileRepository,
-    );
+      final getCurrentProfileUseCase = GetCurrentProfileUseCase(
+        profileRepository,
+      );
 
-    _profileCubit = ProfileCubit(getCurrentProfileUseCase, profileRepository);
+      _profileCubit = ProfileCubit(getCurrentProfileUseCase, profileRepository);
+    } catch (e) {
+      print('Error initializing ProfileCubit in LeaderboardScreen: $e');
+      // Set a fallback or handle the error appropriately
+    }
   }
 
   Future<void> _loadCurrentUser() async {
-    await _profileCubit.loadProfile();
-    if (_profileCubit.user != null) {
-      setState(() {
-        _currentUsername = _profileCubit.user!.username;
-      });
+    if (_profileCubit != null) {
+      await _profileCubit!.loadProfile();
+      if (_profileCubit!.user != null) {
+        setState(() {
+          _currentUsername = _profileCubit!.user!.username;
+        });
+      }
     }
   }
 
   @override
   void dispose() {
-    _profileCubit.dispose();
+    _profileCubit?.dispose();
     super.dispose();
   }
 

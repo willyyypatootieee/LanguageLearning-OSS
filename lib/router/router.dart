@@ -8,7 +8,6 @@ import '../featureAuthentication/presentation/screens/login_screen.dart';
 import '../featureAuthentication/presentation/screens/register_screen.dart';
 import '../featureProfile/presentation/screens/profile_screen.dart';
 import '../featureDictionary/screens/ipa_chart_screen.dart';
-import '../featureLeaderboard/presentation/screens/leaderboard_screen.dart';
 import '../featureLeaderboard/presentation/widgets/leaderboard_provider.dart';
 import 'route_constants.dart';
 
@@ -226,23 +225,43 @@ class _RootScreen extends StatelessWidget {
   }
 
   Future<String> _determineInitialRoute() async {
-    final onboardingRepository = ServiceLocator.instance.onboardingRepository;
-    final authRepository = ServiceLocator.instance.authRepository;
+    try {
+      final onboardingRepository = ServiceLocator.instance.onboardingRepository;
+      final authRepository = ServiceLocator.instance.authRepository;
 
-    // Check user status
-    final hasCompletedOnboarding =
-        await onboardingRepository.hasCompletedOnboarding();
-    final isLoggedIn = await authRepository.isLoggedIn();
+      // Check user status with error handling
+      bool hasCompletedOnboarding = false;
+      bool isLoggedIn = false;
 
-    // Route logic:
-    // 1. If user is logged in -> go to home
-    // 2. If user completed onboarding but not logged in -> go to welcome
-    // 3. If user hasn't completed onboarding -> go to onboarding
-    if (isLoggedIn) {
-      return AppRoutes.home;
-    } else if (hasCompletedOnboarding) {
-      return AppRoutes.welcome;
-    } else {
+      try {
+        hasCompletedOnboarding =
+            await onboardingRepository.hasCompletedOnboarding();
+      } catch (e) {
+        print('Error checking onboarding status: $e');
+        hasCompletedOnboarding = false;
+      }
+
+      try {
+        isLoggedIn = await authRepository.isLoggedIn();
+      } catch (e) {
+        print('Error checking login status: $e');
+        isLoggedIn = false;
+      }
+
+      // Route logic:
+      // 1. If user is logged in -> go to home
+      // 2. If user completed onboarding but not logged in -> go to welcome
+      // 3. If user hasn't completed onboarding -> go to onboarding
+      if (isLoggedIn) {
+        return AppRoutes.home;
+      } else if (hasCompletedOnboarding) {
+        return AppRoutes.welcome;
+      } else {
+        return AppRoutes.onboarding;
+      }
+    } catch (e) {
+      print('Error in _determineInitialRoute: $e');
+      // Fallback to onboarding if anything goes wrong
       return AppRoutes.onboarding;
     }
   }
