@@ -6,8 +6,16 @@ import '../../../core/constants/app_constants.dart';
 import '../../../shared/shared_exports.dart';
 import '../../../router/router_exports.dart';
 import '../widgets/bento_leaderboard_widgets.dart';
+import '../../../featureAuthentication/data/datasources/auth_local_datasource.dart';
+import '../../../featureAuthentication/data/datasources/auth_remote_datasource.dart';
+import '../../../featureAuthentication/data/repositories/auth_repository_impl.dart';
+import '../../../featureProfile/data/datasources/profile_local_datasource.dart';
+import '../../../featureProfile/data/datasources/profile_remote_datasource.dart';
+import '../../../featureProfile/data/repositories/profile_repository_impl.dart';
+import '../../../featureProfile/domain/usecases/get_current_profile_usecase.dart';
+import '../../../featureProfile/presentation/cubit/profile_cubit.dart';
 
-class LeaderboardScreen extends StatelessWidget {
+class LeaderboardScreen extends StatefulWidget {
   final int currentIndex;
   final Function(int) onNavTap;
   const LeaderboardScreen({
@@ -15,6 +23,56 @@ class LeaderboardScreen extends StatelessWidget {
     required this.currentIndex,
     required this.onNavTap,
   });
+
+  @override
+  State<LeaderboardScreen> createState() => _LeaderboardScreenState();
+}
+
+class _LeaderboardScreenState extends State<LeaderboardScreen> {
+  late final ProfileCubit _profileCubit;
+  String _currentUsername = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeCubit();
+    _loadCurrentUser();
+  }
+
+  void _initializeCubit() {
+    // Initialize repositories and use cases
+    final authRepository = AuthRepositoryImpl(
+      AuthRemoteDataSource(),
+      AuthLocalDataSource(),
+    );
+
+    final profileRepository = ProfileRepositoryImpl(
+      ProfileRemoteDataSource(),
+      ProfileLocalDataSource(),
+      authRepository,
+    );
+
+    final getCurrentProfileUseCase = GetCurrentProfileUseCase(
+      profileRepository,
+    );
+
+    _profileCubit = ProfileCubit(getCurrentProfileUseCase, profileRepository);
+  }
+
+  Future<void> _loadCurrentUser() async {
+    await _profileCubit.loadProfile();
+    if (_profileCubit.user != null) {
+      setState(() {
+        _currentUsername = _profileCubit.user!.username;
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _profileCubit.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -113,8 +171,8 @@ class LeaderboardScreen extends StatelessWidget {
                 grouped[type]?.add(user);
               }
 
-              // Find current user (replace with actual logic)
-              String currentUser = 'You';
+              // Find current user from profile
+              String currentUser = _currentUsername;
 
               return CustomScrollView(
                 slivers: [
@@ -190,9 +248,9 @@ class LeaderboardScreen extends StatelessWidget {
         ),
       ),
       bottomNavigationBar: MainNavbar(
-        currentIndex: currentIndex,
+        currentIndex: widget.currentIndex,
         onTap: (index) {
-          if (index == currentIndex) return;
+          if (index == widget.currentIndex) return;
           switch (index) {
             case 0:
               appRouter.goToHome();

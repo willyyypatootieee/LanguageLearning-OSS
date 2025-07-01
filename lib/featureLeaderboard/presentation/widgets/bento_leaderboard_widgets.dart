@@ -56,13 +56,16 @@ class _BentoTop3WidgetState extends State<BentoTop3Widget>
           child: SlideTransition(
             position: _slideAnimation,
             child: Container(
-              margin: const EdgeInsets.all(16),
+              margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Header section
                   Container(
-                    padding: const EdgeInsets.all(20),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 16,
+                    ),
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         begin: Alignment.topLeft,
@@ -103,7 +106,7 @@ class _BentoTop3WidgetState extends State<BentoTop3Widget>
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Hall of Fame',
+                              'Top Tier',
                               style: Theme.of(
                                 context,
                               ).textTheme.headlineSmall?.copyWith(
@@ -113,7 +116,7 @@ class _BentoTop3WidgetState extends State<BentoTop3Widget>
                               ),
                             ),
                             Text(
-                              'Top Performers',
+                              'Pemain Hebat, Lo Bisa Jadi Terbaik!',
                               style: Theme.of(
                                 context,
                               ).textTheme.bodyMedium?.copyWith(
@@ -129,7 +132,7 @@ class _BentoTop3WidgetState extends State<BentoTop3Widget>
 
                   // Bento grid for top 3
                   Container(
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: const BorderRadius.only(
@@ -166,12 +169,13 @@ class _BentoTop3WidgetState extends State<BentoTop3Widget>
     final thirdPlace = widget.top3Users.length > 2 ? widget.top3Users[2] : null;
 
     return SizedBox(
-      height: 300,
+      height: 350,
+      // width: double.infinity,
       child: Row(
         children: [
           // Left column (2nd place)
           Expanded(
-            flex: 2,
+            flex: 3,
             child: Column(
               children: [
                 if (secondPlace != null)
@@ -193,7 +197,7 @@ class _BentoTop3WidgetState extends State<BentoTop3Widget>
                       },
                     ),
                   ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 10),
                 if (thirdPlace != null)
                   Expanded(
                     child: TweenAnimationBuilder<double>(
@@ -216,27 +220,17 @@ class _BentoTop3WidgetState extends State<BentoTop3Widget>
               ],
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 8),
           // Right column (1st place - larger)
           Expanded(
-            flex: 3,
+            flex: 4,
             child:
                 firstPlace != null
-                    ? TweenAnimationBuilder<double>(
-                      duration: const Duration(milliseconds: 1000),
-                      tween: Tween(begin: 0.0, end: 1.0),
-                      curve: Curves.elasticOut,
-                      builder: (context, value, child) {
-                        return Transform.scale(
-                          scale: value,
-                          child: _buildUserCard(
-                            firstPlace,
-                            1,
-                            const Color(0xFFFFD700), // Gold
-                            isChampion: true,
-                          ),
-                        );
-                      },
+                    ? _buildUserCard(
+                      firstPlace,
+                      1,
+                      const Color(0xFFFFD700), // Gold
+                      isChampion: true,
                     )
                     : const SizedBox(),
           ),
@@ -261,7 +255,7 @@ class _BentoTop3WidgetState extends State<BentoTop3Widget>
           duration: const Duration(milliseconds: 300),
           transform: Matrix4.identity()..scale(isChampion ? pulseValue : 1.0),
           child: Container(
-            padding: const EdgeInsets.all(8),
+            padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
@@ -302,8 +296,8 @@ class _BentoTop3WidgetState extends State<BentoTop3Widget>
                       return Transform.scale(
                         scale: bounceValue,
                         child: Container(
-                          width: isChampion ? 40 : 30,
-                          height: isChampion ? 40 : 30,
+                          width: isChampion ? 44 : 34,
+                          height: isChampion ? 44 : 34,
                           decoration: BoxDecoration(
                             color: accentColor,
                             shape: BoxShape.circle,
@@ -320,7 +314,7 @@ class _BentoTop3WidgetState extends State<BentoTop3Widget>
                               '$position',
                               style: TextStyle(
                                 color: Colors.white,
-                                fontSize: isChampion ? 18 : 14,
+                                fontSize: isChampion ? 20 : 16,
                                 fontWeight: FontWeight.bold,
                                 fontFamily: 'PlusJakartaSans',
                               ),
@@ -332,7 +326,7 @@ class _BentoTop3WidgetState extends State<BentoTop3Widget>
                   ),
 
                   if (isChampion) ...[
-                    const SizedBox(height: 2),
+                    const SizedBox(height: 4),
                     TweenAnimationBuilder<double>(
                       duration: const Duration(milliseconds: 1200),
                       tween: Tween(begin: 0.0, end: 1.0),
@@ -343,14 +337,14 @@ class _BentoTop3WidgetState extends State<BentoTop3Widget>
                           child: Icon(
                             Icons.emoji_events,
                             color: accentColor,
-                            size: 20,
+                            size: 24,
                           ),
                         );
                       },
                     ),
                   ],
 
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 8),
 
                   // User avatar
                   TweenAnimationBuilder<double>(
@@ -361,12 +355,12 @@ class _BentoTop3WidgetState extends State<BentoTop3Widget>
                       return Transform.scale(
                         scale: value,
                         child: CircleAvatar(
-                          radius: isChampion ? 24 : 18,
+                          radius: isChampion ? 28 : 22,
                           backgroundColor: accentColor.withOpacity(0.2),
                           child: Text(
                             user.username[0].toUpperCase(),
                             style: TextStyle(
-                              fontSize: isChampion ? 20 : 14,
+                              fontSize: isChampion ? 24 : 18,
                               fontWeight: FontWeight.bold,
                               color: accentColor,
                               fontFamily: 'PlusJakartaSans',
@@ -377,7 +371,7 @@ class _BentoTop3WidgetState extends State<BentoTop3Widget>
                     },
                   ),
 
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 8),
 
                   // Username
                   TweenAnimationBuilder<double>(
@@ -390,7 +384,7 @@ class _BentoTop3WidgetState extends State<BentoTop3Widget>
                         child: Text(
                           user.username,
                           style: TextStyle(
-                            fontSize: isChampion ? 14 : 10,
+                            fontSize: isChampion ? 16 : 12,
                             fontWeight: FontWeight.bold,
                             color: AppColors.gray900,
                             fontFamily: 'PlusJakartaSans',
@@ -403,7 +397,7 @@ class _BentoTop3WidgetState extends State<BentoTop3Widget>
                     },
                   ),
 
-                  const SizedBox(height: 2),
+                  const SizedBox(height: 4),
 
                   // Score
                   TweenAnimationBuilder<double>(
@@ -415,8 +409,8 @@ class _BentoTop3WidgetState extends State<BentoTop3Widget>
                         scale: value,
                         child: Container(
                           padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 3,
+                            horizontal: 10,
+                            vertical: 4,
                           ),
                           decoration: BoxDecoration(
                             color: accentColor.withOpacity(0.2),
@@ -425,9 +419,9 @@ class _BentoTop3WidgetState extends State<BentoTop3Widget>
                           child: Text(
                             '${user.scoreEnglish} pts',
                             style: TextStyle(
-                              fontSize: isChampion ? 12 : 8,
+                              fontSize: isChampion ? 14 : 10,
                               fontWeight: FontWeight.bold,
-                              color: accentColor,
+                              color: isChampion ? Colors.black : accentColor,
                               fontFamily: 'Nunito',
                             ),
                           ),
@@ -519,7 +513,7 @@ class _BentoStatsWidgetState extends State<BentoStatsWidget>
                 child: Transform.translate(
                   offset: Offset(0, _slideAnimations[0].value),
                   child: _buildStatCard(
-                    'Total Players',
+                    'Pemain Total',
                     totalUsers.toString(),
                     Icons.people,
                     AppColors.primary,
@@ -531,7 +525,7 @@ class _BentoStatsWidgetState extends State<BentoStatsWidget>
                 child: Transform.translate(
                   offset: Offset(0, _slideAnimations[1].value),
                   child: _buildStatCard(
-                    'Average Score',
+                    'Rata-Rata Skor',
                     '$averageScore pts',
                     Icons.analytics,
                     AppColors.accent,
@@ -543,8 +537,8 @@ class _BentoStatsWidgetState extends State<BentoStatsWidget>
                 child: Transform.translate(
                   offset: Offset(0, _slideAnimations[2].value),
                   child: _buildStatCard(
-                    'Highest Score',
-                    '$highestScore pts',
+                    'Skor Tertinggi',
+                    '$highestScore Point',
                     Icons.trending_up,
                     AppColors.success,
                   ),
@@ -795,8 +789,8 @@ class BentoRankSectionWidget extends StatelessWidget {
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: [
-                    AppColors.success.withOpacity(0.1),
-                    AppColors.success.withOpacity(0.05),
+                    AppColors.success.withOpacity(0.15),
+                    AppColors.success.withOpacity(0.08),
                   ],
                 )
                 : null,
@@ -805,9 +799,19 @@ class BentoRankSectionWidget extends StatelessWidget {
         border:
             isCurrentUser
                 ? Border.all(
-                  color: AppColors.success.withOpacity(0.3),
+                  color: AppColors.success.withOpacity(0.4),
                   width: 2,
                 )
+                : null,
+        boxShadow:
+            isCurrentUser
+                ? [
+                  BoxShadow(
+                    color: AppColors.success.withOpacity(0.2),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ]
                 : null,
       ),
       child: ListTile(
@@ -866,27 +870,10 @@ class BentoRankSectionWidget extends StatelessWidget {
                 ),
               ),
             ),
-            if (isCurrentUser)
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: AppColors.success.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Text(
-                  'You',
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.success,
-                    fontFamily: 'Nunito',
-                  ),
-                ),
-              ),
           ],
         ),
         subtitle: Text(
-          'Rank: ${user.currentRank}',
+          rankType == 'Unranked' ? 'Rank: -' : 'Rank: ${user.currentRank}',
           style: const TextStyle(
             fontSize: 12,
             color: AppColors.gray600,
