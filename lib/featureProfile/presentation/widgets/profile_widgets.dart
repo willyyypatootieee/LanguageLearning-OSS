@@ -386,7 +386,7 @@ class ProfileInfoCard extends StatelessWidget {
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    'Joined $joinDate',
+                    'Bergabung Pada $joinDate',
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: AppColors.gray600,
                       fontWeight: FontWeight.w500,
@@ -457,12 +457,15 @@ class ProfileActionButtons extends StatelessWidget {
             child: Container(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [AppColors.accent, AppColors.accent.withOpacity(0.8)],
+                  colors: [
+                    AppColors.primary,
+                    AppColors.primary.withOpacity(0.8),
+                  ],
                 ),
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: AppColors.accent.withOpacity(0.3),
+                    color: AppColors.accent.withOpacity(0),
                     blurRadius: 12,
                     offset: const Offset(0, 6),
                   ),

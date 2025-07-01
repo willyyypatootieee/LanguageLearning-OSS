@@ -112,16 +112,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   String _monthYear(DateTime date) {
     final months = [
-      'January',
-      'February',
-      'March',
+      'Januari',
+      'Februari',
+      'Maret',
       'April',
-      'May',
-      'June',
-      'July',
-      'August',
+      'Mei',
+      'Juni',
+      'Juli',
+      'Agustus',
       'September',
-      'October',
+      'Oktober',
       'November',
       'December',
     ];
@@ -226,28 +226,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     children: [
                       ProfileStatCard(
                         icon: Icons.local_fire_department,
-                        label: 'Day Streak',
+                        label: 'Streak Hari Ini',
                         value: user.streakDay.toString(),
                         iconColor: Colors.deepOrange,
                         backgroundColor: Colors.white,
                       ),
                       ProfileStatCard(
                         icon: Icons.bolt,
-                        label: 'Total XP',
+                        label: 'Total Point',
                         value: user.totalXp.toString(),
                         iconColor: Colors.amber[600],
                         backgroundColor: Colors.white,
                       ),
                       ProfileStatCard(
                         icon: Icons.emoji_events,
-                        label: 'Current League',
+                        label: 'Rank Saat Ini',
                         value: user.currentRank,
                         iconColor: Colors.purple[600],
                         backgroundColor: Colors.white,
                       ),
                       ProfileStatCard(
                         icon: Icons.flag,
-                        label: 'English Score',
+                        label: 'Score Belajar',
                         value: user.scoreEnglish.toString(),
                         iconColor: Colors.green[600],
                         backgroundColor: Colors.white,
