@@ -131,23 +131,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBody: true,
       backgroundColor: AppColors.gray50,
-      body: SafeArea(
-        child: ListenableBuilder(
-          listenable: _profileCubit,
-          builder: (context, child) {
-            final user = _profileCubit.user;
-            if (_profileCubit.user == null && _profileCubit.isLoading) {
-              return const Center(child: CircularProgressIndicator());
-            }
-            if (_profileCubit.error != null && user == null) {
-              return Center(child: Text(_profileCubit.error!));
-            }
-            if (user == null) {
-              return const Center(child: Text('No profile data available'));
-            }
-            return Column(
+      body: ListenableBuilder(
+        listenable: _profileCubit,
+        builder: (context, child) {
+          final user = _profileCubit.user;
+          if (_profileCubit.user == null && _profileCubit.isLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (_profileCubit.error != null && user == null) {
+            return Center(child: Text(_profileCubit.error!));
+          }
+          if (user == null) {
+            return const Center(child: Text('No profile data available'));
+          }
+          return SingleChildScrollView(
+            child: Column(
               children: [
+                // Add top padding to account for status bar
+                SizedBox(height: MediaQuery.of(context).padding.top),
                 ProfileHeader(
                   username: user.username,
                   handle: '@${user.username}',
@@ -184,49 +187,51 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                   ),
                 ),
-                Expanded(
-                  child: GridView.count(
-                    crossAxisCount: 2,
-                    childAspectRatio: 1.7,
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    mainAxisSpacing: 16,
-                    crossAxisSpacing: 16,
-                    children: [
-                      ProfileStatCard(
-                        icon: Icons.local_fire_department,
-                        label: 'Day Streak',
-                        value: user.streakDay.toString(),
-                        iconColor: Colors.orange,
-                        backgroundColor: Colors.white,
-                      ),
-                      ProfileStatCard(
-                        icon: Icons.bolt,
-                        label: 'Total Xp',
-                        value: user.totalXp.toString(),
-                        iconColor: Colors.amber,
-                        backgroundColor: Colors.white,
-                      ),
-                      ProfileStatCard(
-                        icon: Icons.emoji_events,
-                        label: 'Current League',
-                        value: user.currentRank,
-                        iconColor: Colors.amber,
-                        backgroundColor: Colors.white,
-                      ),
-                      ProfileStatCard(
-                        icon: Icons.flag,
-                        label: 'English Score',
-                        value: user.scoreEnglish.toString(),
-                        iconColor: Colors.red,
-                        backgroundColor: Colors.white,
-                      ),
-                    ],
-                  ),
+                GridView.count(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  crossAxisCount: 2,
+                  childAspectRatio: 1.7,
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  mainAxisSpacing: 16,
+                  crossAxisSpacing: 16,
+                  children: [
+                    ProfileStatCard(
+                      icon: Icons.local_fire_department,
+                      label: 'Day Streak',
+                      value: user.streakDay.toString(),
+                      iconColor: Colors.orange,
+                      backgroundColor: Colors.white.withValues(alpha: 0.9),
+                    ),
+                    ProfileStatCard(
+                      icon: Icons.bolt,
+                      label: 'Total Xp',
+                      value: user.totalXp.toString(),
+                      iconColor: Colors.amber,
+                      backgroundColor: Colors.white.withValues(alpha: 0.9),
+                    ),
+                    ProfileStatCard(
+                      icon: Icons.emoji_events,
+                      label: 'Current League',
+                      value: user.currentRank,
+                      iconColor: Colors.amber,
+                      backgroundColor: Colors.white.withValues(alpha: 0.9),
+                    ),
+                    ProfileStatCard(
+                      icon: Icons.flag,
+                      label: 'English Score',
+                      value: user.scoreEnglish.toString(),
+                      iconColor: Colors.red,
+                      backgroundColor: Colors.white.withValues(alpha: 0.9),
+                    ),
+                  ],
                 ),
+                // Add bottom padding to account for floating navbar
+                const SizedBox(height: 100),
               ],
-            );
-          },
-        ),
+            ),
+          );
+        },
       ),
       bottomNavigationBar: MainNavbar(
         currentIndex: 4,

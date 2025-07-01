@@ -4,9 +4,6 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/constants/app_constants.dart';
 import '../widgets/ipa_button.dart';
 import '../../../shared/shared_exports.dart';
-import '../../../featureLeaderboard/presentation/widgets/leaderboard_provider.dart';
-import '../../featureHomeScreen/presentation/screens/home_screen.dart';
-import '../../featureProfile/presentation/screens/profile_screen.dart';
 import '../../../router/router_exports.dart';
 
 // IPA Vowels (matching screenshot)
@@ -46,10 +43,14 @@ class IPAChartScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.lightTheme.colorScheme.surface,
+      extendBody: true,
+      backgroundColor:
+          AppColors.gray50, // Use the same background as other screens
       appBar: AppBar(
         title: const Text('IPA Chart'),
-        backgroundColor: AppTheme.lightTheme.colorScheme.surface,
+        backgroundColor: Colors.white.withValues(
+          alpha: 0.9,
+        ), // Semi-transparent white
         elevation: 0,
         foregroundColor: Colors.black,
         leading: IconButton(
@@ -57,13 +58,14 @@ class IPAChartScreen extends StatelessWidget {
           onPressed: () => context.go('/home'),
         ),
       ),
-      body: SafeArea(
+      body: Container(
+        color: Colors.white.withOpacity(0.5), // Semi-transparent white overlay
         child: SingleChildScrollView(
           padding: const EdgeInsets.only(
             left: 16,
             right: 16,
             top: 16,
-            bottom: 120,
+            bottom: 120, // Increased bottom padding for floating navbar
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

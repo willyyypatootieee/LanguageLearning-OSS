@@ -171,7 +171,7 @@ class ProfileInfoCard extends StatelessWidget {
       width: double.infinity,
       margin: const EdgeInsets.symmetric(horizontal: 0),
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-      color: Colors.white,
+      color: Colors.white.withValues(alpha: 0.9), // Semi-transparent white
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

@@ -62,6 +62,9 @@ class _IPASymbolButtonState extends State<IPASymbolButton> {
           // Removed fixed height to allow content to determine height
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
+            color: Colors.white.withValues(
+              alpha: 0.9,
+            ), // Semi-transparent white background
             borderRadius: BorderRadius.circular(12),
             border: Border.all(color: Colors.grey.shade300),
           ),
