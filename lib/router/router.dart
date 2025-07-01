@@ -27,57 +27,94 @@ class GlobalRouter {
         GoRoute(
           path: AppRoutes.root,
           name: AppRoutes.rootName,
-          builder: (context, state) => const _RootScreen(),
+          pageBuilder:
+              (context, state) => NoTransitionPage(
+                key: state.pageKey,
+                child: const _RootScreen(),
+              ),
         ), // Onboarding route
         GoRoute(
           path: AppRoutes.onboarding,
           name: AppRoutes.onboardingName,
-          builder: (context, state) => const OnboardingScreen(),
+          pageBuilder:
+              (context, state) => NoTransitionPage(
+                key: state.pageKey,
+                child: const OnboardingScreen(),
+              ),
         ),
 
         // Welcome route
         GoRoute(
           path: AppRoutes.welcome,
           name: AppRoutes.welcomeName,
-          builder: (context, state) => const WelcomeScreen(),
+          pageBuilder:
+              (context, state) => NoTransitionPage(
+                key: state.pageKey,
+                child: const WelcomeScreen(),
+              ),
         ), // Home route
         GoRoute(
           path: AppRoutes.home,
           name: AppRoutes.homeName,
-          builder: (context, state) => const HomeScreen(),
+          pageBuilder:
+              (context, state) => NoTransitionPage(
+                key: state.pageKey,
+                child: const HomeScreen(),
+              ),
         ),
 
         // Authentication routes
         GoRoute(
           path: AppRoutes.login,
           name: AppRoutes.loginName,
-          builder: (context, state) => const LoginScreen(),
+          pageBuilder:
+              (context, state) => NoTransitionPage(
+                key: state.pageKey,
+                child: const LoginScreen(),
+              ),
         ),
         GoRoute(
           path: AppRoutes.register,
           name: AppRoutes.registerName,
-          builder: (context, state) => const RegisterScreen(),
+          pageBuilder:
+              (context, state) => NoTransitionPage(
+                key: state.pageKey,
+                child: const RegisterScreen(),
+              ),
         ),
 
         // Profile route
         GoRoute(
           path: AppRoutes.profile,
           name: AppRoutes.profileName,
-          builder: (context, state) => const ProfileScreen(),
+          pageBuilder:
+              (context, state) => NoTransitionPage(
+                key: state.pageKey,
+                child: const ProfileScreen(),
+              ),
         ),
         // Dictionary route
         GoRoute(
           path: AppRoutes.dictionary,
           name: AppRoutes.dictionaryName,
-          builder: (context, state) => const IPAChartScreen(),
+          pageBuilder:
+              (context, state) => NoTransitionPage(
+                key: state.pageKey,
+                child: const IPAChartScreen(),
+              ),
         ),
         // Leaderboard route
         GoRoute(
           path: AppRoutes.leaderboard,
           name: AppRoutes.leaderboardName,
-          builder:
-              (context, state) =>
-                  LeaderboardProvider(currentIndex: 3, onNavTap: (int idx) {}),
+          pageBuilder:
+              (context, state) => NoTransitionPage(
+                key: state.pageKey,
+                child: LeaderboardProvider(
+                  currentIndex: 3,
+                  onNavTap: (int idx) {},
+                ),
+              ),
         ),
         // Add more routes here as you develop more features
       ],
