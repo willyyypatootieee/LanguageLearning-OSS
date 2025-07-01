@@ -14,6 +14,8 @@ import '../../../featureProfile/data/datasources/profile_remote_datasource.dart'
 import '../../../featureProfile/data/repositories/profile_repository_impl.dart';
 import '../../../featureProfile/domain/usecases/get_current_profile_usecase.dart';
 import '../../../featureProfile/presentation/cubit/profile_cubit.dart';
+import '../../../featurePractice/data/datasources/practice_local_datasource.dart';
+import '../../../featurePractice/data/repositories/practice_repository_impl.dart';
 
 class LeaderboardScreen extends StatefulWidget {
   final int currentIndex;
@@ -79,6 +81,23 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
   void dispose() {
     _profileCubit?.dispose();
     super.dispose();
+  }
+
+  Future<void> _navigateToPractice() async {
+    try {
+      final repository = PracticeRepositoryImpl(PracticeLocalDataSource());
+      final hasCompletedOnboarding =
+          await repository.isPracticeOnboardingCompleted();
+
+      if (hasCompletedOnboarding) {
+        appRouter.goToPractice();
+      } else {
+        appRouter.goToPracticeOnboarding();
+      }
+    } catch (e) {
+      // If there's an error, go to onboarding
+      appRouter.goToPracticeOnboarding();
+    }
   }
 
   @override
@@ -361,9 +380,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
               appRouter.goToDictionary();
               break;
             case 2:
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Practice feature coming soon!')),
-              );
+              _navigateToPractice();
               break;
             case 4:
               appRouter.goToProfile();

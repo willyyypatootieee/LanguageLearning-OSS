@@ -4,6 +4,8 @@ import '../../../core/constants/app_constants.dart';
 import '../widgets/ipa_button.dart';
 import '../../../shared/shared_exports.dart';
 import '../../../router/router_exports.dart';
+import '../../../featurePractice/data/datasources/practice_local_datasource.dart';
+import '../../../featurePractice/data/repositories/practice_repository_impl.dart';
 
 // IPA Vowels (matching screenshot)
 final List<Map<String, String>> vowelIPA = [
@@ -70,6 +72,23 @@ class _IPAChartScreenState extends State<IPAChartScreen>
   void dispose() {
     _fadeController.dispose();
     super.dispose();
+  }
+
+  Future<void> _navigateToPractice() async {
+    try {
+      final repository = PracticeRepositoryImpl(PracticeLocalDataSource());
+      final hasCompletedOnboarding =
+          await repository.isPracticeOnboardingCompleted();
+
+      if (hasCompletedOnboarding) {
+        appRouter.goToPractice();
+      } else {
+        appRouter.goToPracticeOnboarding();
+      }
+    } catch (e) {
+      // If there's an error, go to onboarding
+      appRouter.goToPracticeOnboarding();
+    }
   }
 
   @override
@@ -197,9 +216,7 @@ class _IPAChartScreenState extends State<IPAChartScreen>
               appRouter.goToHome();
               break;
             case 2:
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Practice feature coming soon!')),
-              );
+              _navigateToPractice();
               break;
             case 3:
               appRouter.goToLeaderboard();

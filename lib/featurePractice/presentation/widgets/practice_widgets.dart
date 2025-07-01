@@ -23,7 +23,7 @@ class PracticeHeader extends StatelessWidget {
         children: [
           // Greeting
           Text(
-            'Ready to Practice?',
+            'Gas VideoCall?',
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
@@ -35,7 +35,7 @@ class PracticeHeader extends StatelessWidget {
           const SizedBox(height: AppConstants.spacingXs),
 
           Text(
-            'Choose a practice mode and start improving your skills',
+            'in develop',
             style: TextStyle(
               fontSize: 14,
               fontFamily: AppTypography.bodyFont,

@@ -13,6 +13,7 @@ class AppRoutes {
   static const String leaderboard = '/leaderboard';
   static const String practice = '/practice';
   static const String practiceOnboarding = '/practice/onboarding';
+  static const String practiceVideoCall = '/practice/video-call';
 
   // Route names (for named navigation)
   static const String rootName = 'root';
@@ -26,6 +27,7 @@ class AppRoutes {
   static const String leaderboardName = 'leaderboard';
   static const String practiceName = 'practice';
   static const String practiceOnboardingName = 'practiceOnboarding';
+  static const String practiceVideoCallName = 'practiceVideoCall';
 
   // Future routes (add as you develop more features)
   // static const String settings = '/settings';

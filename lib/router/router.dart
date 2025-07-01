@@ -11,6 +11,7 @@ import '../featureDictionary/screens/ipa_chart_screen.dart';
 import '../featureLeaderboard/presentation/widgets/leaderboard_provider.dart';
 import '../featurePractice/presentation/screens/practice_screen.dart';
 import '../featurePractice/presentation/screens/practice_onboarding_screen.dart';
+import '../featurePractice/presentation/screens/practice_video_call_screen.dart';
 import 'route_constants.dart';
 
 /// Global router instance that can be accessed throughout the app
@@ -136,6 +137,15 @@ class GlobalRouter {
                 child: const PracticeOnboardingScreen(),
               ),
         ),
+        GoRoute(
+          path: AppRoutes.practiceVideoCall,
+          name: AppRoutes.practiceVideoCallName,
+          pageBuilder:
+              (context, state) => NoTransitionPage(
+                key: state.pageKey,
+                child: const PracticeVideoCallScreen(),
+              ),
+        ),
         // Add more routes here as you develop more features
       ],
 
@@ -203,6 +213,9 @@ class GlobalRouter {
   /// Navigate to practice onboarding screen
   void goToPracticeOnboarding() => _router.go(AppRoutes.practiceOnboarding);
 
+  /// Navigate to practice video call screen
+  void goToPracticeVideoCall() => _router.go(AppRoutes.practiceVideoCall);
+
   /// Navigate to root and let it decide the route
   void goToRoot() => _router.go(AppRoutes.root);
 
@@ -264,14 +277,12 @@ class _RootScreen extends StatelessWidget {
         hasCompletedOnboarding =
             await onboardingRepository.hasCompletedOnboarding();
       } catch (e) {
-        print('Error checking onboarding status: $e');
         hasCompletedOnboarding = false;
       }
 
       try {
         isLoggedIn = await authRepository.isLoggedIn();
       } catch (e) {
-        print('Error checking login status: $e');
         isLoggedIn = false;
       }
 
@@ -287,7 +298,6 @@ class _RootScreen extends StatelessWidget {
         return AppRoutes.onboarding;
       }
     } catch (e) {
-      print('Error in _determineInitialRoute: $e');
       // Fallback to onboarding if anything goes wrong
       return AppRoutes.onboarding;
     }

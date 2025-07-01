@@ -16,9 +16,7 @@ class ProfileRemoteDataSource {
     try {
       final url =
           '${ProfileConstants.baseUrl}${ProfileConstants.getUserEndpoint(userId)}';
-      print('ProfileRemoteDataSource: Making API call to: $url');
-      print('ProfileRemoteDataSource: User ID: $userId');
-      print('ProfileRemoteDataSource: Token: ${token.substring(0, 20)}...');      final response = await _client.get(
+      final response = await _client.get(
         Uri.parse(url),
         headers: {
           'Content-Type': 'application/json',
@@ -28,27 +26,15 @@ class ProfileRemoteDataSource {
         },
       );
 
-      print('ProfileRemoteDataSource: Response status: ${response.statusCode}');
-      print('ProfileRemoteDataSource: Response body: ${response.body}');
-
       if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body) as Map<String, dynamic>;
 
         if (responseData['success'] == true && responseData['data'] != null) {
-          print('ProfileRemoteDataSource: Successfully parsed profile data');
           return ProfileUser.fromJson(responseData['data']);
-        } else {
-          print(
-            'ProfileRemoteDataSource: API response success=false or data is null',
-          );
         }
-      } else {
-        print(
-          'ProfileRemoteDataSource: API returned error status code: ${response.statusCode}',
-        );
-      }      return null;
+      }
+      return null;
     } catch (e) {
-      print('ProfileRemoteDataSource: Exception occurred: $e');
       return null; // Return null instead of throwing exception
     }
   }
@@ -60,7 +46,8 @@ class ProfileRemoteDataSource {
     UpdateProfileRequest request,
   ) async {
     try {
-      if (request.isEmpty) return false;      final response = await _client.put(
+      if (request.isEmpty) return false;
+      final response = await _client.put(
         Uri.parse(
           '${ProfileConstants.baseUrl}${ProfileConstants.getUserEndpoint(userId)}',
         ),

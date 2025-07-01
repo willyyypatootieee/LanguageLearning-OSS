@@ -64,6 +64,7 @@ flutter:
     - assets/images/
     - assets/images/onboarding/
     - assets/animation/chooseAvatar.riv
+    - assets/animation/bear.riv
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

@@ -5,6 +5,8 @@ import '../../../shared/widgets/global_navbar.dart';
 import '../../../featureAuthentication/data/datasources/auth_local_datasource.dart';
 import '../../../featureAuthentication/data/datasources/auth_remote_datasource.dart';
 import '../../../featureAuthentication/data/repositories/auth_repository_impl.dart';
+import '../../../featurePractice/data/datasources/practice_local_datasource.dart';
+import '../../../featurePractice/data/repositories/practice_repository_impl.dart';
 import '../../data/datasources/profile_local_datasource.dart';
 import '../../data/datasources/profile_remote_datasource.dart';
 import '../../data/repositories/profile_repository_impl.dart';
@@ -81,6 +83,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
         );
       }
+    }
+  }
+
+  Future<void> _navigateToPractice() async {
+    try {
+      final repository = PracticeRepositoryImpl(PracticeLocalDataSource());
+      final hasCompletedOnboarding =
+          await repository.isPracticeOnboardingCompleted();
+
+      if (hasCompletedOnboarding) {
+        appRouter.goToPractice();
+      } else {
+        appRouter.goToPracticeOnboarding();
+      }
+    } catch (e) {
+      // If there's an error, go to onboarding
+      appRouter.goToPracticeOnboarding();
     }
   }
 
@@ -274,9 +293,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               appRouter.goToDictionary();
               break;
             case 2:
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Practice feature coming soon!')),
-              );
+              _navigateToPractice();
               break;
             case 3:
               appRouter.goToLeaderboard();

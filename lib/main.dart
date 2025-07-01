@@ -10,8 +10,8 @@ void main() {
   // Add error handling for web platform
   if (kIsWeb) {
     FlutterError.onError = (FlutterErrorDetails details) {
-      print('Flutter Error: ${details.exception}');
-      print('Stack trace: ${details.stack}');
+      // print('Flutter Error: ${details.exception}');
+      // print('Stack trace: ${details.stack}');
     };
   }
 
@@ -65,7 +65,7 @@ class BeLingApp extends StatelessWidget {
       }
       return appContent;
     } catch (e) {
-      print('Error building app: $e');
+      // print('Error building app: $e');
       // Fallback UI
       return MaterialApp(
         home: Scaffold(

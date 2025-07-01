@@ -92,7 +92,7 @@ class _PracticeScreenState extends State<PracticeScreen>
 
   void _onPracticeModeSelected(PracticeMode mode) {
     // Handle practice mode selection
-    if (mode.title == 'Conversation Practice') {
+    if (mode.title.contains('Ngobrol Sama Beruang AI')) {
       _showConversationPracticeDialog();
     } else {
       _showComingSoonDialog(mode.title);
@@ -115,27 +115,41 @@ class _PracticeScreenState extends State<PracticeScreen>
               ],
             ),
             content: const Text(
-              'Ready to start practicing with our AI bear companion? You can have natural conversations and receive instant feedback on your speaking skills!',
+              'Mau mulai ngobrol sama beruang AI yang supportive? Lo bisa ngobrol natural dan dapet feedback langsung!',
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: const Text('Maybe Later'),
+                child: const Text('Nanti Aja'),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  _navigateToVideoCall();
+                },
+                child: Text(
+                  'Check Preview',
+                  style: TextStyle(color: AppColors.accent),
+                ),
               ),
               ElevatedButton(
                 onPressed: () {
                   Navigator.pop(context);
-                  // TODO: Navigate to conversation practice
+                  _navigateToVideoCall();
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   foregroundColor: Colors.white,
                 ),
-                child: const Text('Start Chatting!'),
+                child: const Text('Mulai Ngobrol!'),
               ),
             ],
           ),
     );
+  }
+
+  void _navigateToVideoCall() {
+    appRouter.push('/practice/video-call');
   }
 
   void _showComingSoonDialog(String featureName) {
