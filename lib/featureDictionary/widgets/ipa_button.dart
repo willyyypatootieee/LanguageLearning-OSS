@@ -39,6 +39,16 @@ class _IPASymbolButtonState extends State<IPASymbolButton> {
             // Use TTS to speak the English example word
             final ttsService = TTSService();
             await ttsService.speak(widget.example);
+
+            // Show a brief message on emulator where TTS might not work
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Speaking: ${widget.example}'),
+                  duration: const Duration(milliseconds: 1000),
+                ),
+              );
+            }
           } finally {
             if (mounted) {
               setState(() {
