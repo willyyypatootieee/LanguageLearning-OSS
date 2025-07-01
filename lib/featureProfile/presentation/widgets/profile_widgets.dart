@@ -27,35 +27,76 @@ class ProfileStatCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(AppConstants.spacingM),
       decoration: BoxDecoration(
-        color: backgroundColor ?? AppColors.gray50,
-        borderRadius: BorderRadius.circular(AppConstants.radiusL),
-        border: Border.all(color: AppColors.gray200, width: 1),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            backgroundColor ?? Colors.white,
+            (backgroundColor ?? Colors.white).withOpacity(0.8),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(AppConstants.radiusXl),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+          BoxShadow(
+            color: (iconColor ?? AppColors.primary).withOpacity(0.1),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+        ],
+        border: Border.all(
+          color: (iconColor ?? AppColors.primary).withOpacity(0.1),
+          width: 1.5,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
           Row(
             children: [
-              Icon(icon, color: iconColor ?? AppColors.primary, size: 20),
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: (iconColor ?? AppColors.primary).withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  icon,
+                  color: iconColor ?? AppColors.primary,
+                  size: 20,
+                ),
+              ),
               const SizedBox(width: AppConstants.spacingS),
               Expanded(
                 child: Text(
                   label,
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: AppColors.gray600,
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0.5,
                   ),
                   overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
                 ),
               ),
             ],
           ),
           const SizedBox(height: AppConstants.spacingS),
-          Text(
-            value,
-            style: theme.textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: AppColors.gray800,
+          Flexible(
+            child: Text(
+              value,
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w800,
+                color: AppColors.gray900,
+                letterSpacing: -0.5,
+              ),
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
             ),
           ),
         ],
@@ -65,7 +106,7 @@ class ProfileStatCard extends StatelessWidget {
 }
 
 /// Profile header with user avatar and basic info
-class ProfileHeader extends StatelessWidget {
+class ProfileHeader extends StatefulWidget {
   final String username;
   final String handle;
   final String joinDate;
@@ -82,59 +123,132 @@ class ProfileHeader extends StatelessWidget {
   });
 
   @override
+  State<ProfileHeader> createState() => _ProfileHeaderState();
+}
+
+class _ProfileHeaderState extends State<ProfileHeader> {
+  rive.Artboard? _artboard;
+  rive.StateMachineController? _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadRive();
+  }
+
+  void _loadRive() async {
+    final data = await rootBundle.load('assets/animation/chooseAvatar.riv');
+    final file = rive.RiveFile.import(data);
+    final artboard = file.mainArtboard;
+    rive.StateMachineController? controller;
+    if (artboard.stateMachines.isNotEmpty) {
+      controller = rive.StateMachineController.fromArtboard(
+        artboard,
+        artboard.stateMachines.first.name,
+      );
+      if (controller != null) {
+        artboard.addController(controller);
+        // Start the animation immediately
+        controller.isActive = true;
+      }
+    }
+    setState(() {
+      _artboard = artboard;
+      _controller = controller;
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller?.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Stack(
       children: [
+        // Base container with height
         Container(
           width: double.infinity,
-          height: 280,
-          color: AppColors.accent,
-          child: Center(
-            child: GestureDetector(
-              onTap: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder:
-                        (_) => const FullscreenAvatarPage(interactive: true),
-                  ),
-                );
-              },
-              child: Container(
-                width: 650,
-                height: 650,
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 100.0),
-                  child: rive.RiveAnimation.asset(
-                    'assets/animation/chooseAvatar.riv',
-                    fit: BoxFit.cover,
-                    // Let the animation play and be interactive
-                    controllers: [],
-                  ),
-                ),
-              ),
+          height: 320,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                AppColors.accent.withOpacity(0.1),
+                AppColors.primary.withOpacity(0.05),
+              ],
             ),
           ),
         ),
+        // Avatar animation (clickable, no circular container)
+        Positioned.fill(
+          child: GestureDetector(
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => const FullscreenAvatarPage(interactive: true),
+                ),
+              );
+            },
+            child:
+                _artboard == null
+                    ? const Center(child: CircularProgressIndicator())
+                    : rive.Rive(artboard: _artboard!, fit: BoxFit.cover),
+          ),
+        ),
+        // Action buttons with modern design
         Positioned(
-          top: 16,
+          top: MediaQuery.of(context).padding.top + 16,
           right: 16,
           child: Row(
             children: [
-              if (onLogoutPressed != null)
-                IconButton(
-                  icon: const Icon(Icons.logout, color: Colors.black, size: 28),
-                  onPressed: onLogoutPressed,
-                  style: IconButton.styleFrom(backgroundColor: Colors.white),
-                ),
-              if (onSettingsPressed != null)
-                IconButton(
-                  icon: const Icon(
-                    Icons.settings,
-                    color: Colors.black,
-                    size: 28,
+              if (widget.onLogoutPressed != null)
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.9),
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
                   ),
-                  onPressed: onSettingsPressed,
-                  style: IconButton.styleFrom(backgroundColor: Colors.white),
+                  child: IconButton(
+                    icon: const Icon(
+                      Icons.logout,
+                      color: AppColors.error,
+                      size: 24,
+                    ),
+                    onPressed: widget.onLogoutPressed,
+                  ),
+                ),
+              const SizedBox(width: 8),
+              if (widget.onSettingsPressed != null)
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.9),
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: IconButton(
+                    icon: const Icon(
+                      Icons.settings,
+                      color: AppColors.gray700,
+                      size: 24,
+                    ),
+                    onPressed: widget.onSettingsPressed,
+                  ),
                 ),
             ],
           ),
@@ -169,27 +283,108 @@ class ProfileInfoCard extends StatelessWidget {
     final theme = Theme.of(context);
     return Container(
       width: double.infinity,
-      margin: const EdgeInsets.symmetric(horizontal: 0),
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-      color: Colors.white.withValues(alpha: 0.9), // Semi-transparent white
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            username.toUpperCase(),
-            style: theme.textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
-            ),
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      transform: Matrix4.translationValues(0, -20, 0),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(AppConstants.radiusXl),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
           ),
-          const SizedBox(height: 4),
-          Text(
-            '$handle · Joined $joinDate',
-            style: theme.textTheme.bodyMedium?.copyWith(color: Colors.black),
+          BoxShadow(
+            color: AppColors.primary.withOpacity(0.1),
+            blurRadius: 40,
+            offset: const Offset(0, 16),
           ),
-          const SizedBox(height: 16),
         ],
       ),
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Text(
+              username.toUpperCase(),
+              style: theme.textTheme.headlineMedium?.copyWith(
+                fontWeight: FontWeight.w900,
+                color: AppColors.gray900,
+                letterSpacing: 1.2,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              handle,
+              style: theme.textTheme.titleMedium?.copyWith(
+                color: AppColors.primary,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                color: AppColors.gray50,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: AppColors.gray200),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.calendar_today,
+                    size: 16,
+                    color: AppColors.gray600,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Joined $joinDate',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: AppColors.gray600,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                _buildStatItem(context, 'Following', following.toString()),
+                Container(height: 40, width: 1, color: AppColors.gray200),
+                _buildStatItem(context, 'Followers', followers.toString()),
+                Container(height: 40, width: 1, color: AppColors.gray200),
+                _buildStatItem(context, 'Country', countryLabel),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStatItem(BuildContext context, String label, String value) {
+    return Column(
+      children: [
+        Text(
+          value,
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.w800,
+            color: AppColors.gray900,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          label,
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+            color: AppColors.gray600,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ],
     );
   }
 }
@@ -202,50 +397,81 @@ class ProfileActionButtons extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Row(
         children: [
           if (onAddFriends != null)
             Expanded(
-              child: ElevatedButton.icon(
-                onPressed: onAddFriends,
-                icon: const Icon(Icons.person_add_alt_1, size: 24),
-                label: const Text('Add Friends'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: Colors.black,
-                  textStyle: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 18,
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      AppColors.primary,
+                      AppColors.primary.withOpacity(0.8),
+                    ],
                   ),
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.primary.withOpacity(0.3),
+                      blurRadius: 12,
+                      offset: const Offset(0, 6),
+                    ),
+                  ],
+                ),
+                child: ElevatedButton.icon(
+                  onPressed: onAddFriends,
+                  icon: const Icon(Icons.person_add_alt_1, size: 20),
+                  label: const Text('Add Friends'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.transparent,
+                    foregroundColor: Colors.white,
+                    shadowColor: Colors.transparent,
+                    textStyle: const TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 16,
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
                   ),
-                  elevation: 6,
-                  shadowColor: Colors.black,
                 ),
               ),
             ),
-          if (onAddFriends != null) const SizedBox(width: 16),
+          if (onAddFriends != null) const SizedBox(width: 12),
           Expanded(
-            child: ElevatedButton.icon(
-              onPressed: onShare,
-              icon: const Icon(Icons.upload_rounded, size: 24),
-              label: const Text('Share  Profile'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.accent,
-                foregroundColor: Colors.black,
-                textStyle: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [AppColors.accent, AppColors.accent.withOpacity(0.8)],
                 ),
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.accent.withOpacity(0.3),
+                    blurRadius: 12,
+                    offset: const Offset(0, 6),
+                  ),
+                ],
+              ),
+              child: ElevatedButton.icon(
+                onPressed: onShare,
+                icon: const Icon(Icons.share_rounded, size: 20),
+                label: const Text('Share Profile'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.transparent,
+                  foregroundColor: Colors.white,
+                  shadowColor: Colors.transparent,
+                  textStyle: const TextStyle(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 16,
+                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
                 ),
-                elevation: 6,
-                shadowColor: Colors.black,
               ),
             ),
           ),
@@ -320,6 +546,8 @@ class _FullscreenAvatarPageState extends State<FullscreenAvatarPage> {
       );
       if (controller != null) {
         artboard.addController(controller);
+        // Start the animation immediately
+        controller.isActive = true;
       }
     }
     setState(() {
@@ -339,6 +567,12 @@ class _FullscreenAvatarPageState extends State<FullscreenAvatarPage> {
         }
       }
     }
+  }
+
+  @override
+  void dispose() {
+    _controller?.dispose();
+    super.dispose();
   }
 
   @override

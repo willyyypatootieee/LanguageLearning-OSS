@@ -132,106 +132,135 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       extendBody: true,
-      backgroundColor: AppColors.gray50,
-      body: ListenableBuilder(
-        listenable: _profileCubit,
-        builder: (context, child) {
-          final user = _profileCubit.user;
-          if (_profileCubit.user == null && _profileCubit.isLoading) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (_profileCubit.error != null && user == null) {
-            return Center(child: Text(_profileCubit.error!));
-          }
-          if (user == null) {
-            return const Center(child: Text('No profile data available'));
-          }
-          return SingleChildScrollView(
-            child: Column(
-              children: [
-                // Add top padding to account for status bar
-                SizedBox(height: MediaQuery.of(context).padding.top),
-                ProfileHeader(
-                  username: user.username,
-                  handle: '@${user.username}',
-                  joinDate: _monthYear(user.createdAt),
-                  onSettingsPressed: () {},
-                  onLogoutPressed: () => _logout(context),
-                ),
-                ProfileInfoCard(
-                  username: user.username,
-                  handle: '@${user.username}',
-                  joinDate: _monthYear(user.createdAt),
-                  following: 69,
-                  followers: 1700,
-                  country: 'id',
-                  countryLabel: 'Indonesia',
-                ),
-                ProfileActionButtons(
-                  onAddFriends: null, // Remove Add Friends button
-                  onShare: () {},
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [AppColors.gray50, Colors.white, AppColors.gray50],
+            stops: const [0.0, 0.3, 1.0],
+          ),
+        ),
+        child: ListenableBuilder(
+          listenable: _profileCubit,
+          builder: (context, child) {
+            final user = _profileCubit.user;
+            if (_profileCubit.user == null && _profileCubit.isLoading) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            if (_profileCubit.error != null && user == null) {
+              return Center(child: Text(_profileCubit.error!));
+            }
+            if (user == null) {
+              return const Center(child: Text('No profile data available'));
+            }
+            return SingleChildScrollView(
+              child: Column(
+                children: [
+                  // Profile header with avatar
+                  ProfileHeader(
+                    username: user.username,
+                    handle: '@${user.username}',
+                    joinDate: _monthYear(user.createdAt),
+                    onSettingsPressed: () {},
+                    onLogoutPressed: () => _logout(context),
                   ),
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      'Overview',
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
+                  // Profile info card (overlapping the header)
+                  ProfileInfoCard(
+                    username: user.username,
+                    handle: '@${user.username}',
+                    joinDate: _monthYear(user.createdAt),
+                    following: 69,
+                    followers: 1700,
+                    country: 'id',
+                    countryLabel: 'Indonesia',
+                  ),
+                  const SizedBox(height: 16),
+                  // Action buttons
+                  ProfileActionButtons(
+                    onAddFriends: null, // Remove Add Friends button
+                    onShare: () {},
+                  ),
+                  const SizedBox(height: 24),
+                  // Overview section header
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 4,
+                          height: 28,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [AppColors.primary, AppColors.accent],
+                            ),
+                            borderRadius: BorderRadius.circular(2),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Text(
+                          'Overview',
+                          style: Theme.of(
+                            context,
+                          ).textTheme.headlineSmall?.copyWith(
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.gray900,
+                            letterSpacing: -0.5,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  // Stats grid with improved layout
+                  GridView.count(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    crossAxisCount: 2,
+                    childAspectRatio: 1.5,
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    mainAxisSpacing: 16,
+                    crossAxisSpacing: 16,
+                    children: [
+                      ProfileStatCard(
+                        icon: Icons.local_fire_department,
+                        label: 'Day Streak',
+                        value: user.streakDay.toString(),
+                        iconColor: Colors.deepOrange,
+                        backgroundColor: Colors.white,
                       ),
-                    ),
+                      ProfileStatCard(
+                        icon: Icons.bolt,
+                        label: 'Total XP',
+                        value: user.totalXp.toString(),
+                        iconColor: Colors.amber[600],
+                        backgroundColor: Colors.white,
+                      ),
+                      ProfileStatCard(
+                        icon: Icons.emoji_events,
+                        label: 'Current League',
+                        value: user.currentRank,
+                        iconColor: Colors.purple[600],
+                        backgroundColor: Colors.white,
+                      ),
+                      ProfileStatCard(
+                        icon: Icons.flag,
+                        label: 'English Score',
+                        value: user.scoreEnglish.toString(),
+                        iconColor: Colors.green[600],
+                        backgroundColor: Colors.white,
+                      ),
+                    ],
                   ),
-                ),
-                GridView.count(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  crossAxisCount: 2,
-                  childAspectRatio: 1.7,
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  mainAxisSpacing: 16,
-                  crossAxisSpacing: 16,
-                  children: [
-                    ProfileStatCard(
-                      icon: Icons.local_fire_department,
-                      label: 'Day Streak',
-                      value: user.streakDay.toString(),
-                      iconColor: Colors.orange,
-                      backgroundColor: Colors.white.withValues(alpha: 0.9),
-                    ),
-                    ProfileStatCard(
-                      icon: Icons.bolt,
-                      label: 'Total Xp',
-                      value: user.totalXp.toString(),
-                      iconColor: Colors.amber,
-                      backgroundColor: Colors.white.withValues(alpha: 0.9),
-                    ),
-                    ProfileStatCard(
-                      icon: Icons.emoji_events,
-                      label: 'Current League',
-                      value: user.currentRank,
-                      iconColor: Colors.amber,
-                      backgroundColor: Colors.white.withValues(alpha: 0.9),
-                    ),
-                    ProfileStatCard(
-                      icon: Icons.flag,
-                      label: 'English Score',
-                      value: user.scoreEnglish.toString(),
-                      iconColor: Colors.red,
-                      backgroundColor: Colors.white.withValues(alpha: 0.9),
-                    ),
-                  ],
-                ),
-                // Add bottom padding to account for floating navbar
-                const SizedBox(height: 100),
-              ],
-            ),
-          );
-        },
+                  // Add bottom padding to account for floating navbar
+                  const SizedBox(height: 120),
+                ],
+              ),
+            );
+          },
+        ),
       ),
       bottomNavigationBar: MainNavbar(
         currentIndex: 4,
