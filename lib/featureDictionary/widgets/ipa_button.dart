@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import '../../core/services/tts_service.dart';
 
-class IPASymbolButton extends StatelessWidget {
+class IPASymbolButton extends StatefulWidget {
   final String symbol;
   final String label;
   final String example;
@@ -13,6 +14,13 @@ class IPASymbolButton extends StatelessWidget {
   });
 
   @override
+  State<IPASymbolButton> createState() => _IPASymbolButtonState();
+}
+
+class _IPASymbolButtonState extends State<IPASymbolButton> {
+  bool _isSpeaking = false;
+
+  @override
   Widget build(BuildContext context) {
     return Material(
       color: Colors.white,
@@ -20,7 +28,25 @@ class IPASymbolButton extends StatelessWidget {
       elevation: 2,
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
-        onTap: () {}, // Placeholder for future interaction
+        onTap: () async {
+          if (_isSpeaking) return;
+
+          setState(() {
+            _isSpeaking = true;
+          });
+
+          try {
+            // Use TTS to speak the English example word
+            final ttsService = TTSService();
+            await ttsService.speak(widget.example);
+          } finally {
+            if (mounted) {
+              setState(() {
+                _isSpeaking = false;
+              });
+            }
+          }
+        },
         child: Container(
           width: 80,
           // Removed fixed height to allow content to determine height
@@ -34,21 +60,30 @@ class IPASymbolButton extends StatelessWidget {
                 MainAxisSize.min, // Prevent overflow by using min size
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(
-                symbol,
-                style: const TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
-              ),
+              _isSpeaking
+                  ? const SizedBox(
+                    width: 28,
+                    height: 28,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
+                    ),
+                  )
+                  : Text(
+                    widget.symbol,
+                    style: const TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
+                  ),
               const SizedBox(height: 4),
               Text(
-                label,
+                widget.label,
                 style: const TextStyle(fontSize: 12, color: Colors.black87),
               ),
               Text(
-                example,
+                widget.example,
                 style: const TextStyle(fontSize: 10, color: Colors.grey),
               ),
             ],
