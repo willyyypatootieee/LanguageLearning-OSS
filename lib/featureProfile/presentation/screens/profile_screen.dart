@@ -11,9 +11,6 @@ import '../../data/repositories/profile_repository_impl.dart';
 import '../../domain/usecases/get_current_profile_usecase.dart';
 import '../cubit/profile_cubit.dart';
 import '../widgets/profile_widgets.dart';
-import '../../../featureLeaderboard/presentation/widgets/leaderboard_provider.dart';
-import '../../../featureHomeScreen/presentation/screens/home_screen.dart';
-import '../../../featureDictionary/screens/ipa_chart_screen.dart';
 
 /// Profile screen showing user information and statistics
 class ProfileScreen extends StatefulWidget {
@@ -25,7 +22,6 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   late final ProfileCubit _profileCubit;
-  bool _isRefreshing = false;
 
   @override
   void initState() {
@@ -56,29 +52,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Future<void> _loadProfile() async {
     await _profileCubit.loadProfile();
-  }
-
-  Future<void> _refreshProfile() async {
-    if (_isRefreshing) return;
-
-    setState(() {
-      _isRefreshing = true;
-    });
-
-    await _profileCubit.refreshProfile();
-
-    setState(() {
-      _isRefreshing = false;
-    });
-  }
-
-  void _onEditProfile() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Edit profile feature coming soon!'),
-        backgroundColor: AppColors.primary,
-      ),
-    );
   }
 
   Future<void> _logout(BuildContext context) async {
