@@ -40,7 +40,7 @@ class TTSService {
           await _flutterTts!.setPitch(1.0);
           _isInitialized = true;
           return;
-        } catch (e) {
+        } catch (e) { 
           _isInitialized = false;
           return;
         }
