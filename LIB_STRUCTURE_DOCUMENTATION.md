@@ -1,4 +1,4 @@
-# 📁 Dokumentasi Struktur Folder `lib` - BeLing App
+# 📁 Dokumentasi Struktur Folder `lib` - BeLing App lengkap
 
 ## 🏗️ Arsitektur Proyek
 
