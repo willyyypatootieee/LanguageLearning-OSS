@@ -26,7 +26,7 @@ class LeaderboardCubit extends Cubit<LeaderboardState> {
 
   List<LeaderboardUser> _assignRanks(List<LeaderboardUser> users) {
     final sorted = List<LeaderboardUser>.from(users)
-      ..sort((a, b) => b.scoreEnglish.compareTo(a.scoreEnglish));
+      ..sort((a, b) => b.totalPoint.compareTo(a.totalPoint));
     for (int i = 0; i < sorted.length; i++) {
       String rank;
       if (i == 0) {
@@ -43,7 +43,7 @@ class LeaderboardCubit extends Cubit<LeaderboardState> {
       sorted[i] = LeaderboardUser(
         id: sorted[i].id,
         username: sorted[i].username,
-        scoreEnglish: sorted[i].scoreEnglish,
+        totalPoint: sorted[i].totalPoint,
         currentRank: rank,
       );
     }

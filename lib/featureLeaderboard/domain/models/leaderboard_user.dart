@@ -2,13 +2,13 @@
 class LeaderboardUser {
   final String id;
   final String username;
-  final int scoreEnglish;
+  final int totalPoint;
   final String currentRank;
 
   const LeaderboardUser({
     required this.id,
     required this.username,
-    required this.scoreEnglish,
+    required this.totalPoint,
     required this.currentRank,
   });
 
@@ -16,7 +16,7 @@ class LeaderboardUser {
     return LeaderboardUser(
       id: json['id'] as String,
       username: json['username'] as String,
-      scoreEnglish: json['score_english'] as int,
+      totalPoint: json['total_xp'] as int,
       currentRank: json['current_rank'] as String,
     );
   }
@@ -25,7 +25,7 @@ class LeaderboardUser {
     return {
       'id': id,
       'username': username,
-      'score_english': scoreEnglish,
+      'total_xp': totalPoint,
       'current_rank': currentRank,
     };
   }

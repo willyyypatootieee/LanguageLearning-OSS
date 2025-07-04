@@ -288,7 +288,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
               };
 
               for (final user in rest) {
-                final type = getRankType(user.scoreEnglish);
+                final type = getRankType(user.totalPoint);
                 grouped[type]?.add(user);
               }
 

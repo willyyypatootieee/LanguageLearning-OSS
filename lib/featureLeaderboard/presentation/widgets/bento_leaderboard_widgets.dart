@@ -417,7 +417,7 @@ class _BentoTop3WidgetState extends State<BentoTop3Widget>
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
-                            '${user.scoreEnglish} pts',
+                            '${user.totalPoint} pts',
                             style: TextStyle(
                               fontSize: isChampion ? 14 : 10,
                               fontWeight: FontWeight.bold,
@@ -490,7 +490,7 @@ class _BentoStatsWidgetState extends State<BentoStatsWidget>
     final averageScore =
         widget.allUsers.isNotEmpty
             ? (widget.allUsers
-                        .map((u) => u.scoreEnglish)
+                        .map((u) => u.totalPoint)
                         .reduce((a, b) => a + b) /
                     totalUsers)
                 .round()
@@ -498,7 +498,7 @@ class _BentoStatsWidgetState extends State<BentoStatsWidget>
     final highestScore =
         widget.allUsers.isNotEmpty
             ? widget.allUsers
-                .map((u) => u.scoreEnglish)
+                .map((u) => u.totalPoint)
                 .reduce((a, b) => a > b ? a : b)
             : 0;
 
@@ -887,7 +887,7 @@ class BentoRankSectionWidget extends StatelessWidget {
             borderRadius: BorderRadius.circular(20),
           ),
           child: Text(
-            '${user.scoreEnglish} pts',
+            '${user.totalPoint} pts',
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.bold,
