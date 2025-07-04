@@ -109,7 +109,11 @@ class _LessonListScreenState extends State<LessonListScreen> {
         if (mounted) {
           Navigator.of(context).push(
             MaterialPageRoute(
-              builder: (context) => LessonScreen(lesson: lessonToUse),
+              builder:
+                  (context) => LessonScreen(
+                    lesson: lessonToUse,
+                    chapter: widget.chapter,
+                  ),
             ),
           );
         }
@@ -119,7 +123,9 @@ class _LessonListScreenState extends State<LessonListScreen> {
         if (mounted) {
           Navigator.of(context).push(
             MaterialPageRoute(
-              builder: (context) => LessonScreen(lesson: demoLesson),
+              builder:
+                  (context) =>
+                      LessonScreen(lesson: demoLesson, chapter: widget.chapter),
             ),
           );
         }

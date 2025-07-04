@@ -1,14 +1,19 @@
 import 'package:flutter/material.dart';
+import '../../../core/health_api_service.dart';
 import '../../../featureChapters/domain/models/chapter.dart';
 import '../../../featureChapters/data/datasources/chapter_remote_datasource.dart';
 import '../widgets/user_stats_bar.dart';
 import '../widgets/tts_waveform_button.dart';
+import '../../../featureAuthentication/data/datasources/auth_local_datasource.dart';
+import '../../../featureAuthentication/data/datasources/auth_remote_datasource.dart';
+import '../../../featureAuthentication/data/repositories/auth_repository_impl.dart';
 
 /// Comprehensive lesson screen with Duolingo-style UI
 class LessonScreen extends StatefulWidget {
   final Lesson lesson;
+  final Chapter chapter;
 
-  const LessonScreen({super.key, required this.lesson});
+  const LessonScreen({super.key, required this.lesson, required this.chapter});
 
   @override
   State<LessonScreen> createState() => _LessonScreenState();
@@ -16,6 +21,7 @@ class LessonScreen extends StatefulWidget {
 
 class _LessonScreenState extends State<LessonScreen> {
   final ChapterRemoteDataSource _dataSource = ChapterRemoteDataSource();
+  String? _userId;
   int _currentQuestionIndex = 0;
   List<Question> _questions = [];
   List<Choice> _currentChoices = [];
@@ -29,7 +35,19 @@ class _LessonScreenState extends State<LessonScreen> {
   @override
   void initState() {
     super.initState();
+    _fetchUserId();
     _loadQuestions();
+  }
+
+  Future<void> _fetchUserId() async {
+    final authRepo = AuthRepositoryImpl(
+      AuthRemoteDataSource(),
+      AuthLocalDataSource(),
+    );
+    final user = await authRepo.getCurrentUser();
+    setState(() {
+      _userId = user?.id;
+    });
   }
 
   Future<void> _loadQuestions() async {
@@ -128,6 +146,10 @@ class _LessonScreenState extends State<LessonScreen> {
   }
 
   void _showLessonComplete() {
+    if (_userId == null) {
+      // Optionally show error or wait
+      return;
+    }
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -137,6 +159,8 @@ class _LessonScreenState extends State<LessonScreen> {
             totalQuestions: _totalQuestions,
             xpReward: widget.lesson.xpReward,
             lesson: widget.lesson,
+            chapterId: widget.chapter.id,
+            userId: _userId!,
             dataSource: _dataSource,
           ),
     );
@@ -335,6 +359,8 @@ class LessonCompleteDialog extends StatefulWidget {
   final int totalQuestions;
   final int xpReward;
   final Lesson lesson;
+  final String chapterId;
+  final String userId;
   final ChapterRemoteDataSource dataSource;
 
   const LessonCompleteDialog({
@@ -343,6 +369,8 @@ class LessonCompleteDialog extends StatefulWidget {
     required this.totalQuestions,
     required this.xpReward,
     required this.lesson,
+    required this.chapterId,
+    required this.userId,
     required this.dataSource,
   });
 
@@ -375,34 +403,20 @@ class _LessonCompleteDialogState extends State<LessonCompleteDialog>
 
   Future<void> _saveProgress() async {
     try {
-      // Calculate coins based on score (1 coin per correct answer, bonus for perfect score)
-      _coinsEarned = widget.score;
-      if (widget.score == widget.totalQuestions) {
-        _coinsEarned += 5; // Perfect score bonus
-      }
-
-      // Calculate final XP (base XP + bonus for good performance)
-      double performanceMultiplier = widget.score / widget.totalQuestions;
-      _finalXp = (widget.xpReward * performanceMultiplier).round();
-      if (performanceMultiplier >= 0.8) {
-        _finalXp += 10; // High performance bonus
-      }
-
-      // Save progress to backend
-      await Future.wait([
-        widget.dataSource.updateUserXp(
-          xpGained: _finalXp,
-          lessonId: widget.lesson.id,
-          score: widget.score,
-          totalQuestions: widget.totalQuestions,
-        ),
-        widget.dataSource.addUserCoins(
-          coinsEarned: _coinsEarned,
-          reason: 'Completed lesson: ${widget.lesson.title}',
-        ),
-        widget.dataSource.completeLesson(widget.lesson.id),
-      ]);
-
+      final healthApi = HealthApiService(
+        baseUrl: 'https://beling-4ef8e653eda6.herokuapp.com',
+        adminSecret: 'bellingadmin',
+      );
+      final result = await healthApi.awardCoinsXPAndHealth(
+        userId: widget.userId,
+        chapterId: widget.chapterId,
+        correctAnswers: widget.score,
+        totalQuestions: widget.totalQuestions,
+      );
+      final data = result['data'] ?? {};
+      _coinsEarned = data['coinsEarned'] ?? widget.score;
+      _finalXp = data['total_xp'] ?? widget.xpReward;
+      // Update user stats in app state/UI if needed
       setState(() {
         _isLoading = false;
       });
@@ -410,10 +424,23 @@ class _LessonCompleteDialogState extends State<LessonCompleteDialog>
       print('Error saving progress: $e');
       setState(() {
         _isLoading = false;
-        // Still show rewards even if backend fails
         _finalXp = widget.xpReward;
         _coinsEarned = widget.score;
       });
+    }
+  }
+
+  void _updateUserStats() async {
+    try {
+      // Optionally, update the user's profile in the backend after awarding coins/xp/health
+      // You can call the PUT /api/users/{id} endpoint here if you want to refresh the user's stats in the app
+      // For now, just pop the dialog and refresh the UI if needed
+      Navigator.of(context).pop(); // Close dialog
+      Navigator.of(context).pop(); // Go back to lesson list
+      // Optionally, trigger a refresh of user stats bar or global state here
+    } catch (e) {
+      Navigator.of(context).pop();
+      Navigator.of(context).pop();
     }
   }
 
@@ -578,13 +605,7 @@ class _LessonCompleteDialogState extends State<LessonCompleteDialog>
               width: double.infinity,
               height: 50,
               child: ElevatedButton(
-                onPressed:
-                    _isLoading
-                        ? null
-                        : () {
-                          Navigator.of(context).pop(); // Close dialog
-                          Navigator.of(context).pop(); // Go back to lesson list
-                        },
+                onPressed: _isLoading ? null : _updateUserStats,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Theme.of(context).colorScheme.primary,
                   foregroundColor: Colors.white,
