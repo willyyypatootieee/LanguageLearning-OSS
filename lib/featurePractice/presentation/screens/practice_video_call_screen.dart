@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:rive/rive.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../router/router_exports.dart';
+import '../widgets/mic_waveform_placeholder.dart';
 
 /// Video call-like screen for practicing with AI bear
 class PracticeVideoCallScreen extends StatefulWidget {
@@ -19,8 +20,6 @@ class _PracticeVideoCallScreenState extends State<PracticeVideoCallScreen>
   late AnimationController _pulseController;
 
   bool _isMuted = false;
-  bool _isCameraOn = true;
-  bool _isListening = false;
 
   @override
   void initState() {
@@ -74,24 +73,6 @@ class _PracticeVideoCallScreenState extends State<PracticeVideoCallScreen>
     setState(() {
       _isMuted = !_isMuted;
     });
-  }
-
-  void _toggleCamera() {
-    setState(() {
-      _isCameraOn = !_isCameraOn;
-    });
-  }
-
-  void _toggleListening() {
-    setState(() {
-      _isListening = !_isListening;
-    });
-
-    if (_isListening) {
-      _pulseController.repeat();
-    } else {
-      _pulseController.stop();
-    }
   }
 
   void _endCall() {
@@ -177,33 +158,6 @@ class _PracticeVideoCallScreenState extends State<PracticeVideoCallScreen>
                             fit: BoxFit.cover,
                           ),
                         ),
-
-                        // Listening indicator
-                        if (_isListening)
-                          Positioned(
-                            bottom: 20,
-                            left: 20,
-                            child: AnimatedBuilder(
-                              animation: _pulseController,
-                              builder: (context, child) {
-                                return Container(
-                                  width: 80 + (10 * _pulseController.value),
-                                  height: 80 + (10 * _pulseController.value),
-                                  decoration: BoxDecoration(
-                                    color: Colors.red.withOpacity(0.3),
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: const Center(
-                                    child: Icon(
-                                      Icons.mic,
-                                      color: Colors.red,
-                                      size: 20,
-                                    ),
-                                  ),
-                                );
-                              },
-                            ),
-                          ),
                       ],
                     ),
                   ),
@@ -217,51 +171,16 @@ class _PracticeVideoCallScreenState extends State<PracticeVideoCallScreen>
                 ),
                 height: 80,
                 decoration: BoxDecoration(
-                  color: _isCameraOn ? AppColors.gray200 : AppColors.gray800,
+                  color: AppColors.gray200,
                   borderRadius: BorderRadius.circular(AppConstants.radiusM),
                   border: Border.all(
                     color: Colors.white.withOpacity(0.2),
                     width: 2,
                   ),
                 ),
-                child:
-                    _isCameraOn
-                        ? const Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(Icons.person, size: 40, color: Colors.grey),
-                              SizedBox(height: 4),
-                              Text(
-                                'Kamu',
-                                style: TextStyle(
-                                  color: Colors.grey,
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ],
-                          ),
-                        )
-                        : const Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.videocam_off,
-                                size: 32,
-                                color: Colors.white,
-                              ),
-                              SizedBox(height: 4),
-                              Text(
-                                'Camera Off',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
+                child: Center(
+                  child: MicWaveformPlaceholder(isActive: !_isMuted),
+                ),
               ),
 
               const SizedBox(height: AppConstants.spacingL),
@@ -278,23 +197,6 @@ class _PracticeVideoCallScreenState extends State<PracticeVideoCallScreen>
                       isActive: !_isMuted,
                       onTap: _toggleMute,
                       label: _isMuted ? 'Unmute' : 'Mute',
-                    ),
-
-                    // Listen/Talk button
-                    _VideoCallButton(
-                      icon: _isListening ? Icons.stop : Icons.play_arrow,
-                      isActive: _isListening,
-                      onTap: _toggleListening,
-                      label: _isListening ? 'Stop' : 'Talk',
-                      color: _isListening ? Colors.red : Colors.green,
-                    ),
-
-                    // Camera button
-                    _VideoCallButton(
-                      icon: _isCameraOn ? Icons.videocam : Icons.videocam_off,
-                      isActive: _isCameraOn,
-                      onTap: _toggleCamera,
-                      label: 'Camera',
                     ),
 
                     // End call button
