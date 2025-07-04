@@ -203,10 +203,10 @@ class _LessonListScreenState extends State<LessonListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white, // Set background to white
       body: Column(
         children: [
           // User stats bar at the top
-          const UserStatsBar(),
 
           // App bar
           Container(

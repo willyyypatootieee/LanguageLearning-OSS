@@ -15,7 +15,6 @@ class ChapterSelectionScreen extends StatelessWidget {
       body: Column(
         children: [
           // User stats bar at the top
-          const UserStatsBar(),
 
           // App bar
           Container(

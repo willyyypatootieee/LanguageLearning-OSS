@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../featureChapters/domain/models/chapter.dart';
 import '../../../featureChapters/data/datasources/chapter_remote_datasource.dart';
 import '../widgets/user_stats_bar.dart';
+import '../widgets/tts_waveform_button.dart';
 
 /// Comprehensive lesson screen with Duolingo-style UI
 class LessonScreen extends StatefulWidget {
@@ -145,7 +146,7 @@ class _LessonScreenState extends State<LessonScreen> {
   Widget build(BuildContext context) {
     if (_isLoading) {
       return Scaffold(
-        backgroundColor: Colors.transparent,
+        backgroundColor: Colors.white,
         body: Center(
           child: CircularProgressIndicator(
             color: Theme.of(context).colorScheme.primary,
@@ -156,10 +157,10 @@ class _LessonScreenState extends State<LessonScreen> {
 
     if (_questions.isEmpty) {
       return Scaffold(
-        backgroundColor: Colors.transparent,
+        backgroundColor: Colors.white,
         appBar: AppBar(
           title: const Text('Lesson'),
-          backgroundColor: Colors.transparent,
+          backgroundColor: Colors.white,
           foregroundColor: Colors.white,
         ),
         body: const Center(child: Text('Tidak ada pertanyaan tersedia')),
@@ -170,16 +171,13 @@ class _LessonScreenState extends State<LessonScreen> {
     final progress = (_currentQuestionIndex + 1) / _totalQuestions;
 
     return Scaffold(
-      backgroundColor: Colors.transparent,
+      backgroundColor: Colors.white, // Set background to white
       body: Column(
         children: [
-          // User stats bar at the top
-          const UserStatsBar(),
-
           // App bar with progress
           Container(
             child: AppBar(
-              backgroundColor: Colors.transparent,
+              backgroundColor: Colors.white,
               elevation: 0,
               leading: IconButton(
                 icon: const Icon(Icons.close, color: Colors.grey),
@@ -244,26 +242,21 @@ class _LessonScreenState extends State<LessonScreen> {
                         final isSelected = _selectedAnswer == choice.text;
                         Color? backgroundColor;
                         Color? borderColor;
-                        Color textColor = Colors.black87;
 
                         if (_isAnswerSubmitted) {
                           if (choice.isCorrect) {
                             backgroundColor = Colors.green[50];
                             borderColor = Colors.green;
-                            textColor = Colors.green[700]!;
                           } else if (isSelected && !choice.isCorrect) {
                             backgroundColor = Colors.red[50];
                             borderColor = Colors.red;
-                            textColor = Colors.red[700]!;
                           } else {
                             backgroundColor = Colors.grey[100];
                             borderColor = Colors.grey[300];
-                            textColor = Colors.grey[600]!;
                           }
                         } else if (isSelected) {
                           backgroundColor = Colors.blue[50];
                           borderColor = Colors.blue;
-                          textColor = Colors.blue[700]!;
                         } else {
                           backgroundColor = Colors.grey[50];
                           borderColor = Colors.grey[300];
@@ -271,70 +264,12 @@ class _LessonScreenState extends State<LessonScreen> {
 
                         return Container(
                           margin: const EdgeInsets.only(bottom: 12),
-                          child: Material(
-                            color: backgroundColor,
-                            borderRadius: BorderRadius.circular(16),
-                            child: InkWell(
-                              borderRadius: BorderRadius.circular(16),
-                              onTap: () => _selectAnswer(choice.text),
-                              child: Container(
-                                padding: const EdgeInsets.all(20),
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(16),
-                                  border: Border.all(
-                                    color: borderColor ?? Colors.grey[300]!,
-                                    width: 2,
-                                  ),
-                                ),
-                                child: Row(
-                                  children: [
-                                    Container(
-                                      width: 32,
-                                      height: 32,
-                                      decoration: BoxDecoration(
-                                        color: borderColor ?? Colors.grey[300],
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                      child: Center(
-                                        child: Text(
-                                          choice.label,
-                                          style: TextStyle(
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 16,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 16),
-                                    Expanded(
-                                      child: Text(
-                                        choice.text,
-                                        style: TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.w500,
-                                          color: textColor,
-                                        ),
-                                      ),
-                                    ),
-                                    if (_isAnswerSubmitted && choice.isCorrect)
-                                      Icon(
-                                        Icons.check_circle,
-                                        color: Colors.green,
-                                        size: 24,
-                                      ),
-                                    if (_isAnswerSubmitted &&
-                                        isSelected &&
-                                        !choice.isCorrect)
-                                      Icon(
-                                        Icons.cancel,
-                                        color: Colors.red,
-                                        size: 24,
-                                      ),
-                                  ],
-                                ),
-                              ),
-                            ),
+                          child: TTSWaveformButton(
+                            text: choice.text,
+                            isSelected: isSelected,
+                            backgroundColor: backgroundColor,
+                            borderColor: borderColor,
+                            onTap: () => _selectAnswer(choice.text),
                           ),
                         );
                       },
