@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'dart:ui';
 import '../../domain/models/user_profile.dart';
 import '../../data/datasources/chapter_remote_datasource.dart';
+import '../../../../../featureAuthentication/data/datasources/auth_local_datasource.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 /// Top status bar widget that displays user stats
 class UserStatsBar extends StatefulWidget {
@@ -23,7 +26,15 @@ class _UserStatsBarState extends State<UserStatsBar> {
 
   Future<void> _loadUserProfile() async {
     try {
-      final profileData = await _dataSource.getUserProfile();
+      final authLocal = AuthLocalDataSource();
+      final currentUser = await authLocal.getCurrentUser();
+      if (currentUser == null) {
+        setState(() {
+          _isLoading = false;
+        });
+        return;
+      }
+      final profileData = await _dataSource.getUserById(currentUser.id);
       if (profileData != null) {
         setState(() {
           _userProfile = UserProfile.fromJson(profileData);
@@ -42,114 +53,212 @@ class _UserStatsBarState extends State<UserStatsBar> {
     }
   }
 
+  // In build(), update the UI for a more modern, fancy look
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return Container(
-        height: 60,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 4,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: const Center(
-          child: SizedBox(
-            height: 20,
-            width: 20,
-            child: CircularProgressIndicator(strokeWidth: 2),
-          ),
-        ),
-      );
-    }
-
-    if (_userProfile == null) {
-      return Container(
-        height: 60,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 4,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            _buildStatItem(icon: Icons.favorite, value: '5', color: Colors.red),
-            _buildStatItem(
-              icon: Icons.monetization_on,
-              value: '0',
-              color: Colors.amber,
-            ),
-            _buildStatItem(icon: Icons.star, value: '0', color: Colors.blue),
-          ],
-        ),
-      );
-    }
-
-    return Container(
-      height: 60,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      return _fancyBar(
+        context,
         children: [
-          // Health/Hearts
-          _buildStatItem(
-            icon: Icons.favorite,
-            value: '${_userProfile!.health}',
-            color: Colors.red,
-          ),
-
-          // Coins
-          _buildStatItem(
+          _fancyStatPlaceholder(),
+          _fancyStatPlaceholder(),
+          _fancyStatPlaceholder(),
+        ],
+      );
+    }
+    if (_userProfile == null) {
+      return _fancyBar(
+        context,
+        children: [
+          _fancyStat(icon: Icons.favorite, value: '5', color: Colors.red),
+          _fancyStat(
             icon: Icons.monetization_on,
-            value: '${_userProfile!.coins}',
+            value: '0',
             color: Colors.amber,
           ),
+          _fancyStat(icon: Icons.star, value: '0', color: Colors.blue),
+        ],
+      );
+    }
+    return _fancyBar(
+      context,
+      children: [
+        _fancyStat(
+          icon: Icons.favorite,
+          value: '${_userProfile!.health}',
+          color: Colors.redAccent,
+        ),
+        _fancyStat(
+          icon: Icons.monetization_on,
+          value: '${_userProfile!.coins}',
+          color: Colors.amber,
+        ),
+        _fancyStat(
+          icon: Icons.star,
+          value: '${_userProfile!.totalXp}',
+          color: Colors.yellow[700]!,
+        ),
+      ],
+    );
+  }
 
-          // Total XP
-          _buildStatItem(
-            icon: Icons.star,
-            value: '${_userProfile!.totalXp}',
-            color: Colors.blue,
+  Widget _fancyBar(BuildContext context, {required List<Widget> children}) {
+    return Container(
+      height: 64,
+      margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(28),
+        gradient: LinearGradient(
+          colors: [Color(0x66FFFFFF), Color(0x33D1E9FF)], // more transparent
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.blueAccent.withOpacity(0.10),
+            blurRadius: 18,
+            offset: const Offset(0, 6),
           ),
         ],
+        border: Border.all(color: Colors.white.withOpacity(0.18), width: 1),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(28),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18), // more blur
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: children.map((child) => Expanded(child: child)).toList(),
+          ),
+        ),
       ),
     );
   }
 
-  Widget _buildStatItem({
+  Widget _fancyStat({
     required IconData icon,
     required String value,
     required Color color,
   }) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.3),
-        borderRadius: BorderRadius.circular(20),
+    Widget coolIcon;
+    if (icon == Icons.favorite) {
+      coolIcon = Container(
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.redAccent.withOpacity(0.5),
+              blurRadius: 16,
+              spreadRadius: 2,
+            ),
+          ],
+        ),
+        child: Icon(Icons.favorite, color: Colors.redAccent, size: 28),
+      );
+    } else if (icon == Icons.monetization_on) {
+      coolIcon = Container(
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.amber.withOpacity(0.5),
+              blurRadius: 16,
+              spreadRadius: 2,
+            ),
+          ],
+        ),
+        child: Icon(Icons.monetization_on, color: Colors.amber[800], size: 28),
+      );
+    } else if (icon == Icons.star) {
+      coolIcon = Container(
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.yellow[800]!.withOpacity(0.5),
+              blurRadius: 16,
+              spreadRadius: 2,
+            ),
+          ],
+        ),
+        child: Icon(Icons.star, color: Colors.yellow[800], size: 28),
+      );
+    } else {
+      coolIcon = Icon(icon, color: color, size: 24);
+    }
+    return TweenAnimationBuilder<double>(
+      tween: Tween<double>(begin: 0.8, end: 1.0),
+      duration: const Duration(milliseconds: 500),
+      curve: Curves.easeOutBack,
+      builder:
+          (context, scale, child) =>
+              Transform.scale(scale: scale, child: child),
+      child: Center(
+        child: Container(
+          margin: const EdgeInsets.symmetric(horizontal: 2),
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(
+              0.7,
+            ), // more solid background for readability
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(color: color.withOpacity(0.18), width: 1),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              coolIcon,
+              const SizedBox(width: 6),
+              Text(
+                value,
+                style: TextStyle(
+                  color: color,
+                  fontWeight: FontWeight.w900,
+                  fontSize: 18,
+                  shadows: [
+                    Shadow(
+                      color: Colors.black.withOpacity(0.10),
+                      blurRadius: 2,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
+    );
+  }
+
+  Widget _fancyStatPlaceholder() {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+      decoration: BoxDecoration(
+        color: Colors.grey.withOpacity(0.10),
+        borderRadius: BorderRadius.circular(22),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, color: Colors.white, size: 20),
-          const SizedBox(width: 6),
-          Text(
-            value,
-            style: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-              fontSize: 16,
+          Container(
+            width: 60,
+            height: 22,
+            decoration: BoxDecoration(
+              color: Colors.grey.withOpacity(0.18),
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Container(
+            width: 32,
+            height: 10,
+            decoration: BoxDecoration(
+              color: Colors.grey.withOpacity(0.12),
+              borderRadius: BorderRadius.circular(4),
             ),
           ),
         ],

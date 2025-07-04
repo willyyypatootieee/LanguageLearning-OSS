@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../constants/chapter_constants.dart';
 import '../../domain/models/chapter.dart';
+import '../../../featureAuthentication/data/datasources/auth_local_datasource.dart';
+import '../../../featureAuthentication/domain/models/user.dart';
 
 /// Remote data source for chapters and lessons API calls
 class ChapterRemoteDataSource {
@@ -331,6 +333,31 @@ class ChapterRemoteDataSource {
       return null;
     } catch (e) {
       print('Error getting user profile: $e');
+      return null;
+    }
+  }
+
+  /// Get user by ID from /api/users/{id}
+  Future<Map<String, dynamic>?> getUserById(String userId) async {
+    try {
+      final url = '${ChapterConstants.baseUrl}/api/users/$userId';
+      final response = await _client.get(
+        Uri.parse(url),
+        headers: {
+          'Content-Type': ChapterConstants.contentType,
+          'Accept': ChapterConstants.accept,
+          'x-admin-secret': ChapterConstants.adminSecret,
+        },
+      );
+      if (response.statusCode == 200) {
+        final responseData = jsonDecode(response.body) as Map<String, dynamic>;
+        if (responseData['success'] == true && responseData['data'] != null) {
+          return responseData['data'] as Map<String, dynamic>;
+        }
+      }
+      return null;
+    } catch (e) {
+      print('Error getting user by ID: $e');
       return null;
     }
   }
