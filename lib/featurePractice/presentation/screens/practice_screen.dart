@@ -214,11 +214,10 @@ class _PracticeScreenState extends State<PracticeScreen>
           ],
         ),
       ),
-      floatingActionButton: MainNavbar(
+      bottomNavigationBar: MainNavbar(
         currentIndex: 2, // Practice tab
         onTap: _onNavTap,
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
   }
 }
