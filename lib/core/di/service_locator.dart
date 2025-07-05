@@ -11,6 +11,13 @@ import '../../featureFeeds/data/repositories/post_repository_impl.dart';
 import '../../featureFeeds/domain/repositories/post_repository.dart';
 import '../../featureFeeds/domain/usecases/get_posts_usecase.dart';
 import '../../featureFeeds/domain/usecases/create_post_usecase.dart';
+import '../../featureFeeds/domain/usecases/search_users_usecase.dart';
+import '../../featureFeeds/domain/usecases/send_friend_request_usecase.dart';
+import '../../featureFeeds/domain/usecases/get_friends_usecase.dart';
+import '../../featureFeeds/domain/usecases/get_pending_friend_requests_usecase.dart';
+import '../../featureFeeds/domain/usecases/accept_friend_request_usecase.dart';
+import '../../featureFeeds/domain/usecases/reject_friend_request_usecase.dart';
+import '../../featureFeeds/domain/usecases/remove_friend_usecase.dart';
 import '../../featureFeeds/presentation/cubit/feeds_cubit.dart';
 
 /// Simple service locator for dependency injection
@@ -36,6 +43,13 @@ class ServiceLocator {
   PostRepository? _postRepository;
   GetPostsUsecase? _getPostsUsecase;
   CreatePostUsecase? _createPostUsecase;
+  SearchUsersUsecase? _searchUsersUsecase;
+  SendFriendRequestUsecase? _sendFriendRequestUsecase;
+  GetFriendsUsecase? _getFriendsUsecase;
+  GetPendingFriendRequestsUsecase? _getPendingFriendRequestsUsecase;
+  AcceptFriendRequestUsecase? _acceptFriendRequestUsecase;
+  RejectFriendRequestUsecase? _rejectFriendRequestUsecase;
+  RemoveFriendUsecase? _removeFriendUsecase;
   FeedsCubit? _feedsCubit;
 
   /// Get onboarding local data source
@@ -106,9 +120,61 @@ class ServiceLocator {
     return _createPostUsecase!;
   }
 
+  /// Get search users use case
+  SearchUsersUsecase get searchUsersUsecase {
+    _searchUsersUsecase ??= SearchUsersUsecaseImpl();
+    return _searchUsersUsecase!;
+  }
+
+  /// Get send friend request use case
+  SendFriendRequestUsecase get sendFriendRequestUsecase {
+    _sendFriendRequestUsecase ??= SendFriendRequestUsecaseImpl();
+    return _sendFriendRequestUsecase!;
+  }
+
+  /// Get friends use case
+  GetFriendsUsecase get getFriendsUsecase {
+    _getFriendsUsecase ??= GetFriendsUsecase();
+    return _getFriendsUsecase!;
+  }
+
+  /// Get pending friend requests use case
+  GetPendingFriendRequestsUsecase get getPendingFriendRequestsUsecase {
+    _getPendingFriendRequestsUsecase ??= GetPendingFriendRequestsUsecase();
+    return _getPendingFriendRequestsUsecase!;
+  }
+
+  /// Get accept friend request use case
+  AcceptFriendRequestUsecase get acceptFriendRequestUsecase {
+    _acceptFriendRequestUsecase ??= AcceptFriendRequestUsecase();
+    return _acceptFriendRequestUsecase!;
+  }
+
+  /// Get reject friend request use case
+  RejectFriendRequestUsecase get rejectFriendRequestUsecase {
+    _rejectFriendRequestUsecase ??= RejectFriendRequestUsecase();
+    return _rejectFriendRequestUsecase!;
+  }
+
+  /// Get remove friend use case
+  RemoveFriendUsecase get removeFriendUsecase {
+    _removeFriendUsecase ??= RemoveFriendUsecase();
+    return _removeFriendUsecase!;
+  }
+
   /// Get feeds cubit (singleton)
   FeedsCubit get feedsCubit {
-    _feedsCubit ??= FeedsCubit(getPostsUsecase, createPostUsecase);
+    _feedsCubit ??= FeedsCubit(
+      getPostsUsecase,
+      createPostUsecase,
+      searchUsersUsecase,
+      sendFriendRequestUsecase,
+      getFriendsUsecase,
+      getPendingFriendRequestsUsecase,
+      acceptFriendRequestUsecase,
+      rejectFriendRequestUsecase,
+      removeFriendUsecase,
+    );
     return _feedsCubit!;
   }
 
@@ -124,6 +190,13 @@ class ServiceLocator {
     _postRepository = null;
     _getPostsUsecase = null;
     _createPostUsecase = null;
+    _searchUsersUsecase = null;
+    _sendFriendRequestUsecase = null;
+    _getFriendsUsecase = null;
+    _getPendingFriendRequestsUsecase = null;
+    _acceptFriendRequestUsecase = null;
+    _rejectFriendRequestUsecase = null;
+    _removeFriendUsecase = null;
     _feedsCubit?.dispose();
     _feedsCubit = null;
   }
