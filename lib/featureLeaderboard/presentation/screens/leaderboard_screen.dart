@@ -413,12 +413,15 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
               appRouter.goToHome();
               break;
             case 1:
-              appRouter.goToDictionary();
+              appRouter.goToFeeds();
               break;
             case 2:
+              appRouter.goToDictionary();
+              break;
+            case 3:
               _navigateToPractice();
               break;
-            case 4:
+            case 5:
               appRouter.goToProfile();
               break;
           }

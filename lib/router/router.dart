@@ -7,6 +7,7 @@ import '../featureHomeScreen/presentation/screens/home_screen.dart';
 import '../featureAuthentication/presentation/screens/login_screen.dart';
 import '../featureAuthentication/presentation/screens/register_screen.dart';
 import '../featureProfile/presentation/screens/profile_screen.dart';
+import '../featureFeeds/presentation/screens/feeds_screen.dart';
 import '../featureDictionary/screens/ipa_chart_screen.dart';
 import '../featureLeaderboard/presentation/widgets/leaderboard_provider.dart';
 import '../featurePractice/presentation/screens/practice_screen.dart';
@@ -95,6 +96,16 @@ class GlobalRouter {
                 child: const ProfileScreen(),
               ),
         ),
+        // Feeds route
+        GoRoute(
+          path: AppRoutes.feeds,
+          name: AppRoutes.feedsName,
+          pageBuilder:
+              (context, state) => NoTransitionPage(
+                key: state.pageKey,
+                child: const FeedsScreen(),
+              ),
+        ),
         // Dictionary route
         GoRoute(
           path: AppRoutes.dictionary,
@@ -113,7 +124,7 @@ class GlobalRouter {
               (context, state) => NoTransitionPage(
                 key: state.pageKey,
                 child: LeaderboardProvider(
-                  currentIndex: 3,
+                  currentIndex: 4,
                   onNavTap: (int idx) {},
                 ),
               ),
@@ -200,6 +211,9 @@ class GlobalRouter {
 
   /// Navigate to profile screen
   void goToProfile() => _router.go(AppRoutes.profile);
+
+  /// Navigate to feeds screen
+  void goToFeeds() => _router.go(AppRoutes.feeds);
 
   /// Navigate to dictionary screen
   void goToDictionary() => _router.go(AppRoutes.dictionary);
@@ -323,6 +337,9 @@ extension AppRouterExtension on BuildContext {
 
   /// Navigate to profile screen
   void goToProfile() => go(AppRoutes.profile);
+
+  /// Navigate to feeds screen
+  void goToFeeds() => go(AppRoutes.feeds);
 
   /// Navigate to root and let it decide the route
   void goToRoot() => go(AppRoutes.root);

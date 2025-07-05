@@ -24,16 +24,19 @@ class _HomeScreenState extends State<HomeScreen> {
         appRouter.goToHome();
         break;
       case 1:
-        appRouter.goToDictionary();
+        appRouter.goToFeeds();
         break;
       case 2:
+        appRouter.goToDictionary();
+        break;
+      case 3:
         // Navigate to practice section - check if onboarding is needed
         _navigateToPractice();
         break;
-      case 3:
+      case 4:
         appRouter.goToLeaderboard();
         break;
-      case 4:
+      case 5:
         appRouter.goToProfile();
         break;
     }

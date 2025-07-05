@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../../../featureChapters/domain/models/chapter.dart';
 import '../../../featureChapters/data/datasources/chapter_remote_datasource.dart';
 import 'lesson_screen.dart';
-import '../widgets/user_stats_bar.dart';
 
 /// Screen to show lessons in a selected chapter
 class LessonListScreen extends StatefulWidget {

@@ -43,7 +43,7 @@ dependencies:
   rive: ^0.13.20
   shared_preferences: ^2.5.3
   equatable: ^2.0.5
-  speech_to_text: ^6.6.0
+  speech_to_text: ^7.1.0
 
 dev_dependencies:
   flutter_lints: ^5.0.0

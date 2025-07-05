@@ -767,7 +767,7 @@ class BentoRankSectionWidget extends StatelessWidget {
               isLast,
               rankColor,
             );
-          }).toList(),
+          }),
         ],
       ),
     );

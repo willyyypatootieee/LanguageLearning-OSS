@@ -69,22 +69,25 @@ class _PracticeScreenState extends State<PracticeScreen>
   }
 
   void _onNavTap(int index) {
-    if (index == 2) return; // Already on practice
+    if (index == 3) return; // Already on practice
 
     switch (index) {
       case 0:
         appRouter.goToHome();
         break;
       case 1:
-        appRouter.goToDictionary();
+        appRouter.goToFeeds();
         break;
       case 2:
-        // Already on practice
+        appRouter.goToDictionary();
         break;
       case 3:
-        appRouter.goToLeaderboard();
+        // Already on practice
         break;
       case 4:
+        appRouter.goToLeaderboard();
+        break;
+      case 5:
         appRouter.goToProfile();
         break;
     }
@@ -215,7 +218,7 @@ class _PracticeScreenState extends State<PracticeScreen>
         ),
       ),
       bottomNavigationBar: MainNavbar(
-        currentIndex: 2, // Practice tab
+        currentIndex: 3, // Practice tab
         onTap: _onNavTap,
       ),
     );

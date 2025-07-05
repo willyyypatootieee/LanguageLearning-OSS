@@ -23,7 +23,7 @@ class _PracticeVideoCallScreenState extends State<PracticeVideoCallScreen>
   late AnimationController _pulseController;
 
   bool _isMuted = false;
-  String? _apiKey = 'AIzaSyCmhRfnswYYEibUkCgrmfd8XQYeK_6z5PM';
+  final String? _apiKey = 'AIzaSyCmhRfnswYYEibUkCgrmfd8XQYeK_6z5PM';
   late stt.SpeechToText _speech;
   late FlutterTts _tts;
   bool _isListening = false;

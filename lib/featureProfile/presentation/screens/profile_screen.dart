@@ -282,20 +282,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
       ),
       bottomNavigationBar: MainNavbar(
-        currentIndex: 4,
+        currentIndex: 5,
         onTap: (index) {
-          if (index == 4) return;
+          if (index == 5) return;
           switch (index) {
             case 0:
               appRouter.goToHome();
               break;
             case 1:
-              appRouter.goToDictionary();
+              appRouter.goToFeeds();
               break;
             case 2:
-              _navigateToPractice();
+              appRouter.goToDictionary();
               break;
             case 3:
+              _navigateToPractice();
+              break;
+            case 4:
               appRouter.goToLeaderboard();
               break;
           }

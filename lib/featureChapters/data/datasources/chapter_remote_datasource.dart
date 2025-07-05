@@ -2,8 +2,6 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../constants/chapter_constants.dart';
 import '../../domain/models/chapter.dart';
-import '../../../featureAuthentication/data/datasources/auth_local_datasource.dart';
-import '../../../featureAuthentication/domain/models/user.dart';
 
 /// Remote data source for chapters and lessons API calls
 class ChapterRemoteDataSource {

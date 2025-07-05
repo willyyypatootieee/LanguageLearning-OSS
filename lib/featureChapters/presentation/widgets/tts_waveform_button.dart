@@ -9,13 +9,13 @@ class TTSWaveformButton extends StatefulWidget {
   final Color? borderColor;
 
   const TTSWaveformButton({
-    Key? key,
+    super.key,
     required this.text,
     required this.onTap,
     this.isSelected = false,
     this.backgroundColor,
     this.borderColor,
-  }) : super(key: key);
+  });
 
   @override
   State<TTSWaveformButton> createState() => _TTSWaveformButtonState();

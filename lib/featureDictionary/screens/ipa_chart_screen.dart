@@ -208,20 +208,23 @@ class _IPAChartScreenState extends State<IPAChartScreen>
         ),
       ),
       bottomNavigationBar: MainNavbar(
-        currentIndex: 1,
+        currentIndex: 2,
         onTap: (index) {
-          if (index == 1) return;
+          if (index == 2) return;
           switch (index) {
             case 0:
               appRouter.goToHome();
               break;
-            case 2:
-              _navigateToPractice();
+            case 1:
+              appRouter.goToFeeds();
               break;
             case 3:
-              appRouter.goToLeaderboard();
+              _navigateToPractice();
               break;
             case 4:
+              appRouter.goToLeaderboard();
+              break;
+            case 5:
               appRouter.goToProfile();
               break;
           }

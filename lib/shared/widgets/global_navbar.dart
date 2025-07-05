@@ -25,6 +25,7 @@ class GlobalNavbar extends StatelessWidget {
   // Define nav items with SVG paths
   static const List<NavItem> _navItems = [
     NavItem(svgPath: 'assets/navbar/home.svg', title: 'Home'),
+    NavItem(svgPath: 'assets/navbar/feeds.svg', title: 'Feeds'),
     NavItem(svgPath: 'assets/navbar/book.svg', title: 'Dictionary'),
     NavItem(svgPath: 'assets/navbar/mouth.svg', title: 'Practice'),
     NavItem(svgPath: 'assets/navbar/leaderboard.svg', title: 'Leaderboard'),

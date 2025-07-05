@@ -9,6 +9,7 @@ class AppRoutes {
   static const String login = '/login';
   static const String register = '/register';
   static const String profile = '/profile';
+  static const String feeds = '/feeds';
   static const String dictionary = '/dictionary';
   static const String leaderboard = '/leaderboard';
   static const String practice = '/practice';
@@ -23,6 +24,7 @@ class AppRoutes {
   static const String loginName = 'login';
   static const String registerName = 'register';
   static const String profileName = 'profile';
+  static const String feedsName = 'feeds';
   static const String dictionaryName = 'dictionary';
   static const String leaderboardName = 'leaderboard';
   static const String practiceName = 'practice';

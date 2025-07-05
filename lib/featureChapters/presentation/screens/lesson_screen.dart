@@ -302,7 +302,7 @@ class _LessonScreenState extends State<LessonScreen> {
 
                   // Bottom button
                   SafeArea(
-                    child: Container(
+                    child: SizedBox(
                       width: double.infinity,
                       height: 60,
                       child: ElevatedButton(

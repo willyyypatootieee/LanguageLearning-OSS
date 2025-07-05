@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../featureChapters/domain/models/chapter.dart';
 import 'lesson_list_screen.dart';
-import '../widgets/user_stats_bar.dart';
 
 /// Simple chapter selection screen to test if chapters load correctly
 class ChapterSelectionScreen extends StatelessWidget {

@@ -193,7 +193,7 @@ class _IPASymbolButtonState extends State<IPASymbolButton>
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           if (_isSpeaking)
-                            Container(
+                            SizedBox(
                               width:
                                   widget.size == IPAButtonSize.large ? 40 : 30,
                               height:

@@ -3,7 +3,6 @@ import 'dart:ui';
 import '../../domain/models/user_profile.dart';
 import '../../data/datasources/chapter_remote_datasource.dart';
 import '../../../../../featureAuthentication/data/datasources/auth_local_datasource.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 /// Top status bar widget that displays user stats
 class UserStatsBar extends StatefulWidget {
@@ -29,27 +28,35 @@ class _UserStatsBarState extends State<UserStatsBar> {
       final authLocal = AuthLocalDataSource();
       final currentUser = await authLocal.getCurrentUser();
       if (currentUser == null) {
-        setState(() {
-          _isLoading = false;
-        });
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+        }
         return;
       }
       final profileData = await _dataSource.getUserById(currentUser.id);
       if (profileData != null) {
-        setState(() {
-          _userProfile = UserProfile.fromJson(profileData);
-          _isLoading = false;
-        });
+        if (mounted) {
+          setState(() {
+            _userProfile = UserProfile.fromJson(profileData);
+            _isLoading = false;
+          });
+        }
       } else {
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+        }
+      }
+    } catch (e) {
+      print('Error loading user profile: $e');
+      if (mounted) {
         setState(() {
           _isLoading = false;
         });
       }
-    } catch (e) {
-      print('Error loading user profile: $e');
-      setState(() {
-        _isLoading = false;
-      });
     }
   }
 
