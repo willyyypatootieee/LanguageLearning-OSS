@@ -2,11 +2,8 @@ import 'package:flutter/material.dart';
 import '../../../core/health_api_service.dart';
 import '../../../featureChapters/domain/models/chapter.dart';
 import '../../../featureChapters/data/datasources/chapter_remote_datasource.dart';
-import '../widgets/user_stats_bar.dart';
 import '../widgets/tts_waveform_button.dart';
 import '../../../featureAuthentication/data/datasources/auth_local_datasource.dart';
-import '../../../featureAuthentication/data/datasources/auth_remote_datasource.dart';
-import '../../../featureAuthentication/data/repositories/auth_repository_impl.dart';
 
 /// Comprehensive lesson screen with Duolingo-style UI
 class LessonScreen extends StatefulWidget {
@@ -40,14 +37,16 @@ class _LessonScreenState extends State<LessonScreen> {
   }
 
   Future<void> _fetchUserId() async {
-    final authRepo = AuthRepositoryImpl(
-      AuthRemoteDataSource(),
-      AuthLocalDataSource(),
-    );
-    final user = await authRepo.getCurrentUser();
-    setState(() {
-      _userId = user?.id;
-    });
+    try {
+      final authLocal = AuthLocalDataSource();
+      final user = await authLocal.getCurrentUser();
+      print('Fetched user: ${user?.id}'); // Debug log
+      setState(() {
+        _userId = user?.id;
+      });
+    } catch (e) {
+      print('Error fetching user ID: $e');
+    }
   }
 
   Future<void> _loadQuestions() async {
@@ -145,11 +144,23 @@ class _LessonScreenState extends State<LessonScreen> {
     }
   }
 
-  void _showLessonComplete() {
+  Future<void> _showLessonComplete() async {
+    // Make sure we have the user ID before showing the dialog
     if (_userId == null) {
-      // Optionally show error or wait
+      await _fetchUserId();
+    }
+
+    if (_userId == null) {
+      // Show error if we still can't get user ID
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Error: Tidak dapat mengidentifikasi pengguna'),
+          backgroundColor: Colors.red,
+        ),
+      );
       return;
     }
+
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -397,48 +408,72 @@ class _LessonCompleteDialogState extends State<LessonCompleteDialog>
       CurvedAnimation(parent: _animationController, curve: Curves.elasticOut),
     );
 
-    _saveProgress();
+    // Set initial values without calling API yet
+    setState(() {
+      _isLoading = false;
+      _finalXp = widget.xpReward;
+      _coinsEarned = widget.score;
+    });
+
     _animationController.forward();
   }
 
-  Future<void> _saveProgress() async {
+  void _updateUserStats() async {
+    print(
+      'Starting _updateUserStats with userId: ${widget.userId}',
+    ); // Debug log
+    setState(() {
+      _isLoading = true;
+    });
+
     try {
+      // 1. Award coins, XP, and health for chapter completion
       final healthApi = HealthApiService(
         baseUrl: 'https://beling-4ef8e653eda6.herokuapp.com',
         adminSecret: 'bellingadmin',
       );
+      print('Calling awardCoinsXPAndHealth...'); // Debug log
       final result = await healthApi.awardCoinsXPAndHealth(
         userId: widget.userId,
         chapterId: widget.chapterId,
         correctAnswers: widget.score,
         totalQuestions: widget.totalQuestions,
       );
+      print('Health API result: $result'); // Debug log
       final data = result['data'] ?? {};
       _coinsEarned = data['coinsEarned'] ?? widget.score;
       _finalXp = data['total_xp'] ?? widget.xpReward;
-      // Update user stats in app state/UI if needed
+
+      // 2. Mark lesson as completed
+      print('Calling completeLesson...'); // Debug log
+      await widget.dataSource.completeLesson(widget.lesson.id);
+
+      // Successfully saved awards
       setState(() {
         _isLoading = false;
       });
+
+      if (!mounted) return;
+
+      // Close dialog and go back to lesson list
+      Navigator.of(context).pop(); // Close dialog
+      Navigator.of(context).pop(); // Go back to lesson list
     } catch (e) {
       print('Error saving progress: $e');
       setState(() {
         _isLoading = false;
-        _finalXp = widget.xpReward;
-        _coinsEarned = widget.score;
       });
-    }
-  }
 
-  void _updateUserStats() async {
-    try {
-      // Optionally, update the user's profile in the backend after awarding coins/xp/health
-      // You can call the PUT /api/users/{id} endpoint here if you want to refresh the user's stats in the app
-      // For now, just pop the dialog and refresh the UI if needed
-      Navigator.of(context).pop(); // Close dialog
-      Navigator.of(context).pop(); // Go back to lesson list
-      // Optionally, trigger a refresh of user stats bar or global state here
-    } catch (e) {
+      if (!mounted) return;
+
+      // Show error message but still close dialog
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Gagal menyimpan progress: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+
       Navigator.of(context).pop();
       Navigator.of(context).pop();
     }
