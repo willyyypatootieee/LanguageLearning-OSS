@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../domain/models/post.dart';
+import 'rank_badge.dart';
+import 'game_stat_chip.dart';
+import 'fancy_reaction_chip.dart';
 
 /// Enhanced gamified post card with modern UI
 class GamePostCard extends StatelessWidget {
@@ -117,42 +120,7 @@ class GamePostCard extends StatelessWidget {
                           ),
                           const SizedBox(width: 8),
                           // Rank badge with icon
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 4,
-                            ),
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                colors: [
-                                  _getRankColor(post.author.currentRank),
-                                  _getRankColor(
-                                    post.author.currentRank,
-                                  ).withValues(alpha: 0.8),
-                                ],
-                              ),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  _getRankIcon(post.author.currentRank),
-                                  size: 12,
-                                  color: Colors.white,
-                                ),
-                                const SizedBox(width: 4),
-                                Text(
-                                  _translateRank(post.author.currentRank),
-                                  style: const TextStyle(
-                                    fontSize: 11,
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
+                          RankBadge(rank: post.author.currentRank),
                         ],
                       ),
                       const SizedBox(height: 4),
@@ -264,22 +232,22 @@ class GamePostCard extends StatelessWidget {
                 // Author gaming stats
                 Row(
                   children: [
-                    _buildGameStatChip(
-                      '⚡ ${post.author.totalXp} XP',
-                      AppColors.primary,
-                      Colors.white,
+                    GameStatChip(
+                      text: '⚡ ${post.author.totalXp} XP',
+                      bgColor: AppColors.primary,
+                      textColor: Colors.white,
                     ),
                     const SizedBox(width: AppConstants.spacingS),
-                    _buildGameStatChip(
-                      '🔥 ${post.author.streakDay} Hari',
-                      AppColors.accent,
-                      Colors.white,
+                    GameStatChip(
+                      text: '🔥 ${post.author.streakDay} Hari',
+                      bgColor: AppColors.accent,
+                      textColor: Colors.white,
                     ),
                     const Spacer(),
-                    _buildGameStatChip(
-                      '🏆 Level ${_calculateLevel(post.author.totalXp)}',
-                      AppColors.success,
-                      Colors.white,
+                    GameStatChip(
+                      text: '🏆 Level ${_calculateLevel(post.author.totalXp)}',
+                      bgColor: AppColors.success,
+                      textColor: Colors.white,
                     ),
                   ],
                 ),
@@ -314,9 +282,9 @@ class GamePostCard extends StatelessWidget {
                                 padding: const EdgeInsets.only(
                                   right: AppConstants.spacingS,
                                 ),
-                                child: _buildFancyReactionChip(
-                                  entry.key,
-                                  entry.value,
+                                child: FancyReactionChip(
+                                  emotion: entry.key,
+                                  count: entry.value,
                                 ),
                               ),
                             )
@@ -333,132 +301,8 @@ class GamePostCard extends StatelessWidget {
     );
   }
 
-  Widget _buildGameStatChip(String text, Color bgColor, Color textColor) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [bgColor, bgColor.withValues(alpha: 0.8)],
-        ),
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: bgColor.withValues(alpha: 0.3),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Text(
-        text,
-        style: TextStyle(
-          fontSize: 12,
-          color: textColor,
-          fontWeight: FontWeight.w700,
-          fontFamily: AppTypography.bodyFont,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildFancyReactionChip(String emotion, int count) {
-    String emoji;
-    switch (emotion) {
-      case 'THUMBS_UP':
-        emoji = '👍';
-        break;
-      case 'THUMBS_DOWN':
-        emoji = '👎';
-        break;
-      case 'LOVE':
-        emoji = '❤️';
-        break;
-      default:
-        emoji = '👍';
-    }
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: AppColors.primary.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: AppColors.primary.withValues(alpha: 0.3),
-          width: 1,
-        ),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(emoji, style: const TextStyle(fontSize: 14)),
-          const SizedBox(width: 4),
-          Text(
-            count.toString(),
-            style: TextStyle(
-              fontSize: 12,
-              color: AppColors.primary,
-              fontWeight: FontWeight.w600,
-              fontFamily: AppTypography.bodyFont,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   int _calculateLevel(int xp) {
     return (xp / 100).floor() + 1;
-  }
-
-  Color _getRankColor(String rank) {
-    switch (rank.toUpperCase()) {
-      case 'BRONZE':
-        return const Color(0xFFCD7F32);
-      case 'SILVER':
-        return const Color(0xFFC0C0C0);
-      case 'GOLD':
-        return const Color(0xFFFFD700);
-      case 'PLATINUM':
-        return const Color(0xFFE5E4E2);
-      case 'DIAMOND':
-        return const Color(0xFFB9F2FF);
-      default:
-        return AppColors.gray500;
-    }
-  }
-
-  IconData _getRankIcon(String rank) {
-    switch (rank.toUpperCase()) {
-      case 'BRONZE':
-        return Icons.military_tech;
-      case 'SILVER':
-        return Icons.workspace_premium;
-      case 'GOLD':
-        return Icons.emoji_events;
-      case 'PLATINUM':
-        return Icons.diamond;
-      case 'DIAMOND':
-        return Icons.auto_awesome;
-      default:
-        return Icons.star;
-    }
-  }
-
-  String _translateRank(String rank) {
-    switch (rank.toUpperCase()) {
-      case 'BRONZE':
-        return 'Perunggu';
-      case 'SILVER':
-        return 'Perak';
-      case 'GOLD':
-        return 'Emas';
-      case 'PLATINUM':
-        return 'Platinum';
-      case 'DIAMOND':
-        return 'Berlian';
-      default:
-        return 'Pemula';
-    }
   }
 
   String _getTimeAgo(DateTime dateTime) {

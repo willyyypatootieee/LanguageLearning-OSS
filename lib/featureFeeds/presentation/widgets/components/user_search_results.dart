@@ -153,7 +153,7 @@ class UserSearchResults extends StatelessWidget {
                     vertical: 2,
                   ),
                   decoration: BoxDecoration(
-                    color: AppColors.accent,
+                    color: AppColors.primary,
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(color: Colors.white, width: 1),
                   ),
