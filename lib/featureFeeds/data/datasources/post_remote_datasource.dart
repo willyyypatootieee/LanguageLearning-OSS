@@ -11,19 +11,15 @@ class PostRemoteDataSource {
   PostRemoteDataSource({http.Client? client})
     : _client = client ?? http.Client();
 
-  /// Get posts feed from API
-  Future<List<Post>> getPosts(String token) async {
+  /// Get posts feed from API (admin auth only)
+  Future<List<Post>> getPosts() async {
     try {
       final url = '${FeedsConstants.baseUrl}${FeedsConstants.postsEndpoint}';
       print('DEBUG: [GET] $url');
-      print(
-        'DEBUG: Token: ${token.length > 10 ? token.substring(0, 10) : token}...',
-      );
 
       final headers = {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
-        'Authorization': 'Bearer $token',
         'X-Admin-Secret': FeedsConstants.adminSecret,
       };
       print('DEBUG: Headers: ${headers.toString()}');
@@ -58,9 +54,6 @@ class PostRemoteDataSource {
           print('DEBUG: Message: ${responseData['message'] ?? 'No message'}');
           return [];
         }
-      } else if (response.statusCode == 401) {
-        print('DEBUG: Unauthorized - Invalid or expired token');
-        throw UnauthorizedException();
       } else if (response.statusCode == 403) {
         print('DEBUG: Forbidden - Check admin secret');
         throw ForbiddenException();
@@ -73,14 +66,6 @@ class PostRemoteDataSource {
         print('DEBUG: Response: ${_formatJson(response.body)}');
         return [];
       }
-    } on TimeoutException {
-      rethrow;
-    } on UnauthorizedException {
-      rethrow;
-    } on ForbiddenException {
-      rethrow;
-    } on ServerException {
-      rethrow;
     } catch (e, stack) {
       print('DEBUG: Exception in getPosts: ${e.toString()}');
       print('DEBUG: Stack trace: $stack');
@@ -88,14 +73,12 @@ class PostRemoteDataSource {
     }
   }
 
-  /// Create a new post via API
-  Future<Post?> createPost(CreatePostRequest request, String token) async {
+  /// Create a new post via API (requires user ID)
+  Future<Post?> createPost(CreatePostRequest request, String userId) async {
     try {
       final url = '${FeedsConstants.baseUrl}${FeedsConstants.postsEndpoint}';
       print('DEBUG: [POST] $url');
-      print(
-        'DEBUG: Token: ${token.length > 10 ? token.substring(0, 10) : token}...',
-      );
+      print('DEBUG: User ID: $userId');
 
       final requestBody = request.toJson();
       print('DEBUG: Request Body: ${_formatJson(jsonEncode(requestBody))}');
@@ -103,8 +86,8 @@ class PostRemoteDataSource {
       final headers = {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
-        'Authorization': 'Bearer $token',
         'X-Admin-Secret': FeedsConstants.adminSecret,
+        'X-User-Id': userId,
       };
       print('DEBUG: Headers: ${headers.toString()}');
 
@@ -132,11 +115,8 @@ class PostRemoteDataSource {
           print('DEBUG: Message: ${responseData['message'] ?? 'No message'}');
           return null;
         }
-      } else if (response.statusCode == 401) {
-        print('DEBUG: Unauthorized - Invalid or expired token');
-        throw UnauthorizedException();
       } else if (response.statusCode == 403) {
-        print('DEBUG: Forbidden - Check admin secret');
+        print('DEBUG: Forbidden - Check admin secret and user ID');
         throw ForbiddenException();
       } else if (response.statusCode == 500) {
         print('DEBUG: Server error - Check server logs');
@@ -147,14 +127,6 @@ class PostRemoteDataSource {
         print('DEBUG: Response: ${_formatJson(response.body)}');
         return null;
       }
-    } on TimeoutException {
-      rethrow;
-    } on UnauthorizedException {
-      rethrow;
-    } on ForbiddenException {
-      rethrow;
-    } on ServerException {
-      rethrow;
     } catch (e, stack) {
       print('DEBUG: Exception in createPost: $e');
       print('DEBUG: Stack trace: $stack');
@@ -172,8 +144,6 @@ class PostRemoteDataSource {
     }
   }
 }
-
-class UnauthorizedException implements Exception {}
 
 class ForbiddenException implements Exception {}
 

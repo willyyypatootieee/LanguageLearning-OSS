@@ -1,17 +1,23 @@
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../../featureAuthentication/data/datasources/auth_local_datasource.dart';
+import '../../../featureAuthentication/domain/models/user.dart';
 
 /// Local data source for posts data
 class PostLocalDataSource {
+  final AuthLocalDataSource _authDataSource;
+
+  PostLocalDataSource({AuthLocalDataSource? authDataSource})
+    : _authDataSource = authDataSource ?? AuthLocalDataSource();
+
   /// Get cached user token
   Future<String?> getToken() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString('auth_token');
+    return _authDataSource.getToken();
   }
 
-  /// Cache user token
-  Future<void> saveToken(String token) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('auth_token', token);
+  /// Get current user ID
+  Future<String?> getUserId() async {
+    final user = await _authDataSource.getCurrentUser();
+    return user?.id;
   }
 
   /// Clear cached data

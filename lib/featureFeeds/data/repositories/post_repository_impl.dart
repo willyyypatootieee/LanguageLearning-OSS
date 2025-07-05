@@ -14,14 +14,8 @@ class PostRepositoryImpl implements PostRepository {
   @override
   Future<List<Post>> getPosts() async {
     try {
-      final token = await _localDataSource.getToken();
-      print('DEBUG: Retrieved token from local storage: $token');
-      if (token == null) {
-        print('DEBUG: Token is null, returning empty list');
-        return [];
-      }
-
-      return await _remoteDataSource.getPosts(token);
+      // For GET requests, we only need admin auth
+      return await _remoteDataSource.getPosts();
     } catch (e) {
       print('DEBUG: Exception in repository getPosts: $e');
       return [];
@@ -31,13 +25,16 @@ class PostRepositoryImpl implements PostRepository {
   @override
   Future<Post?> createPost(CreatePostRequest request) async {
     try {
-      final token = await _localDataSource.getToken();
-      if (token == null) {
+      // For POST requests, we need the user ID
+      final userId = await _localDataSource.getUserId();
+      if (userId == null) {
+        print('DEBUG: Cannot create post - User ID is null');
         return null;
       }
 
-      return await _remoteDataSource.createPost(request, token);
+      return await _remoteDataSource.createPost(request, userId);
     } catch (e) {
+      print('DEBUG: Exception in repository createPost: $e');
       return null;
     }
   }
