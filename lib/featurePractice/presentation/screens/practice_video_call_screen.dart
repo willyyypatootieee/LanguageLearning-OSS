@@ -1,7 +1,9 @@
+import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import 'package:rive/rive.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:flutter_tts/flutter_tts.dart';
+import 'package:permission_handler/permission_handler.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../router/router_exports.dart';
 import '../widgets/mic_waveform_placeholder.dart';
@@ -17,19 +19,23 @@ class PracticeVideoCallScreen extends StatefulWidget {
 }
 
 class _PracticeVideoCallScreenState extends State<PracticeVideoCallScreen>
-    with TickerProviderStateMixin {
+    with TickerProviderStateMixin, WidgetsBindingObserver {
   RiveAnimationController? _bearController;
   late AnimationController _fadeController;
   late AnimationController _pulseController;
 
   bool _isMuted = false;
+  // API key - in production, this should be stored securely, not hardcoded
   final String? _apiKey = 'AIzaSyCmhRfnswYYEibUkCgrmfd8XQYeK_6z5PM';
   late stt.SpeechToText _speech;
   late FlutterTts _tts;
   bool _isListening = false;
   String _lastUserText = '';
   String _bearResponse = '';
+  String _userText = ''; // Added to show what the user is saying
   GeminiApiService? _geminiService;
+  bool _isProcessing =
+      false; // For tracking when we're waiting for Gemini response
 
   @override
   void initState() {
@@ -47,6 +53,10 @@ class _PracticeVideoCallScreenState extends State<PracticeVideoCallScreen>
     _speech = stt.SpeechToText();
     _tts = FlutterTts();
     _initTtsVoice();
+
+    // Add observer for app lifecycle changes to handle permission changes
+    WidgetsBinding.instance.addObserver(this);
+
     // Bear greets the user on call start
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       const greeting =
@@ -127,7 +137,19 @@ class _PracticeVideoCallScreenState extends State<PracticeVideoCallScreen>
     _pulseController.dispose();
     _speech.stop();
     _tts.stop();
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      // When the app is resumed, check if we should restart listening
+      // This helps when returning from permission settings
+      if (!_isMuted && !_isListening && !_isProcessing) {
+        _startListening();
+      }
+    }
   }
 
   void _onRiveInit(Artboard artboard) {
@@ -193,6 +215,77 @@ class _PracticeVideoCallScreenState extends State<PracticeVideoCallScreen>
 
   Future<void> _startListening() async {
     if (_isMuted || _apiKey == null) return;
+
+    // Check microphone permission using permission_handler
+    if (Platform.isAndroid || Platform.isIOS) {
+      final status = await Permission.microphone.status;
+      if (status.isDenied) {
+        // Request permission
+        final result = await Permission.microphone.request();
+        if (result.isDenied) {
+          setState(() {
+            _userText = 'Microphone permission denied';
+          });
+
+          // Show dialog explaining why we need permission
+          if (mounted) {
+            showDialog(
+              context: context,
+              builder:
+                  (context) => AlertDialog(
+                    title: const Text('Microphone Permission Required'),
+                    content: const Text(
+                      'To practice speaking with Dr. Hiro, the app needs access to your microphone. '
+                      'Please grant microphone permission in your device settings.',
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        child: const Text('OK'),
+                      ),
+                    ],
+                  ),
+            );
+          }
+          return;
+        }
+      } else if (status.isPermanentlyDenied) {
+        // User previously denied permission and selected "Don't ask again"
+        setState(() {
+          _userText = 'Microphone permission permanently denied';
+        });
+
+        // Show dialog explaining how to enable the permission in settings
+        if (mounted) {
+          showDialog(
+            context: context,
+            builder:
+                (context) => AlertDialog(
+                  title: const Text('Microphone Permission Required'),
+                  content: const Text(
+                    'To practice speaking with Dr. Hiro, the app needs access to your microphone. '
+                    'Please enable microphone permission in your device settings.',
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      child: const Text('Cancel'),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        openAppSettings();
+                      },
+                      child: const Text('Open Settings'),
+                    ),
+                  ],
+                ),
+          );
+        }
+        return;
+      }
+    }
+
     bool available = await _speech.initialize(
       onStatus: (status) {
         if (status == 'done' && !_isMuted) {
@@ -200,15 +293,51 @@ class _PracticeVideoCallScreenState extends State<PracticeVideoCallScreen>
           _processUserSpeech(_lastUserText);
         }
       },
-      onError: (error) {},
+      onError: (error) {
+        // Handle errors (could be permission-related)
+        setState(() {
+          _isListening = false;
+          _userText =
+              error.errorMsg.contains('permission')
+                  ? 'Microphone permission denied'
+                  : 'Error: ${error.errorMsg}';
+        });
+
+        // If error is related to permissions, show guidance
+        if (error.errorMsg.contains('permission') && mounted) {
+          showDialog(
+            context: context,
+            builder:
+                (context) => AlertDialog(
+                  title: const Text('Microphone Permission Required'),
+                  content: const Text(
+                    'To practice speaking with Dr. Hiro, the app needs access to your microphone. '
+                    'Please grant microphone permission in your device settings.',
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      child: const Text('OK'),
+                    ),
+                  ],
+                ),
+          );
+        }
+      },
     );
+
     if (available) {
-      setState(() => _isListening = true);
+      setState(() {
+        _isListening = true;
+        _userText = 'Listening...'; // Show that we're listening
+      });
       _setBearHearing(true); // Start Hear animation
       _speech.listen(
         onResult: (result) {
           setState(() {
             _lastUserText = result.recognizedWords;
+            _userText =
+                result.recognizedWords; // Update the UI with what we're hearing
           });
           if (result.finalResult) {
             _setBearHearing(false); // Stop Hear animation
@@ -217,16 +346,27 @@ class _PracticeVideoCallScreenState extends State<PracticeVideoCallScreen>
         },
         localeId: 'en_US',
       );
+    } else {
+      setState(() {
+        _userText = 'Speech recognition not available';
+      });
     }
   }
 
   Future<void> _processUserSpeech(String userText) async {
     if (userText.trim().isEmpty || _apiKey == null) return;
-    setState(() => _isListening = false);
+    setState(() {
+      _isListening = false;
+      _userText = userText;
+      _isProcessing = true;
+    });
     _speech.stop();
-    _geminiService ??= GeminiApiService(_apiKey!);
+    _geminiService ??= GeminiApiService(_apiKey);
     final response = await _geminiService!.getBearResponse(userText);
-    setState(() => _bearResponse = response);
+    setState(() {
+      _bearResponse = response;
+      _isProcessing = false;
+    });
     await _speakBearResponse(response);
     if (!_isMuted) _startListening();
   }
@@ -393,7 +533,7 @@ class _PracticeVideoCallScreenState extends State<PracticeVideoCallScreen>
                 ),
               ),
 
-              // User waveform (small preview)
+              // User waveform and speech preview
               Padding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: AppConstants.spacingM,
@@ -405,12 +545,70 @@ class _PracticeVideoCallScreenState extends State<PracticeVideoCallScreen>
                     color: AppColors.gray200,
                     borderRadius: BorderRadius.circular(AppConstants.radiusM),
                     border: Border.all(
-                      color: Colors.white.withOpacity(0.2),
+                      color:
+                          _isProcessing
+                              ? Colors.orange.withOpacity(0.5)
+                              : (_isListening
+                                  ? Colors.green.withOpacity(0.5)
+                                  : Colors.white.withOpacity(0.2)),
                       width: 2,
                     ),
                   ),
-                  child: Center(
-                    child: MicWaveformPlaceholder(isActive: !_isMuted),
+                  child: Stack(
+                    children: [
+                      Center(
+                        child: MicWaveformPlaceholder(
+                          isActive: !_isMuted && _isListening,
+                        ),
+                      ),
+                      if (_userText.isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.all(10.0),
+                          child: Align(
+                            alignment: Alignment.topCenter,
+                            child: Text(
+                              _userText,
+                              style: TextStyle(
+                                color: Colors.white.withOpacity(0.9),
+                                fontWeight: FontWeight.w500,
+                              ),
+                              textAlign: TextAlign.center,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ),
+                      if (_isProcessing)
+                        Align(
+                          alignment: Alignment.bottomCenter,
+                          child: Padding(
+                            padding: const EdgeInsets.only(bottom: 8.0),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const SizedBox(
+                                  width: 12,
+                                  height: 12,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                      Colors.white,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'Bear is thinking...',
+                                  style: TextStyle(
+                                    color: Colors.white.withOpacity(0.7),
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                    ],
                   ),
                 ),
               ),
