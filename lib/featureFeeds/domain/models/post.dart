@@ -25,6 +25,22 @@ class Post {
   });
 
   factory Post.fromJson(Map<String, dynamic> json) {
+    // Handle case where author information might be missing (e.g., in create post response)
+    PostAuthor author;
+    if (json['author'] != null) {
+      author = PostAuthor.fromJson(json['author'] as Map<String, dynamic>);
+    } else {
+      // Create a minimal placeholder author using authorId
+      author = PostAuthor(
+        id: json['author_id'] as String,
+        username: 'User', // Placeholder username
+        scoreEnglish: 0,
+        streakDay: 0,
+        totalXp: 0,
+        currentRank: 'Wood', // Default rank
+      );
+    }
+
     return Post(
       id: json['id'] as String,
       authorId: json['author_id'] as String,
@@ -36,7 +52,7 @@ class Post {
           json['deleted_at'] != null
               ? DateTime.parse(json['deleted_at'] as String)
               : null,
-      author: PostAuthor.fromJson(json['author'] as Map<String, dynamic>),
+      author: author,
       reactionsCount:
           json['reactions_count'] != null
               ? Map<String, int>.from(json['reactions_count'] as Map)
