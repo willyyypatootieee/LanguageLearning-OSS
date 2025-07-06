@@ -173,19 +173,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
             if (user == null) {
               return const Center(child: Text('No profile data available'));
             }
-            return SingleChildScrollView(
-              child: Column(
-                children: [
-                  // Profile header with avatar
-                  ProfileHeader(
+
+            // Use CustomScrollView instead of SingleChildScrollView for better performance
+            return CustomScrollView(
+              // Use cacheExtent to improve scrolling performance
+              cacheExtent: 800,
+              physics: const AlwaysScrollableScrollPhysics(),
+              slivers: [
+                SliverToBoxAdapter(
+                  child: ProfileHeader(
                     username: user.username,
                     handle: '@${user.username}',
                     joinDate: _monthYear(user.createdAt),
                     onSettingsPressed: () {},
                     onLogoutPressed: () => _logout(context),
                   ),
-                  // Profile info card (overlapping the header)
-                  ProfileInfoCard(
+                ),
+                SliverToBoxAdapter(
+                  child: ProfileInfoCard(
                     username: user.username,
                     handle: '@${user.username}',
                     joinDate: _monthYear(user.createdAt),
@@ -194,52 +199,60 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     country: 'id',
                     countryLabel: 'Indonesia',
                   ),
-                  const SizedBox(height: 16),
-                  // Action buttons
-                  ProfileActionButtons(
-                    onAddFriends: null, // Remove Add Friends button
-                    onShare: () {},
+                ),
+                SliverToBoxAdapter(
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 16),
+                      // Action buttons
+                      ProfileActionButtons(onAddFriends: null, onShare: () {}),
+                    ],
                   ),
-                  const SizedBox(height: 24),
-                  // Overview section header
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 4,
-                          height: 28,
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topCenter,
-                              end: Alignment.bottomCenter,
-                              colors: [AppColors.primary, AppColors.accent],
+                ),
+                SliverToBoxAdapter(
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 24),
+                      // Overview section header
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 4,
+                              height: 28,
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  begin: Alignment.topCenter,
+                                  end: Alignment.bottomCenter,
+                                  colors: [AppColors.primary, AppColors.accent],
+                                ),
+                                borderRadius: BorderRadius.circular(2),
+                              ),
                             ),
-                            borderRadius: BorderRadius.circular(2),
-                          ),
+                            const SizedBox(width: 12),
+                            Text(
+                              'Overview',
+                              style: Theme.of(
+                                context,
+                              ).textTheme.headlineSmall?.copyWith(
+                                fontWeight: FontWeight.w800,
+                                color: AppColors.gray900,
+                                letterSpacing: -0.5,
+                              ),
+                            ),
+                          ],
                         ),
-                        const SizedBox(width: 12),
-                        Text(
-                          'Overview',
-                          style: Theme.of(
-                            context,
-                          ).textTheme.headlineSmall?.copyWith(
-                            fontWeight: FontWeight.w800,
-                            color: AppColors.gray900,
-                            letterSpacing: -0.5,
-                          ),
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 16),
-                  // Stats grid with improved layout
-                  GridView.count(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
+                ),
+                // Use SliverPadding and SliverGrid for more efficient grid rendering
+                SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 120),
+                  sliver: SliverGrid.count(
                     crossAxisCount: 2,
                     childAspectRatio: 1.5,
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
                     mainAxisSpacing: 16,
                     crossAxisSpacing: 16,
                     children: [
@@ -273,10 +286,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                     ],
                   ),
-                  // Add bottom padding to account for floating navbar
-                  const SizedBox(height: 120),
-                ],
-              ),
+                ),
+              ],
             );
           },
         ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:rive/rive.dart' as rive;
 import 'package:flutter/services.dart' show rootBundle;
 import '../../../core/constants/app_constants.dart';
+import 'fullscreen_avatar_page.dart';
 
 /// Profile stat card widget showing user statistics
 class ProfileStatCard extends StatelessWidget {
@@ -27,25 +28,15 @@ class ProfileStatCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(AppConstants.spacingM),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            backgroundColor ?? Colors.white,
-            (backgroundColor ?? Colors.white).withOpacity(0.8),
-          ],
-        ),
+        color: backgroundColor ?? Colors.white,
         borderRadius: BorderRadius.circular(AppConstants.radiusXl),
+        // Simplified shadow for better performance
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-          BoxShadow(
-            color: (iconColor ?? AppColors.primary).withOpacity(0.1),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
+            blurRadius: 8,
+            offset: const Offset(0, 3),
+            spreadRadius: 0,
           ),
         ],
         border: Border.all(
@@ -129,6 +120,7 @@ class ProfileHeader extends StatefulWidget {
 class _ProfileHeaderState extends State<ProfileHeader> {
   rive.Artboard? _artboard;
   rive.StateMachineController? _controller;
+  bool _isAnimationActive = false;
 
   @override
   void initState() {
@@ -148,14 +140,23 @@ class _ProfileHeaderState extends State<ProfileHeader> {
       );
       if (controller != null) {
         artboard.addController(controller);
-        // Start the animation immediately
-        controller.isActive = true;
+        // Don't start animation immediately
+        controller.isActive = false;
       }
     }
     setState(() {
       _artboard = artboard;
       _controller = controller;
     });
+  }
+
+  void _toggleAnimation() {
+    if (_controller != null) {
+      setState(() {
+        _isAnimationActive = !_isAnimationActive;
+        _controller!.isActive = _isAnimationActive;
+      });
+    }
   }
 
   @override
@@ -192,8 +193,8 @@ class _ProfileHeaderState extends State<ProfileHeader> {
               margin: const EdgeInsets.only(
                 left: 16,
                 right: 16,
-                top: 40,
-                bottom: 24,
+                top: 60, // Moved down by increasing this value
+                bottom: 4, // Reduced bottom margin to shift content down
               ),
               decoration: BoxDecoration(
                 color: Colors.white,
@@ -224,20 +225,39 @@ class _ProfileHeaderState extends State<ProfileHeader> {
                   ),
                   child: GestureDetector(
                     onTap: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder:
-                              (_) =>
-                                  const FullscreenAvatarPage(interactive: true),
-                        ),
-                      );
+                      _toggleAnimation();
+                      Future.delayed(const Duration(milliseconds: 500), () {
+                        if (context.mounted) {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder:
+                                  (_) => const FullscreenAvatarPage(
+                                    interactive: true,
+                                  ),
+                            ),
+                          );
+                        }
+                      });
                     },
                     child:
                         _artboard == null
                             ? const Center(child: CircularProgressIndicator())
-                            : rive.Rive(
-                              artboard: _artboard!,
-                              fit: BoxFit.cover,
+                            : Container(
+                              padding: const EdgeInsets.only(
+                                top: 100,
+                                bottom: 5,
+                              ), // Push content down within container
+                              alignment:
+                                  Alignment
+                                      .bottomCenter, // Align to bottom center
+                              child: Transform.scale(
+                                scale:
+                                    6.80, // Scale down the Rive animation to 75%
+                                child: rive.Rive(
+                                  artboard: _artboard!,
+                                  fit: BoxFit.contain,
+                                ),
+                              ),
                             ),
                   ),
                 ),
@@ -334,16 +354,13 @@ class ProfileInfoCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(AppConstants.radiusXl),
+        // Simplified shadow for better performance
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.08),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
-          ),
-          BoxShadow(
-            color: AppColors.primary.withOpacity(0.1),
-            blurRadius: 40,
-            offset: const Offset(0, 16),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
+            spreadRadius: 0,
           ),
         ],
       ),
@@ -526,99 +543,6 @@ class ProfileSection extends StatelessWidget {
         ),
         child,
       ],
-    );
-  }
-}
-
-/// Fullscreen avatar page widget
-class FullscreenAvatarPage extends StatefulWidget {
-  final bool interactive;
-  const FullscreenAvatarPage({super.key, this.interactive = false});
-
-  @override
-  State<FullscreenAvatarPage> createState() => _FullscreenAvatarPageState();
-}
-
-class _FullscreenAvatarPageState extends State<FullscreenAvatarPage> {
-  rive.Artboard? _artboard;
-  rive.StateMachineController? _controller;
-  List<rive.SMIInput<dynamic>>? _inputs;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadRive();
-  }
-
-  void _loadRive() async {
-    final data = await rootBundle.load('assets/animation/chooseAvatar.riv');
-    final file = rive.RiveFile.import(data);
-    final artboard = file.mainArtboard;
-    rive.StateMachineController? controller;
-    if (artboard.stateMachines.isNotEmpty) {
-      controller = rive.StateMachineController.fromArtboard(
-        artboard,
-        artboard.stateMachines.first.name,
-      );
-      if (controller != null) {
-        artboard.addController(controller);
-        // Start the animation immediately
-        controller.isActive = true;
-      }
-    }
-    setState(() {
-      _artboard = artboard;
-      _controller = controller;
-      _inputs = controller?.inputs.toList();
-    });
-  }
-
-  void _onTap() {
-    if (_inputs != null) {
-      for (final input in _inputs!) {
-        if (input is rive.SMIBool) {
-          input.value = !input.value;
-        } else if (input is rive.SMITrigger) {
-          input.fire();
-        }
-      }
-    }
-  }
-
-  @override
-  void dispose() {
-    _controller?.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      body: Stack(
-        children: [
-          Center(
-            child:
-                _artboard == null
-                    ? const CircularProgressIndicator()
-                    : GestureDetector(
-                      onTap: _onTap,
-                      child: rive.Rive(artboard: _artboard!),
-                    ),
-          ),
-          Positioned(
-            top: MediaQuery.of(context).padding.top + 16,
-            left: 16,
-            child: IconButton(
-              icon: const Icon(Icons.arrow_back, color: Colors.white, size: 32),
-              onPressed: () => Navigator.of(context).pop(),
-              style: IconButton.styleFrom(
-                backgroundColor: Colors.black.withOpacity(0.3),
-              ),
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

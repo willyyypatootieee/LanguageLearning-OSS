@@ -86,6 +86,92 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
 
+          // Check image 2 (top right area)
+          Positioned(
+            top: MediaQuery.of(context).size.height * 0.28,
+            right: MediaQuery.of(context).size.width * 0.02,
+            child: GestureDetector(
+              onTap: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Work In Progress!'),
+                    duration: Duration(seconds: 2),
+                  ),
+                );
+              },
+              child: Image.asset(
+                'assets/images/Check.png',
+                // width: 60,
+                // height: 60,
+              ),
+            ),
+          ),
+
+          // Check image 3 (middle right area)
+          Positioned(
+            top: MediaQuery.of(context).size.height * 0.44,
+            right: MediaQuery.of(context).size.width * 0.25,
+            child: GestureDetector(
+              onTap: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('WORK IN PROGRESS! COMING SOON!'),
+                    duration: Duration(seconds: 2),
+                  ),
+                );
+              },
+              child: Image.asset('assets/images/Check.png'),
+            ),
+          ),
+
+          // Check image 4 (bottom middle area)
+          Positioned(
+            bottom: MediaQuery.of(context).size.height * 0.31,
+            left: MediaQuery.of(context).size.width * 0.25,
+            child: GestureDetector(
+              onTap: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('WORK IN PROGRESS! COMING SOON!'),
+                    duration: Duration(seconds: 2),
+                  ),
+                );
+              },
+              child: Image.asset(
+                'assets/images/Check.png',
+                // width: 60,
+                // height: 60,
+              ),
+            ),
+          ),
+
+          // Treasure chest in the marked area
+          Positioned(
+            bottom:
+                MediaQuery.of(context).size.height *
+                0.18, // Position near the bottom
+            left:
+                MediaQuery.of(context).size.width *
+                0.50, // Position on the right side of the path
+            child: GestureDetector(
+              onTap: () {
+                // Show a special message when the chest is tapped
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('COMING SOON!'),
+                    duration: Duration(seconds: 2),
+                  ),
+                );
+                // You can add additional logic here to open the chest, show rewards, etc.
+              },
+              child: Image.asset(
+                'assets/images/chest.png', // Using chest.png from your assets
+                // width: 70, // Make it slightly larger than the checkmarks
+                // height: 70,
+              ),
+            ),
+          ),
+
           // Start button overlay (approximate position, adjust as needed)
           Positioned(
             top: MediaQuery.of(context).size.height * 0.14, // adjust as needed
