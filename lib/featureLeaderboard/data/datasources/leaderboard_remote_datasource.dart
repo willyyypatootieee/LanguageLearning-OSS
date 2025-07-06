@@ -14,15 +14,28 @@ class LeaderboardRemoteDataSourceImpl implements LeaderboardRemoteDataSource {
 
   @override
   Future<List<LeaderboardUser>> fetchLeaderboardUsers() async {
-    final response = await dio.get(
-      '$baseUrl/api/users',
-      options: Options(headers: {'x-admin-secret': adminSecret}),
-    );
-    if (response.statusCode == 200 && response.data['success'] == true) {
-      final List users = response.data['data'];
-      return users.map((json) => LeaderboardUser.fromJson(json)).toList();
-    } else {
-      throw Exception('Failed to fetch leaderboard users');
+    try {
+      // Add cache-busting query parameter to avoid HTTP caching
+      final timestamp = DateTime.now().millisecondsSinceEpoch;
+      final response = await dio.get(
+        '$baseUrl/api/users?_cb=$timestamp',
+        options: Options(
+          headers: {'x-admin-secret': adminSecret},
+          // Ensure we don't use cached responses
+          extra: {'refresh': true},
+        ),
+      );
+
+      if (response.statusCode == 200 && response.data['success'] == true) {
+        final List users = response.data['data'];
+        return users.map((json) => LeaderboardUser.fromJson(json)).toList();
+      } else {
+        throw Exception(
+          'Failed to fetch leaderboard users: ${response.statusCode}',
+        );
+      }
+    } catch (e) {
+      throw Exception('Failed to fetch leaderboard users: $e');
     }
   }
 }

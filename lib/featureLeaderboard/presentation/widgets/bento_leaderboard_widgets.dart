@@ -403,28 +403,64 @@ class _BentoTop3WidgetState extends State<BentoTop3Widget>
                   TweenAnimationBuilder<double>(
                     duration: const Duration(milliseconds: 800),
                     tween: Tween(begin: 0.0, end: 1.0),
-                    curve: Curves.bounceOut,
-                    builder: (context, value, child) {
+                    curve: Curves.elasticOut,
+                    builder: (context, scaleValue, child) {
                       return Transform.scale(
-                        scale: value,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: accentColor.withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Text(
-                            '${user.totalPoint} pts',
-                            style: TextStyle(
-                              fontSize: isChampion ? 14 : 10,
-                              fontWeight: FontWeight.bold,
-                              color: isChampion ? Colors.black : accentColor,
-                              fontFamily: 'Nunito',
-                            ),
-                          ),
+                        scale: scaleValue,
+                        child: TweenAnimationBuilder<int>(
+                          duration: const Duration(milliseconds: 1500),
+                          tween: IntTween(begin: 0, end: user.totalPoint),
+                          curve: Curves.easeOutCubic,
+                          builder: (context, value, child) {
+                            return Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 6,
+                              ),
+                              decoration: BoxDecoration(
+                                color: accentColor.withOpacity(0.2),
+                                borderRadius: BorderRadius.circular(16),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: accentColor.withOpacity(0.2),
+                                    blurRadius: 6,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                                border: Border.all(
+                                  color: accentColor.withOpacity(0.3),
+                                  width: 1.5,
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.star_rounded,
+                                    size: isChampion ? 18 : 14,
+                                    color:
+                                        isChampion
+                                            ? Colors.amber.shade700
+                                            : accentColor,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    '$value pts',
+                                    style: TextStyle(
+                                      fontSize: isChampion ? 16 : 12,
+                                      fontWeight: FontWeight.bold,
+                                      color:
+                                          isChampion
+                                              ? Colors.amber.shade700
+                                              : accentColor,
+                                      fontFamily: 'Nunito',
+                                      letterSpacing: -0.3,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
                         ),
                       );
                     },
@@ -538,8 +574,8 @@ class _BentoStatsWidgetState extends State<BentoStatsWidget>
                   offset: Offset(0, _slideAnimations[2].value),
                   child: _buildStatCard(
                     'Skor Tertinggi',
-                    '$highestScore Point',
-                    Icons.trending_up,
+                    '$highestScore pts',
+                    Icons.emoji_events_rounded,
                     AppColors.success,
                   ),
                 ),
@@ -881,19 +917,42 @@ class BentoRankSectionWidget extends StatelessWidget {
           ),
         ),
         trailing: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           decoration: BoxDecoration(
-            color: rankColor.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(20),
+            color: rankColor.withOpacity(0.15),
+            borderRadius: BorderRadius.circular(18),
+            boxShadow: [
+              BoxShadow(
+                color: rankColor.withOpacity(0.12),
+                blurRadius: 4,
+                offset: const Offset(0, 2),
+              ),
+            ],
+            border: Border.all(color: rankColor.withOpacity(0.3), width: 1.2),
           ),
-          child: Text(
-            '${user.totalPoint} pts',
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-              color: rankColor,
-              fontFamily: 'Nunito',
-            ),
+          child: TweenAnimationBuilder<int>(
+            duration: const Duration(milliseconds: 1000),
+            tween: IntTween(begin: 0, end: user.totalPoint),
+            curve: Curves.easeOutCubic,
+            builder: (context, value, child) {
+              return Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.star_rounded, size: 16, color: rankColor),
+                  const SizedBox(width: 4),
+                  Text(
+                    '$value pts',
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                      color: rankColor,
+                      fontFamily: 'Nunito',
+                      letterSpacing: -0.3,
+                    ),
+                  ),
+                ],
+              );
+            },
           ),
         ),
       ),

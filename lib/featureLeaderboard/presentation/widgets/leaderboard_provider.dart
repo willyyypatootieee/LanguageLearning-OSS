@@ -50,7 +50,7 @@ class _LeaderboardProviderState extends State<LeaderboardProvider>
     return RepositoryProvider.value(
       value: _dio!,
       child: BlocProvider.value(
-        value: _leaderboardCubit!..fetchLeaderboard(),
+        value: _leaderboardCubit!..fetchLeaderboard(forceRefresh: true),
         child: LeaderboardScreen(
           currentIndex: widget.currentIndex,
           onNavTap: widget.onNavTap,

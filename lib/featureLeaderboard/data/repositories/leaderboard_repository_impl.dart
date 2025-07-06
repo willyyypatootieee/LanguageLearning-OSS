@@ -12,11 +12,21 @@ class LeaderboardRepositoryImpl implements LeaderboardRepository {
   Future<List<LeaderboardUser>> getLeaderboardUsers({
     bool forceRefresh = false,
   }) async {
-    if (!forceRefresh && _cache != null) {
-      return _cache!;
+    // Always fetch fresh data if forceRefresh is true or if cache is null
+    if (forceRefresh || _cache == null) {
+      try {
+        final users = await remoteDataSource.fetchLeaderboardUsers();
+        _cache = users;
+        return users;
+      } catch (e) {
+        // If fetch fails but we have cached data, return that as fallback
+        if (_cache != null) {
+          return _cache!;
+        }
+        // Otherwise rethrow the error
+        rethrow;
+      }
     }
-    final users = await remoteDataSource.fetchLeaderboardUsers();
-    _cache = users;
-    return users;
+    return _cache!;
   }
 }

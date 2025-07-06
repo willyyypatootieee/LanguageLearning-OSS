@@ -31,7 +31,8 @@ class LeaderboardScreen extends StatefulWidget {
   State<LeaderboardScreen> createState() => _LeaderboardScreenState();
 }
 
-class _LeaderboardScreenState extends State<LeaderboardScreen> {
+class _LeaderboardScreenState extends State<LeaderboardScreen>
+    with WidgetsBindingObserver {
   ProfileCubit? _profileCubit;
   String _currentUsername = '';
 
@@ -40,6 +41,56 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
     super.initState();
     _initializeCubit();
     _loadCurrentUser();
+
+    // Register as an observer for app lifecycle changes
+    WidgetsBinding.instance.addObserver(this);
+
+    // Set up a delayed refresh to update the leaderboard when screen loads
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _refreshLeaderboard();
+    });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Refresh data when dependencies change (e.g., when returning to this screen)
+    _refreshLeaderboard();
+  }
+
+  @override
+  void didUpdateWidget(LeaderboardScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Refresh when the widget is updated (e.g., when navigating between tabs)
+    if (widget.currentIndex == 3 && oldWidget.currentIndex != 3) {
+      _refreshLeaderboard();
+    }
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // When app comes to foreground, refresh the leaderboard
+    if (state == AppLifecycleState.resumed && mounted) {
+      _refreshLeaderboard();
+    }
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _profileCubit?.dispose();
+    super.dispose();
+  }
+
+  void _refreshLeaderboard() {
+    // Force refresh the leaderboard data
+    if (mounted) {
+      try {
+        context.read<LeaderboardCubit>().fetchLeaderboard(forceRefresh: true);
+      } catch (e) {
+        print('Error refreshing leaderboard: $e');
+      }
+    }
   }
 
   void _initializeCubit() {
@@ -76,12 +127,6 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
         });
       }
     }
-  }
-
-  @override
-  void dispose() {
-    _profileCubit?.dispose();
-    super.dispose();
   }
 
   Future<void> _navigateToPractice() async {
@@ -247,6 +292,22 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                                   ],
                                 ),
                               ),
+                              const SizedBox(width: 8),
+                              InkWell(
+                                onTap: () => _refreshLeaderboard(),
+                                child: Container(
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withOpacity(0.2),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: const Icon(
+                                    Icons.refresh_rounded,
+                                    color: Colors.white,
+                                    size: 20,
+                                  ),
+                                ),
+                              ),
                             ],
                           ),
                         ],
@@ -331,28 +392,43 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
               // Find current user from profile
               String currentUser = _currentUsername;
 
-              return CustomScrollView(
-                slivers: [
-                  // Top 3 Bento Box
-                  SliverToBoxAdapter(child: BentoTop3Widget(top3Users: top3)),
+              return RefreshIndicator(
+                onRefresh: () async {
+                  // Force refresh when pulled down
+                  await context.read<LeaderboardCubit>().fetchLeaderboard(
+                    forceRefresh: true,
+                  );
+                },
+                color: AppColors.primary,
+                backgroundColor: Colors.white,
+                strokeWidth: 3,
+                displacement: 40,
+                child: CustomScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  slivers: [
+                    // Top 3 Bento Box
+                    SliverToBoxAdapter(child: BentoTop3Widget(top3Users: top3)),
 
-                  // Stats Overview
-                  SliverToBoxAdapter(child: BentoStatsWidget(allUsers: users)),
+                    // Stats Overview
+                    SliverToBoxAdapter(
+                      child: BentoStatsWidget(allUsers: users),
+                    ),
 
-                  // Rank sections
-                  for (final rankType in ['Wood+', 'Wood', 'Unranked'])
-                    if (grouped[rankType]!.isNotEmpty)
-                      SliverToBoxAdapter(
-                        child: BentoRankSectionWidget(
-                          rankType: rankType,
-                          users: grouped[rankType]!,
-                          currentUsername: currentUser,
+                    // Rank sections
+                    for (final rankType in ['Wood+', 'Wood', 'Unranked'])
+                      if (grouped[rankType]!.isNotEmpty)
+                        SliverToBoxAdapter(
+                          child: BentoRankSectionWidget(
+                            rankType: rankType,
+                            users: grouped[rankType]!,
+                            currentUsername: currentUser,
+                          ),
                         ),
-                      ),
 
-                  // Bottom padding for navbar
-                  const SliverToBoxAdapter(child: SizedBox(height: 120)),
-                ],
+                    // Bottom padding for navbar
+                    const SliverToBoxAdapter(child: SizedBox(height: 120)),
+                  ],
+                ),
               );
             } else if (state is LeaderboardError) {
               return Center(
