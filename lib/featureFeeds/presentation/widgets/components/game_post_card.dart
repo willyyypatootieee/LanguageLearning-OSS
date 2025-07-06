@@ -1,19 +1,69 @@
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../domain/models/post.dart';
+import '../../../../featureAuthentication/data/datasources/auth_local_datasource.dart';
+import 'package:provider/provider.dart';
+import '../../cubit/feeds_cubit.dart';
 import 'rank_badge.dart';
 import 'fancy_reaction_chip.dart';
 
 /// Enhanced gamified post card with modern UI
-class GamePostCard extends StatelessWidget {
+class GamePostCard extends StatefulWidget {
   final Post post;
+  final bool isReply;
+  final VoidCallback? onPostDeleted;
+  final VoidCallback? onReplyAdded;
 
-  const GamePostCard({super.key, required this.post});
+  const GamePostCard({
+    super.key,
+    required this.post,
+    this.isReply = false,
+    this.onPostDeleted,
+    this.onReplyAdded,
+  });
+
+  @override
+  State<GamePostCard> createState() => _GamePostCardState();
+}
+
+class _GamePostCardState extends State<GamePostCard> {
+  bool _isReplyFormVisible = false;
+  final TextEditingController _replyController = TextEditingController();
+  String? _currentUserId;
+  bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCurrentUser();
+  }
+
+  @override
+  void dispose() {
+    _replyController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _loadCurrentUser() async {
+    final authDataSource = AuthLocalDataSource();
+    final user = await authDataSource.getCurrentUser();
+    if (user != null && mounted) {
+      setState(() {
+        _currentUserId = user.id;
+      });
+    }
+  }
+
+  bool get _isPostOwner =>
+      _currentUserId != null && widget.post.authorId == _currentUserId;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(bottom: AppConstants.spacingL),
+      margin: EdgeInsets.only(
+        bottom: AppConstants.spacingL,
+        left: widget.isReply ? AppConstants.spacingXl : 0,
+      ),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
@@ -25,11 +75,18 @@ class GamePostCard extends StatelessWidget {
             spreadRadius: 2,
           ),
         ],
+        border:
+            widget.isReply
+                ? Border.all(
+                  color: AppColors.primary.withOpacity(0.2),
+                  width: 1,
+                )
+                : null,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Author header with rank badge
+          // Author header with rank badge and delete button
           Container(
             padding: const EdgeInsets.all(AppConstants.spacingL),
             decoration: BoxDecoration(
@@ -66,7 +123,7 @@ class GamePostCard extends StatelessWidget {
                         radius: 24,
                         backgroundColor: Colors.transparent,
                         child: Text(
-                          post.author.username[0].toUpperCase(),
+                          widget.post.author.username[0].toUpperCase(),
                           style: const TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
@@ -90,7 +147,7 @@ class GamePostCard extends StatelessWidget {
                           border: Border.all(color: Colors.white, width: 2),
                         ),
                         child: Text(
-                          'Lv.${_calculateLevel(post.author.totalXp)}',
+                          'Lv.${_calculateLevel(widget.post.author.totalXp)}',
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 10,
@@ -109,7 +166,7 @@ class GamePostCard extends StatelessWidget {
                       Row(
                         children: [
                           Text(
-                            post.author.username,
+                            widget.post.author.username,
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 16,
@@ -119,12 +176,12 @@ class GamePostCard extends StatelessWidget {
                           ),
                           const SizedBox(width: 8),
                           // Rank badge with icon
-                          RankBadge(rank: post.author.currentRank),
+                          RankBadge(rank: widget.post.author.currentRank),
                         ],
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        _getTimeAgo(post.createdAt),
+                        _getTimeAgo(widget.post.createdAt),
                         style: TextStyle(
                           fontSize: 12,
                           color: AppColors.gray500,
@@ -134,18 +191,26 @@ class GamePostCard extends StatelessWidget {
                     ],
                   ),
                 ),
+                // Delete button (only visible to post owner)
+                if (_isPostOwner)
+                  IconButton(
+                    onPressed: _deletePost,
+                    icon: Icon(
+                      Icons.delete_outline,
+                      color: AppColors.error,
+                      size: 20,
+                    ),
+                    tooltip: 'Hapus post',
+                  ),
               ],
             ),
           ),
 
           // Post content
           Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppConstants.spacingL,
-              vertical: AppConstants.spacingM,
-            ),
+            padding: const EdgeInsets.all(AppConstants.spacingL),
             child: Text(
-              post.content,
+              widget.post.content,
               style: TextStyle(
                 fontSize: 15,
                 color: AppColors.gray800,
@@ -157,7 +222,7 @@ class GamePostCard extends StatelessWidget {
           ),
 
           // Post image with modern styling
-          if (post.imageUrl != null) ...[
+          if (widget.post.imageUrl != null) ...[
             Padding(
               padding: const EdgeInsets.symmetric(
                 horizontal: AppConstants.spacingL,
@@ -176,7 +241,7 @@ class GamePostCard extends StatelessWidget {
                     ],
                   ),
                   child: Image.network(
-                    post.imageUrl!,
+                    widget.post.imageUrl!,
                     width: double.infinity,
                     fit: BoxFit.cover,
                     errorBuilder: (context, error, stackTrace) {
@@ -229,8 +294,8 @@ class GamePostCard extends StatelessWidget {
             child: Column(
               children: [
                 // Reactions row
-                if (post.reactionsCount != null &&
-                    post.reactionsCount!.isNotEmpty) ...[
+                if (widget.post.reactionsCount != null &&
+                    widget.post.reactionsCount!.isNotEmpty) ...[
                   Container(
                     padding: const EdgeInsets.all(AppConstants.spacingM),
                     decoration: BoxDecoration(
@@ -250,7 +315,7 @@ class GamePostCard extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(width: AppConstants.spacingS),
-                        ...post.reactionsCount!.entries
+                        ...widget.post.reactionsCount!.entries
                             .where((entry) => entry.value > 0)
                             .map(
                               (entry) => Padding(
@@ -268,12 +333,324 @@ class GamePostCard extends StatelessWidget {
                     ),
                   ),
                 ],
+
+                const SizedBox(height: AppConstants.spacingM),
+
+                // Action buttons: Reply, React
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    // Reply button
+                    _ActionButton(
+                      icon: Icons.reply,
+                      label: 'Balas',
+                      onTap: () {
+                        setState(() {
+                          _isReplyFormVisible = !_isReplyFormVisible;
+                        });
+                      },
+                    ),
+
+                    // Like button
+                    _ReactionButton(
+                      emotion: 'THUMBS_UP',
+                      label: 'Suka',
+                      count: widget.post.reactionsCount?['THUMBS_UP'] ?? 0,
+                      postId: widget.post.id,
+                    ),
+
+                    // Love button
+                    _ReactionButton(
+                      emotion: 'LOVE',
+                      label: 'Cinta',
+                      count: widget.post.reactionsCount?['LOVE'] ?? 0,
+                      postId: widget.post.id,
+                    ),
+
+                    // Expand replies button (only if post has replies)
+                    // Temporarily disabled until individual post API is fixed
+                    /*
+                    if (widget.post.replies != null &&
+                        widget.post.replies!.isNotEmpty)
+                      _ActionButton(
+                        icon:
+                            _isExpanded
+                                ? Icons.keyboard_arrow_up
+                                : Icons.keyboard_arrow_down,
+                        label:
+                            _isExpanded
+                                ? 'Tutup'
+                                : '${widget.post.replies!.length} Balasan',
+                        onTap: () {
+                          setState(() {
+                            _isExpanded = !_isExpanded;
+                          });
+                        },
+                      ),
+                    */
+                  ],
+                ),
+
+                // Reply form
+                if (_isReplyFormVisible) ...[
+                  const SizedBox(height: AppConstants.spacingM),
+                  _buildReplyForm(),
+                ],
+
+                // Replies (if expanded) - Temporarily disabled
+                /*
+                if (_isExpanded && widget.post.replies != null) ...[
+                  const SizedBox(height: AppConstants.spacingM),
+                  ...widget.post.replies!
+                      .map(
+                        (reply) => Padding(
+                          padding: const EdgeInsets.only(
+                            bottom: AppConstants.spacingM,
+                          ),
+                          child: ChangeNotifierProvider.value(
+                            value: Provider.of<FeedsCubit>(
+                              context,
+                              listen: false,
+                            ),
+                            child: ReplyCard(
+                              post: reply,
+                              onReplyDeleted: () {
+                                // Refresh the parent post to update replies list
+                                _refreshPost();
+                              },
+                            ),
+                          ),
+                        ),
+                      )
+                      .toList(),
+                ],
+                */
               ],
             ),
           ),
         ],
       ),
     );
+  }
+
+  Widget _buildReplyForm() {
+    return Container(
+      padding: const EdgeInsets.all(AppConstants.spacingM),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.gray200),
+      ),
+      child: Column(
+        children: [
+          TextFormField(
+            controller: _replyController,
+            maxLines: 3,
+            decoration: InputDecoration(
+              hintText: 'Ketik balasanmu di sini...',
+              hintStyle: TextStyle(
+                color: AppColors.gray400,
+                fontFamily: AppTypography.bodyFont,
+              ),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: AppColors.gray300),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: AppColors.primary, width: 2),
+              ),
+              contentPadding: const EdgeInsets.all(AppConstants.spacingM),
+            ),
+          ),
+          const SizedBox(height: AppConstants.spacingM),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              TextButton(
+                onPressed: () {
+                  setState(() {
+                    _isReplyFormVisible = false;
+                    _replyController.clear();
+                  });
+                },
+                style: TextButton.styleFrom(foregroundColor: AppColors.gray600),
+                child: const Text('Batal'),
+              ),
+              const SizedBox(width: AppConstants.spacingS),
+              ElevatedButton(
+                onPressed: _isLoading ? null : _submitReply,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppConstants.spacingL,
+                    vertical: AppConstants.spacingM,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                child:
+                    _isLoading
+                        ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2,
+                          ),
+                        )
+                        : const Text('Kirim'),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _submitReply() async {
+    if (_replyController.text.trim().isEmpty) return;
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final feedsCubit = Provider.of<FeedsCubit>(context, listen: false);
+      final replyContent = _replyController.text.trim();
+
+      final result = await feedsCubit.createPost(
+        replyContent,
+        parentId: widget.post.id,
+      );
+
+      if (result) {
+        // Clear form and hide it
+        _replyController.clear();
+        setState(() {
+          _isReplyFormVisible = false;
+        });
+
+        // Show success message
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Balasan berhasil dikirim'),
+            backgroundColor: AppColors.success,
+            duration: Duration(seconds: 2),
+          ),
+        );
+
+        // Refresh the feed to get the updated replies
+        await _refreshPost();
+
+        // Notify parent
+        if (widget.onReplyAdded != null) {
+          widget.onReplyAdded!();
+        }
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Gagal mengirim balasan'),
+            backgroundColor: AppColors.error,
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (e) {
+      print('Error posting reply: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Gagal mengirim balasan: ${e.toString()}'),
+          backgroundColor: Colors.red.shade700,
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _deletePost() async {
+    // Show confirmation dialog
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Hapus Post'),
+            content: const Text('Apakah Anda yakin ingin menghapus post ini?'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text('Batal'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                style: TextButton.styleFrom(foregroundColor: AppColors.error),
+                child: const Text('Hapus'),
+              ),
+            ],
+          ),
+    );
+
+    if (confirmed != true) return;
+
+    try {
+      setState(() {
+        _isLoading = true;
+      });
+
+      final feedsCubit = Provider.of<FeedsCubit>(context, listen: false);
+      final success = await feedsCubit.deletePost(widget.post.id);
+
+      if (success) {
+        if (widget.onPostDeleted != null) {
+          widget.onPostDeleted!();
+        }
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Post berhasil dihapus'),
+            backgroundColor: AppColors.success,
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Gagal menghapus post'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    } catch (e) {
+      print('Error deleting post: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error: ${e.toString()}'),
+          backgroundColor: AppColors.error,
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _refreshPost() async {
+    try {
+      final feedsCubit = Provider.of<FeedsCubit>(context, listen: false);
+      // Instead of getting individual post, refresh the entire feed
+      await feedsCubit.loadPosts(forceRefresh: true);
+    } catch (e) {
+      print('Error refreshing posts: $e');
+    }
   }
 
   int _calculateLevel(int xp) {
@@ -292,6 +669,182 @@ class GamePostCard extends StatelessWidget {
       return '${difference.inMinutes} menit lalu';
     } else {
       return 'Baru saja';
+    }
+  }
+}
+
+/// Action button for post interactions
+class _ActionButton extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  const _ActionButton({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppConstants.spacingM,
+          vertical: AppConstants.spacingS,
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 16, color: AppColors.gray600),
+            const SizedBox(width: 4),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                color: AppColors.gray700,
+                fontFamily: AppTypography.bodyFont,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Reaction button that handles adding/removing reactions
+class _ReactionButton extends StatefulWidget {
+  final String emotion;
+  final String label;
+  final int count;
+  final String postId;
+
+  const _ReactionButton({
+    required this.emotion,
+    required this.label,
+    required this.count,
+    required this.postId,
+  });
+
+  @override
+  _ReactionButtonState createState() => _ReactionButtonState();
+}
+
+class _ReactionButtonState extends State<_ReactionButton> {
+  bool _isActive = false;
+  bool _isLoading = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: _isLoading ? null : _toggleReaction,
+      borderRadius: BorderRadius.circular(8),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppConstants.spacingM,
+          vertical: AppConstants.spacingS,
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (_isLoading)
+              SizedBox(
+                width: 16,
+                height: 16,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: AppColors.primary,
+                ),
+              )
+            else
+              _getEmotionIcon(),
+            const SizedBox(width: 4),
+            Text(
+              widget.count > 0
+                  ? '${widget.label} (${widget.count})'
+                  : widget.label,
+              style: TextStyle(
+                fontSize: 12,
+                color: _isActive ? AppColors.primary : AppColors.gray700,
+                fontWeight: _isActive ? FontWeight.bold : FontWeight.normal,
+                fontFamily: AppTypography.bodyFont,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _getEmotionIcon() {
+    String emoji;
+    switch (widget.emotion) {
+      case 'THUMBS_UP':
+        emoji = '👍';
+        break;
+      case 'THUMBS_DOWN':
+        emoji = '👎';
+        break;
+      case 'LOVE':
+        emoji = '❤️';
+        break;
+      default:
+        emoji = '👍';
+    }
+
+    return Text(emoji, style: const TextStyle(fontSize: 16));
+  }
+
+  Future<void> _toggleReaction() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final feedsCubit = Provider.of<FeedsCubit>(context, listen: false);
+
+      if (_isActive) {
+        // Remove reaction
+        final success = await feedsCubit.removeReaction(widget.postId);
+        if (success) {
+          setState(() {
+            _isActive = false;
+          });
+        } else {
+          throw Exception('Failed to remove reaction');
+        }
+      } else {
+        // Add reaction
+        final reaction = await feedsCubit.addReaction(
+          widget.postId,
+          widget.emotion,
+        );
+        if (reaction != null) {
+          setState(() {
+            _isActive = true;
+          });
+        } else {
+          throw Exception('Failed to add reaction');
+        }
+      }
+    } catch (e) {
+      print('Error toggling reaction: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Fitur reaksi sedang dalam perbaikan'),
+          backgroundColor: Colors.orange,
+          duration: Duration(seconds: 2),
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 }

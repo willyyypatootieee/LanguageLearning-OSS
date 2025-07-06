@@ -18,6 +18,11 @@ import '../../featureFeeds/domain/usecases/get_pending_friend_requests_usecase.d
 import '../../featureFeeds/domain/usecases/accept_friend_request_usecase.dart';
 import '../../featureFeeds/domain/usecases/reject_friend_request_usecase.dart';
 import '../../featureFeeds/domain/usecases/remove_friend_usecase.dart';
+import '../../featureFeeds/domain/usecases/delete_post_usecase.dart';
+import '../../featureFeeds/domain/usecases/add_reaction_usecase.dart';
+import '../../featureFeeds/domain/usecases/remove_reaction_usecase.dart';
+import '../../featureFeeds/domain/usecases/get_post_by_id_usecase.dart';
+import '../../featureFeeds/domain/usecases/get_reactions_usecase.dart';
 import '../../featureFeeds/presentation/cubit/feeds_cubit.dart';
 
 /// Simple service locator for dependency injection
@@ -50,6 +55,11 @@ class ServiceLocator {
   AcceptFriendRequestUsecase? _acceptFriendRequestUsecase;
   RejectFriendRequestUsecase? _rejectFriendRequestUsecase;
   RemoveFriendUsecase? _removeFriendUsecase;
+  DeletePostUsecase? _deletePostUsecase;
+  AddReactionUsecase? _addReactionUsecase;
+  RemoveReactionUsecase? _removeReactionUsecase;
+  GetPostByIdUsecase? _getPostByIdUsecase;
+  GetReactionsUsecase? _getReactionsUsecase;
   FeedsCubit? _feedsCubit;
 
   /// Get onboarding local data source
@@ -162,6 +172,36 @@ class ServiceLocator {
     return _removeFriendUsecase!;
   }
 
+  /// Get delete post use case
+  DeletePostUsecase get deletePostUsecase {
+    _deletePostUsecase ??= DeletePostUsecase(postRepository);
+    return _deletePostUsecase!;
+  }
+
+  /// Get add reaction use case
+  AddReactionUsecase get addReactionUsecase {
+    _addReactionUsecase ??= AddReactionUsecase(postRepository);
+    return _addReactionUsecase!;
+  }
+
+  /// Get remove reaction use case
+  RemoveReactionUsecase get removeReactionUsecase {
+    _removeReactionUsecase ??= RemoveReactionUsecase(postRepository);
+    return _removeReactionUsecase!;
+  }
+
+  /// Get post by ID use case
+  GetPostByIdUsecase get getPostByIdUsecase {
+    _getPostByIdUsecase ??= GetPostByIdUsecase(postRepository);
+    return _getPostByIdUsecase!;
+  }
+
+  /// Get reactions use case
+  GetReactionsUsecase get getReactionsUsecase {
+    _getReactionsUsecase ??= GetReactionsUsecase(postRepository);
+    return _getReactionsUsecase!;
+  }
+
   /// Get feeds cubit (singleton)
   FeedsCubit get feedsCubit {
     _feedsCubit ??= FeedsCubit(
@@ -174,6 +214,11 @@ class ServiceLocator {
       acceptFriendRequestUsecase,
       rejectFriendRequestUsecase,
       removeFriendUsecase,
+      deletePostUsecase,
+      addReactionUsecase,
+      removeReactionUsecase,
+      getPostByIdUsecase,
+      getReactionsUsecase,
     );
     return _feedsCubit!;
   }

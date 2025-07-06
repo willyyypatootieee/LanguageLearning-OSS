@@ -4,6 +4,7 @@ import '../../domain/models/post_request.dart';
 import '../../domain/models/user_search_result.dart';
 import '../../domain/models/friend.dart';
 import '../../domain/models/friend_request.dart';
+import '../../domain/models/reaction.dart';
 import '../../domain/usecases/get_posts_usecase.dart';
 import '../../domain/usecases/create_post_usecase.dart';
 import '../../domain/usecases/search_users_usecase.dart';
@@ -13,6 +14,11 @@ import '../../domain/usecases/get_pending_friend_requests_usecase.dart';
 import '../../domain/usecases/accept_friend_request_usecase.dart';
 import '../../domain/usecases/reject_friend_request_usecase.dart';
 import '../../domain/usecases/remove_friend_usecase.dart';
+import '../../domain/usecases/delete_post_usecase.dart';
+import '../../domain/usecases/add_reaction_usecase.dart';
+import '../../domain/usecases/remove_reaction_usecase.dart';
+import '../../domain/usecases/get_post_by_id_usecase.dart';
+import '../../domain/usecases/get_reactions_usecase.dart';
 import 'feed_state.dart';
 import 'post_management.dart';
 import 'friend_management.dart';
@@ -31,6 +37,11 @@ class FeedsCubit extends ChangeNotifier
     AcceptFriendRequestUsecase acceptFriendRequestUsecase,
     RejectFriendRequestUsecase rejectFriendRequestUsecase,
     RemoveFriendUsecase removeFriendUsecase,
+    DeletePostUsecase deletePostUsecase,
+    AddReactionUsecase addReactionUsecase,
+    RemoveReactionUsecase removeReactionUsecase,
+    GetPostByIdUsecase getPostByIdUsecase,
+    GetReactionsUsecase getReactionsUsecase,
   ) {
     state = FeedState();
 
@@ -44,6 +55,11 @@ class FeedsCubit extends ChangeNotifier
     this.acceptFriendRequestUsecase = acceptFriendRequestUsecase;
     this.rejectFriendRequestUsecase = rejectFriendRequestUsecase;
     this.removeFriendUsecase = removeFriendUsecase;
+    this.deletePostUsecase = deletePostUsecase;
+    this.addReactionUsecase = addReactionUsecase;
+    this.removeReactionUsecase = removeReactionUsecase;
+    this.getPostByIdUsecase = getPostByIdUsecase;
+    this.getReactionsUsecase = getReactionsUsecase;
   }
 
   // Public getters to expose state

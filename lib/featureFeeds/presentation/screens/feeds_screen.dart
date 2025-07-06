@@ -134,7 +134,10 @@ class _FeedsScreenState extends State<FeedsScreen> {
                     padding: const EdgeInsets.all(AppConstants.spacingL),
                     itemCount: _feedsCubit.posts.length,
                     itemBuilder: (context, index) {
-                      return PostCard(post: _feedsCubit.posts[index]);
+                      return ChangeNotifierProvider.value(
+                        value: _feedsCubit,
+                        child: PostCard(post: _feedsCubit.posts[index]),
+                      );
                     },
                   ),
                 );
