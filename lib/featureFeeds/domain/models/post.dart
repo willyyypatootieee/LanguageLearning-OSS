@@ -90,6 +90,7 @@ class PostAuthor {
   });
 
   factory PostAuthor.fromJson(Map<String, dynamic> json) {
+    // Use the total_xp field directly from the API
     return PostAuthor(
       id: json['id'] as String,
       username: json['username'] as String,

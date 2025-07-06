@@ -44,6 +44,17 @@ class PostRemoteDataSource {
         if (responseData['success'] == true && responseData['data'] != null) {
           final postsData = responseData['data'] as List<dynamic>;
           print('DEBUG: Successfully parsed ${postsData.length} posts');
+
+          // Debug: Inspect the total_xp field in each post's author
+          for (var post in postsData) {
+            if (post is Map<String, dynamic> &&
+                post['author'] is Map<String, dynamic>) {
+              print(
+                'DEBUG: Post author totalXp: ${post['author']['total_xp']}',
+              );
+            }
+          }
+
           return postsData
               .map(
                 (postJson) => Post.fromJson(postJson as Map<String, dynamic>),

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../domain/models/post.dart';
 import 'rank_badge.dart';
-import 'game_stat_chip.dart';
 import 'fancy_reaction_chip.dart';
 
 /// Enhanced gamified post card with modern UI
@@ -229,33 +228,9 @@ class GamePostCard extends StatelessWidget {
             ),
             child: Column(
               children: [
-                // Author gaming stats
-                Row(
-                  children: [
-                    GameStatChip(
-                      text: '⚡ ${post.author.totalXp} XP',
-                      bgColor: AppColors.primary,
-                      textColor: Colors.white,
-                    ),
-                    const SizedBox(width: AppConstants.spacingS),
-                    GameStatChip(
-                      text: '🔥 ${post.author.streakDay} Hari',
-                      bgColor: AppColors.accent,
-                      textColor: Colors.white,
-                    ),
-                    const Spacer(),
-                    GameStatChip(
-                      text: '🏆 Level ${_calculateLevel(post.author.totalXp)}',
-                      bgColor: AppColors.success,
-                      textColor: Colors.white,
-                    ),
-                  ],
-                ),
-
                 // Reactions row
                 if (post.reactionsCount != null &&
                     post.reactionsCount!.isNotEmpty) ...[
-                  const SizedBox(height: AppConstants.spacingM),
                   Container(
                     padding: const EdgeInsets.all(AppConstants.spacingM),
                     decoration: BoxDecoration(
