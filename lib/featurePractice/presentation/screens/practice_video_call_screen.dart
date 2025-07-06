@@ -358,10 +358,10 @@ class _PracticeVideoCallScreenState extends State<PracticeVideoCallScreen>
                     borderRadius: BorderRadius.circular(AppConstants.radiusL),
                     child: Stack(
                       children: [
-                        // Cat animation
+                        // Bear animation
                         Positioned.fill(
                           child: RiveAnimation.asset(
-                            'assets/animation/cat.riv',
+                            'assets/animation/bear.riv',
                             onInit: _onRiveInit,
                             fit: BoxFit.cover,
                           ),
