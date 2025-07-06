@@ -46,15 +46,25 @@ class IPAChartScreen extends StatefulWidget {
 }
 
 class _IPAChartScreenState extends State<IPAChartScreen>
-    with TickerProviderStateMixin {
+    with TickerProviderStateMixin, AutomaticKeepAliveClientMixin {
   late AnimationController _fadeController;
   late Animation<double> _fadeAnimation;
+  
+  // Cache for the grid layouts to prevent rebuilds
+  Widget? _vowelGrid;
+  Widget? _consonantGrid;
+  
+  // ScrollController to optimize scrolling
+  final ScrollController _scrollController = ScrollController();
+  
+  @override
+  bool get wantKeepAlive => true;
 
   @override
   void initState() {
     super.initState();
     _fadeController = AnimationController(
-      duration: const Duration(milliseconds: 1200),
+      duration: const Duration(milliseconds: 1000), // Slightly faster animation
       vsync: this,
     );
 
@@ -64,13 +74,16 @@ class _IPAChartScreenState extends State<IPAChartScreen>
 
     // Start the entrance animation
     Future.delayed(const Duration(milliseconds: 100), () {
-      _fadeController.forward();
+      if (mounted) {
+        _fadeController.forward();
+      }
     });
   }
 
   @override
   void dispose() {
     _fadeController.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -93,6 +106,8 @@ class _IPAChartScreenState extends State<IPAChartScreen>
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
+    
     return Scaffold(
       extendBody: true,
       body: FadeTransition(
@@ -109,98 +124,11 @@ class _IPAChartScreenState extends State<IPAChartScreen>
             child: Column(
               children: [
                 // Custom App Bar
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 16,
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          'IPA Sound Chart',
-                          style: AppTheme.lightTheme.textTheme.headlineMedium
-                              ?.copyWith(
-                                fontWeight: FontWeight.w800,
-                                color: AppColors.gray800,
-                              ),
-                        ),
-                      ),
-                      // Add sound toggle button
-                      Container(
-                        decoration: BoxDecoration(
-                          color: AppColors.primary.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(
-                            color: AppColors.primary.withOpacity(0.2),
-                          ),
-                        ),
-                        child: IconButton(
-                          icon: const Icon(
-                            Icons.volume_up,
-                            color: AppColors.primary,
-                          ),
-                          onPressed: () {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: const Row(
-                                  children: [
-                                    Icon(
-                                      Icons.info_outline,
-                                      color: Colors.white,
-                                    ),
-                                    SizedBox(width: 8),
-                                    Text(
-                                      'Pilih Simbol untuk mendengar pengucapan',
-                                    ),
-                                  ],
-                                ),
-                                backgroundColor: AppColors.primary,
-                                duration: const Duration(seconds: 2),
-                                behavior: SnackBarBehavior.floating,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
+                _buildAppBar(),
+                
                 // Main Content
                 Expanded(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.only(
-                      left: 20,
-                      right: 20,
-                      bottom: 120,
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const SizedBox(height: 8),
-                        _buildSectionHeader(
-                          'Vowels',
-                          Icons.record_voice_over,
-                          AppColors.primary,
-                        ),
-                        const SizedBox(height: 16),
-                        _buildBentoGrid(vowelIPA, 'vowels'),
-                        const SizedBox(height: 40),
-                        _buildSectionHeader(
-                          'Consonants',
-                          Icons.hearing,
-                          AppColors.accent,
-                        ),
-                        const SizedBox(height: 16),
-                        _buildBentoGrid(consonantIPA, 'consonants'),
-                        const SizedBox(height: 20),
-                      ],
-                    ),
-                  ),
+                  child: _buildContent(),
                 ),
               ],
             ),
@@ -211,26 +139,94 @@ class _IPAChartScreenState extends State<IPAChartScreen>
         currentIndex: 2,
         onTap: (index) {
           if (index == 2) return;
-          switch (index) {
-            case 0:
-              appRouter.goToHome();
-              break;
-            case 1:
-              appRouter.goToFeeds();
-              break;
-            case 3:
-              _navigateToPractice();
-              break;
-            case 4:
-              appRouter.goToLeaderboard();
-              break;
-            case 5:
-              appRouter.goToProfile();
-              break;
-          }
+          _handleNavigation(index);
         },
       ),
     );
+  }
+  
+  Widget _buildAppBar() {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: 20,
+        vertical: 16,
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              'IPA Sound Chart',
+              style: AppTheme.lightTheme.textTheme.headlineMedium
+                  ?.copyWith(
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.gray800,
+                  ),
+            ),
+          ),
+          // Add sound toggle button
+          Container(
+            decoration: BoxDecoration(
+              color: AppColors.primary.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: AppColors.primary.withOpacity(0.2),
+              ),
+            ),
+            child: IconButton(
+              icon: const Icon(
+                Icons.volume_up,
+                color: AppColors.primary,
+              ),
+              onPressed: _showHintSnackbar,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+  
+  Widget _buildContent() {
+    return ListView(
+      controller: _scrollController,
+      physics: const AlwaysScrollableScrollPhysics(),
+      padding: const EdgeInsets.only(
+        left: 20,
+        right: 20,
+        bottom: 120,
+      ),
+      cacheExtent: 1200, // Cache more content to reduce rebuilds when scrolling
+      children: [
+        const SizedBox(height: 8),
+        _buildSectionHeader(
+          'Vowels',
+          Icons.record_voice_over,
+          AppColors.primary,
+        ),
+        const SizedBox(height: 16),
+        _buildVowelsGrid(),
+        const SizedBox(height: 40),
+        _buildSectionHeader(
+          'Consonants',
+          Icons.hearing,
+          AppColors.accent,
+        ),
+        const SizedBox(height: 16),
+        _buildConsonantsGrid(),
+        const SizedBox(height: 20),
+      ],
+    );
+  }
+  
+  Widget _buildVowelsGrid() {
+    // Use cached grid if available
+    _vowelGrid ??= _buildBentoGrid(vowelIPA, 'vowels');
+    return _vowelGrid!;
+  }
+  
+  Widget _buildConsonantsGrid() {
+    // Use cached grid if available
+    _consonantGrid ??= _buildBentoGrid(consonantIPA, 'consonants');
+    return _consonantGrid!;
   }
 
   Widget _buildSectionHeader(String title, IconData icon, Color color) {
@@ -302,17 +298,14 @@ class _IPAChartScreenState extends State<IPAChartScreen>
     );
   }
 
-  Widget _buildResponsiveGrid(
-    List<Map<String, String>> ipaList,
-    double maxWidth,
-  ) {
+  Widget _buildResponsiveGrid(List<Map<String, String>> ipaList, double maxWidth) {
     // Calculate how many columns can fit
     const buttonWidth = 110.0; // Medium button width
     const spacing = 8.0;
     int crossAxisCount = ((maxWidth - 16) / (buttonWidth + spacing))
         .floor()
-        .clamp(3, 4); // Fixed at 4 columns
-
+        .clamp(3, 4); // Fixed at 3-4 columns
+    
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -325,17 +318,69 @@ class _IPAChartScreenState extends State<IPAChartScreen>
       itemCount: ipaList.length,
       itemBuilder: (context, i) {
         final ipa = ipaList[i];
-        return AnimatedContainer(
-          duration: Duration(milliseconds: 300 + (i * 50)),
-          child: IPASymbolButton(
-            symbol: ipa['symbol']!,
-            label: ipa['label']!,
-            example: ipa['example']!,
-            size: IPAButtonSize.medium,
-            index: i,
+        // Wrap each button in RepaintBoundary to isolate repaints
+        return RepaintBoundary(
+          child: AnimatedContainer(
+            duration: Duration(milliseconds: 200 + (i * 30)), // Faster animations
+            curve: Curves.easeInOut,
+            child: IPASymbolButton(
+              key: ValueKey('${ipa['symbol']}_$i'), // Use stable key for better reuse
+              symbol: ipa['symbol']!,
+              label: ipa['label']!,
+              example: ipa['example']!,
+              size: IPAButtonSize.medium,
+              index: i,
+            ),
           ),
         );
       },
     );
+  }
+  
+  void _showHintSnackbar() {
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Row(
+            children: [
+              Icon(
+                Icons.info_outline,
+                color: Colors.white,
+              ),
+              SizedBox(width: 8),
+              Text(
+                'Pilih Simbol untuk mendengar pengucapan',
+              ),
+            ],
+          ),
+          backgroundColor: AppColors.primary,
+          duration: const Duration(seconds: 2),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+      );
+    }
+  }
+  
+  void _handleNavigation(int index) {
+    switch (index) {
+      case 0:
+        appRouter.goToHome();
+        break;
+      case 1:
+        appRouter.goToFeeds();
+        break;
+      case 3:
+        _navigateToPractice();
+        break;
+      case 4:
+        appRouter.goToLeaderboard();
+        break;
+      case 5:
+        appRouter.goToProfile();
+        break;
+    }
   }
 }

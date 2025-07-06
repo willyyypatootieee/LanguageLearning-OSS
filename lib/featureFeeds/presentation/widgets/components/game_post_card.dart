@@ -26,16 +26,27 @@ class GamePostCard extends StatefulWidget {
   State<GamePostCard> createState() => _GamePostCardState();
 }
 
-class _GamePostCardState extends State<GamePostCard> {
+class _GamePostCardState extends State<GamePostCard> with AutomaticKeepAliveClientMixin {
   bool _isReplyFormVisible = false;
-  final TextEditingController _replyController = TextEditingController();
+  late final TextEditingController _replyController;
   String? _currentUserId;
   bool _isLoading = false;
+  
+  // Cached values to prevent rebuilds
+  late final bool _isPostOwner;
+  late final String _timeAgo;
+  late final int _level;
+  
+  @override
+  bool get wantKeepAlive => true;
 
   @override
   void initState() {
     super.initState();
+    _replyController = TextEditingController();
     _loadCurrentUser();
+    _timeAgo = _getTimeAgo(widget.post.createdAt);
+    _level = _calculateLevel(widget.post.author.totalXp);
   }
 
   @override
@@ -50,15 +61,19 @@ class _GamePostCardState extends State<GamePostCard> {
     if (user != null && mounted) {
       setState(() {
         _currentUserId = user.id;
+        _isPostOwner = user.id == widget.post.authorId;
       });
     }
   }
 
-  bool get _isPostOwner =>
+  // Use getter only if _currentUserId isn't loaded yet
+  bool get _isPostOwnerFallback =>
       _currentUserId != null && widget.post.authorId == _currentUserId;
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
+    
     return Container(
       margin: EdgeInsets.only(
         bottom: AppConstants.spacingL,
@@ -67,11 +82,11 @@ class _GamePostCardState extends State<GamePostCard> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
-        boxShadow: [
+        boxShadow: const [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.08),
+            color: Color.fromRGBO(0, 0, 0, 0.08),
             blurRadius: 20,
-            offset: const Offset(0, 4),
+            offset: Offset(0, 4),
             spreadRadius: 2,
           ),
         ],
@@ -87,125 +102,8 @@ class _GamePostCardState extends State<GamePostCard> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Author header with rank badge and delete button
-          Container(
-            padding: const EdgeInsets.all(AppConstants.spacingL),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [AppColors.gray50, Colors.white],
-              ),
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(20),
-                topRight: Radius.circular(20),
-              ),
-            ),
-            child: Row(
-              children: [
-                // Enhanced avatar with rank glow
-                Stack(
-                  children: [
-                    Container(
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        gradient: LinearGradient(
-                          colors: [AppColors.primary, AppColors.accent],
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: AppColors.primary.withValues(alpha: 0.4),
-                            blurRadius: 12,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: CircleAvatar(
-                        radius: 24,
-                        backgroundColor: Colors.transparent,
-                        child: Text(
-                          widget.post.author.username[0].toUpperCase(),
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18,
-                          ),
-                        ),
-                      ),
-                    ),
-                    // Level badge
-                    Positioned(
-                      bottom: -2,
-                      right: -2,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 6,
-                          vertical: 2,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppColors.accent,
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: Colors.white, width: 2),
-                        ),
-                        child: Text(
-                          'Lv.${_calculateLevel(widget.post.author.totalXp)}',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(width: AppConstants.spacingM),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Text(
-                            widget.post.author.username,
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                              fontFamily: AppTypography.headerFont,
-                              color: AppColors.gray900,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          // Rank badge with icon
-                          RankBadge(rank: widget.post.author.currentRank),
-                        ],
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        _getTimeAgo(widget.post.createdAt),
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: AppColors.gray500,
-                          fontFamily: AppTypography.bodyFont,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                // Delete button (only visible to post owner)
-                if (_isPostOwner)
-                  IconButton(
-                    onPressed: _deletePost,
-                    icon: Icon(
-                      Icons.delete_outline,
-                      color: AppColors.error,
-                      size: 20,
-                    ),
-                    tooltip: 'Hapus post',
-                  ),
-              ],
-            ),
-          ),
-
+          _buildHeader(),
+          
           // Post content
           Padding(
             padding: const EdgeInsets.all(AppConstants.spacingL),
@@ -222,214 +120,337 @@ class _GamePostCardState extends State<GamePostCard> {
           ),
 
           // Post image with modern styling
-          if (widget.post.imageUrl != null) ...[
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppConstants.spacingL,
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(16),
-                child: Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.1),
-                        blurRadius: 10,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Image.network(
-                    widget.post.imageUrl!,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Container(
-                        height: 200,
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [AppColors.gray100, AppColors.gray200],
-                          ),
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.broken_image_outlined,
-                              color: AppColors.gray400,
-                              size: 48,
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              'Gambar tidak dapat dimuat',
-                              style: TextStyle(
-                                color: AppColors.gray500,
-                                fontSize: 14,
-                                fontFamily: AppTypography.bodyFont,
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: AppConstants.spacingM),
-          ],
-
+          if (widget.post.imageUrl != null) 
+            _buildPostImage(),
+          
           // Stats and reactions section
-          Container(
-            padding: const EdgeInsets.all(AppConstants.spacingL),
-            decoration: BoxDecoration(
-              color: AppColors.gray50.withValues(alpha: 0.5),
-              borderRadius: const BorderRadius.only(
-                bottomLeft: Radius.circular(20),
-                bottomRight: Radius.circular(20),
-              ),
-            ),
+          _buildReactionsSection(),
+        ],
+      ),
+    );
+  }
+  
+  Widget _buildHeader() {
+    return Container(
+      padding: const EdgeInsets.all(AppConstants.spacingL),
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [AppColors.gray50, Colors.white],
+        ),
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(20),
+          topRight: Radius.circular(20),
+        ),
+      ),
+      child: Row(
+        children: [
+          // Enhanced avatar with rank glow
+          _buildAvatar(),
+          const SizedBox(width: AppConstants.spacingM),
+          Expanded(
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Reactions row
-                if (widget.post.reactionsCount != null &&
-                    widget.post.reactionsCount!.isNotEmpty) ...[
-                  Container(
-                    padding: const EdgeInsets.all(AppConstants.spacingM),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: AppColors.gray200, width: 1),
-                    ),
-                    child: Row(
-                      children: [
-                        Text(
-                          'Reaksi:',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: AppColors.gray600,
-                            fontWeight: FontWeight.w500,
-                            fontFamily: AppTypography.bodyFont,
-                          ),
-                        ),
-                        const SizedBox(width: AppConstants.spacingS),
-                        ...widget.post.reactionsCount!.entries
-                            .where((entry) => entry.value > 0)
-                            .map(
-                              (entry) => Padding(
-                                padding: const EdgeInsets.only(
-                                  right: AppConstants.spacingS,
-                                ),
-                                child: FancyReactionChip(
-                                  emotion: entry.key,
-                                  count: entry.value,
-                                ),
-                              ),
-                            )
-                            .toList(),
-                      ],
-                    ),
-                  ),
-                ],
-
-                const SizedBox(height: AppConstants.spacingM),
-
-                // Action buttons: Reply, React
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    // Reply button
-                    _ActionButton(
-                      icon: Icons.reply,
-                      label: 'Balas',
-                      onTap: () {
-                        setState(() {
-                          _isReplyFormVisible = !_isReplyFormVisible;
-                        });
-                      },
-                    ),
-
-                    // Like button
-                    _ReactionButton(
-                      emotion: 'THUMBS_UP',
-                      label: 'Suka',
-                      count: widget.post.reactionsCount?['THUMBS_UP'] ?? 0,
-                      postId: widget.post.id,
-                    ),
-
-                    // Love button
-                    _ReactionButton(
-                      emotion: 'LOVE',
-                      label: 'Cinta',
-                      count: widget.post.reactionsCount?['LOVE'] ?? 0,
-                      postId: widget.post.id,
-                    ),
-
-                    // Expand replies button (only if post has replies)
-                    // Temporarily disabled until individual post API is fixed
-                    /*
-                    if (widget.post.replies != null &&
-                        widget.post.replies!.isNotEmpty)
-                      _ActionButton(
-                        icon:
-                            _isExpanded
-                                ? Icons.keyboard_arrow_up
-                                : Icons.keyboard_arrow_down,
-                        label:
-                            _isExpanded
-                                ? 'Tutup'
-                                : '${widget.post.replies!.length} Balasan',
-                        onTap: () {
-                          setState(() {
-                            _isExpanded = !_isExpanded;
-                          });
-                        },
+                    Text(
+                      widget.post.author.username,
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                        fontFamily: AppTypography.headerFont,
+                        color: AppColors.gray900,
                       ),
-                    */
+                    ),
+                    const SizedBox(width: 8),
+                    // Rank badge with icon
+                    RankBadge(rank: widget.post.author.currentRank),
                   ],
                 ),
-
-                // Reply form
-                if (_isReplyFormVisible) ...[
-                  const SizedBox(height: AppConstants.spacingM),
-                  _buildReplyForm(),
-                ],
-
-                // Replies (if expanded) - Temporarily disabled
-                /*
-                if (_isExpanded && widget.post.replies != null) ...[
-                  const SizedBox(height: AppConstants.spacingM),
-                  ...widget.post.replies!
-                      .map(
-                        (reply) => Padding(
-                          padding: const EdgeInsets.only(
-                            bottom: AppConstants.spacingM,
-                          ),
-                          child: ChangeNotifierProvider.value(
-                            value: Provider.of<FeedsCubit>(
-                              context,
-                              listen: false,
-                            ),
-                            child: ReplyCard(
-                              post: reply,
-                              onReplyDeleted: () {
-                                // Refresh the parent post to update replies list
-                                _refreshPost();
-                              },
-                            ),
-                          ),
-                        ),
-                      )
-                      .toList(),
-                ],
-                */
+                const SizedBox(height: 4),
+                Text(
+                  _timeAgo,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: AppColors.gray500,
+                    fontFamily: AppTypography.bodyFont,
+                  ),
+                ),
               ],
             ),
           ),
+          // Delete button (only visible to post owner)
+          if (_currentUserId != null ? _isPostOwner : _isPostOwnerFallback)
+            IconButton(
+              onPressed: _deletePost,
+              icon: Icon(
+                Icons.delete_outline,
+                color: AppColors.error,
+                size: 20,
+              ),
+              tooltip: 'Hapus post',
+            ),
         ],
       ),
+    );
+  }
+  
+  Widget _buildAvatar() {
+    return Stack(
+      children: [
+        Container(
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            gradient: const LinearGradient(
+              colors: [AppColors.primary, AppColors.accent],
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.primary.withOpacity(0.4),
+                blurRadius: 12,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: CircleAvatar(
+            radius: 24,
+            backgroundColor: Colors.transparent,
+            child: Text(
+              widget.post.author.username[0].toUpperCase(),
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+              ),
+            ),
+          ),
+        ),
+        // Level badge
+        Positioned(
+          bottom: -2,
+          right: -2,
+          child: Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 6,
+              vertical: 2,
+            ),
+            decoration: BoxDecoration(
+              color: AppColors.accent,
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: Colors.white, width: 2),
+            ),
+            child: Text(
+              'Lv.$_level',
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 10,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+  
+  Widget _buildPostImage() {
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppConstants.spacingL,
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(16),
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Color.fromRGBO(0, 0, 0, 0.1),
+                    blurRadius: 10,
+                    offset: Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Image.network(
+                widget.post.imageUrl!,
+                width: double.infinity,
+                fit: BoxFit.cover,
+                cacheWidth: 600, // Add cache width to improve performance
+                cacheHeight: 600, // Add cache height to improve performance
+                errorBuilder: (context, error, stackTrace) {
+                  return Container(
+                    height: 200,
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [AppColors.gray100, AppColors.gray200],
+                      ),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.broken_image_outlined,
+                          color: AppColors.gray400,
+                          size: 48,
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Gambar tidak dapat dimuat',
+                          style: TextStyle(
+                            color: AppColors.gray500,
+                            fontSize: 14,
+                            fontFamily: AppTypography.bodyFont,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: AppConstants.spacingM),
+      ],
+    );
+  }
+  
+  Widget _buildReactionsSection() {
+    // Use const for static widgets when possible
+    return Container(
+      padding: const EdgeInsets.all(AppConstants.spacingL),
+      decoration: const BoxDecoration(
+        color: Color.fromRGBO(249, 250, 251, 0.5),
+        borderRadius: BorderRadius.only(
+          bottomLeft: Radius.circular(20),
+          bottomRight: Radius.circular(20),
+        ),
+      ),
+      child: Column(
+        children: [
+          // Reactions row
+          _buildReactionsList(),
+          
+          const SizedBox(height: AppConstants.spacingM),
+          
+          // Action buttons
+          _buildActionButtons(),
+          
+          // Reply form
+          if (_isReplyFormVisible) 
+            _buildReplyForm(),
+          
+          // Reply counter
+          if (widget.post.replies != null && widget.post.replies!.isNotEmpty) 
+            _buildRepliesInfo(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildReactionsList() {
+    // Optimized reactions list builder
+    if (widget.post.reactionsCount != null &&
+        widget.post.reactionsCount!.isNotEmpty) {
+      return Container(
+        padding: const EdgeInsets.all(AppConstants.spacingM),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: AppColors.gray200, width: 1),
+        ),
+        child: Row(
+          children: [
+            Text(
+              'Reaksi:',
+              style: TextStyle(
+                fontSize: 12,
+                color: AppColors.gray600,
+                fontWeight: FontWeight.w500,
+                fontFamily: AppTypography.bodyFont,
+              ),
+            ),
+            const SizedBox(width: AppConstants.spacingS),
+            ...widget.post.reactionsCount!.entries
+                .where((entry) => entry.value > 0)
+                .map(
+                  (entry) => Padding(
+                    padding: const EdgeInsets.only(
+                      right: AppConstants.spacingS,
+                    ),
+                    child: FancyReactionChip(
+                      emotion: entry.key,
+                      count: entry.value,
+                    ),
+                  ),
+                )
+                .toList(),
+          ],
+        ),
+      );
+    } else {
+      return const SizedBox.shrink();
+    }
+  }
+
+  Widget _buildActionButtons() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: [
+        // Reply button
+        _ActionButton(
+          icon: Icons.reply,
+          label: 'Balas',
+          onTap: () {
+            setState(() {
+              _isReplyFormVisible = !_isReplyFormVisible;
+            });
+          },
+        ),
+
+        // Like button
+        _ReactionButton(
+          emotion: 'THUMBS_UP',
+          label: 'Suka',
+          count: widget.post.reactionsCount?['THUMBS_UP'] ?? 0,
+          postId: widget.post.id,
+        ),
+
+        // Love button
+        _ReactionButton(
+          emotion: 'LOVE',
+          label: 'Cinta',
+          count: widget.post.reactionsCount?['LOVE'] ?? 0,
+          postId: widget.post.id,
+        ),
+
+        // Expand replies button (only if post has replies)
+        // Temporarily disabled until individual post API is fixed
+        /*
+        if (widget.post.replies != null &&
+            widget.post.replies!.isNotEmpty)
+          _ActionButton(
+            icon:
+                _isExpanded
+                    ? Icons.keyboard_arrow_up
+                    : Icons.keyboard_arrow_down,
+            label:
+                _isExpanded
+                    ? 'Tutup'
+                    : '${widget.post.replies!.length} Balasan',
+            onTap: () {
+              setState(() {
+                _isExpanded = !_isExpanded;
+              });
+            },
+          ),
+        */
+      ],
     );
   }
 
@@ -653,24 +674,83 @@ class _GamePostCardState extends State<GamePostCard> {
     }
   }
 
+  // The remaining methods implement specific UI components
+  // Each method is responsible for building a specific part of the UI
+  
+  // Helper methods
   int _calculateLevel(int xp) {
+    // Simple level calculation based on XP
     return (xp / 100).floor() + 1;
   }
 
   String _getTimeAgo(DateTime dateTime) {
-    final now = DateTime.now();
-    final difference = now.difference(dateTime);
+    final difference = DateTime.now().difference(dateTime);
 
-    if (difference.inDays > 0) {
-      return '${difference.inDays} hari lalu';
+    if (difference.inDays > 30) {
+      return '${(difference.inDays / 30).floor()} bulan';
+    } else if (difference.inDays > 0) {
+      return '${difference.inDays} hari';
     } else if (difference.inHours > 0) {
-      return '${difference.inHours} jam lalu';
+      return '${difference.inHours} jam';
     } else if (difference.inMinutes > 0) {
-      return '${difference.inMinutes} menit lalu';
+      return '${difference.inMinutes} menit';
     } else {
       return 'Baru saja';
     }
   }
+  
+  // This method is implemented earlier in the file
+  
+  Widget _buildRepliesInfo() {
+    final repliesCount = widget.post.replies?.length ?? 0;
+    
+    return Padding(
+      padding: const EdgeInsets.only(top: AppConstants.spacingS),
+      child: InkWell(
+        onTap: () {
+          // Navigate to detailed view of post with replies
+        },
+        child: Container(
+          padding: const EdgeInsets.symmetric(
+            vertical: AppConstants.spacingS,
+            horizontal: AppConstants.spacingM,
+          ),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: AppColors.primary.withOpacity(0.2),
+            ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.comment_outlined,
+                size: 14,
+                color: AppColors.primary,
+              ),
+              const SizedBox(width: 4),
+              Text(
+                '$repliesCount ${repliesCount == 1 ? 'balasan' : 'balasan'}',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: AppColors.primary,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+  
+  // Removed duplicated method
+  
+  // Removed duplicated method
+  
+  // Removed duplicated method
 }
 
 /// Action button for post interactions

@@ -18,15 +18,29 @@ class FeedsScreen extends StatefulWidget {
   State<FeedsScreen> createState() => _FeedsScreenState();
 }
 
-class _FeedsScreenState extends State<FeedsScreen> {
+class _FeedsScreenState extends State<FeedsScreen>
+    with AutomaticKeepAliveClientMixin {
   late FeedsCubit _feedsCubit;
+  final ScrollController _scrollController = ScrollController();
+
+  // Track if we've already shown an error message
+  bool _hasShownError = false;
+
+  @override
+  bool get wantKeepAlive => true;
 
   @override
   void initState() {
     super.initState();
     _feedsCubit = ServiceLocator.instance.feedsCubit;
-    _loadPosts();
-    _loadFriendsData();
+
+    // Load posts with a small delay to avoid janky animations during screen transitions
+    Future.delayed(const Duration(milliseconds: 100), () {
+      if (mounted) {
+        _loadPosts();
+        _loadFriendsData();
+      }
+    });
   }
 
   Future<void> _loadPosts() async {
@@ -41,23 +55,25 @@ class _FeedsScreenState extends State<FeedsScreen> {
   void _openFriendsManagement() {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder:
-            (context) => ChangeNotifierProvider.value(
-              value: _feedsCubit,
-              child: const FriendsManagementWidget(),
-            ),
+        builder: (context) => ChangeNotifierProvider.value(
+          value: _feedsCubit,
+          child: const FriendsManagementWidget(),
+        ),
       ),
     );
   }
 
   @override
   void dispose() {
+    _scrollController.dispose();
     // Don't dispose the cubit here since it's a singleton
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
+
     return Scaffold(
       backgroundColor: AppColors.gray50,
       body: Column(
@@ -67,6 +83,7 @@ class _FeedsScreenState extends State<FeedsScreen> {
             onCreatePost: () => _showCreatePostModal(context),
             onOpenFriends: _openFriendsManagement,
           ),
+
           // Search bar
           FeedsSearchBar(
             onSearchChanged: (query) {
@@ -77,72 +94,13 @@ class _FeedsScreenState extends State<FeedsScreen> {
             },
             onFilterTap: () => _showFilterModal(context),
           ),
+
           // User search results
-          AnimatedBuilder(
-            animation: _feedsCubit,
-            builder: (context, child) {
-              if (_feedsCubit.userSearchResults.isNotEmpty ||
-                  _feedsCubit.isSearchingUsers) {
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: AppConstants.spacingM),
-                  child: UserSearchResults(
-                    users: _feedsCubit.userSearchResults,
-                    feedsCubit: _feedsCubit,
-                    isLoading: _feedsCubit.isSearchingUsers,
-                  ),
-                );
-              }
-              return const SizedBox.shrink();
-            },
-          ),
+          _buildUserSearchResults(),
+
           // Posts feed
           Expanded(
-            child: AnimatedBuilder(
-              animation: _feedsCubit,
-              builder: (context, child) {
-                if (_feedsCubit.errorMessage != null) {
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(_feedsCubit.errorMessage!),
-                        backgroundColor: AppColors.error,
-                        behavior: SnackBarBehavior.floating,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                    );
-                    _feedsCubit.clearError();
-                  });
-                }
-
-                if (_feedsCubit.isLoading && _feedsCubit.posts.isEmpty) {
-                  return const GameLoadingWidget();
-                }
-
-                if (_feedsCubit.posts.isEmpty) {
-                  return EmptyFeedsWidget(
-                    onCreatePost: () => _showCreatePostModal(context),
-                  );
-                }
-
-                return RefreshIndicator(
-                  onRefresh: () => _feedsCubit.refreshPosts(),
-                  color: AppColors.primary,
-                  backgroundColor: Colors.white,
-                  child: ListView.builder(
-                    padding: const EdgeInsets.all(AppConstants.spacingL),
-                    itemCount: _feedsCubit.posts.length,
-                    itemBuilder: (context, index) {
-                      return ChangeNotifierProvider.value(
-                        value: _feedsCubit,
-                        child: PostCard(post: _feedsCubit.posts[index]),
-                      );
-                    },
-                  ),
-                );
-              },
-            ),
+            child: _buildPostsFeed(),
           ),
         ],
       ),
@@ -150,26 +108,104 @@ class _FeedsScreenState extends State<FeedsScreen> {
         currentIndex: 1,
         onTap: (index) {
           if (index == 1) return;
-          switch (index) {
-            case 0:
-              appRouter.goToHome();
-              break;
-            case 2:
-              appRouter.goToDictionary();
-              break;
-            case 3:
-              _navigateToPractice();
-              break;
-            case 4:
-              appRouter.goToLeaderboard();
-              break;
-            case 5:
-              appRouter.goToProfile();
-              break;
-          }
+          _handleNavigation(index);
         },
       ),
     );
+  }
+
+  Widget _buildUserSearchResults() {
+    return AnimatedBuilder(
+      animation: _feedsCubit,
+      builder: (context, child) {
+        if (_feedsCubit.userSearchResults.isNotEmpty ||
+            _feedsCubit.isSearchingUsers) {
+          return Padding(
+            padding: const EdgeInsets.only(bottom: AppConstants.spacingM),
+            child: UserSearchResults(
+              users: _feedsCubit.userSearchResults,
+              feedsCubit: _feedsCubit,
+              isLoading: _feedsCubit.isSearchingUsers,
+            ),
+          );
+        }
+        return const SizedBox.shrink();
+      },
+    );
+  }
+
+  Widget _buildPostsFeed() {
+    return AnimatedBuilder(
+      animation: _feedsCubit,
+      builder: (context, child) {
+        // Handle error messages
+        if (_feedsCubit.errorMessage != null && !_hasShownError) {
+          _hasShownError = true;
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(_feedsCubit.errorMessage!),
+                  backgroundColor: AppColors.error,
+                  behavior: SnackBarBehavior.floating,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              );
+              _feedsCubit.clearError();
+            }
+          });
+        } else if (_feedsCubit.errorMessage == null) {
+          _hasShownError = false;
+        }
+
+        if (_feedsCubit.isLoading && _feedsCubit.posts.isEmpty) {
+          return const GameLoadingWidget();
+        }
+
+        if (_feedsCubit.posts.isEmpty) {
+          return EmptyFeedsWidget(
+            onCreatePost: () => _showCreatePostModal(context),
+          );
+        }
+
+        return RefreshIndicator(
+          onRefresh: _handleRefresh,
+          color: AppColors.primary,
+          backgroundColor: Colors.white,
+          child: _buildOptimizedPostsList(),
+        );
+      },
+    );
+  }
+
+  Widget _buildOptimizedPostsList() {
+    return ListView.builder(
+      controller: _scrollController,
+      physics: const AlwaysScrollableScrollPhysics(),
+      padding: const EdgeInsets.all(AppConstants.spacingL),
+      itemCount: _feedsCubit.posts.length,
+      // Use cacheExtent to keep items in memory when scrolling
+      cacheExtent: MediaQuery.of(context).size.height,
+      itemBuilder: (context, index) {
+        // Use RepaintBoundary to isolate painting for each item
+        return RepaintBoundary(
+          child: ChangeNotifierProvider.value(
+            value: _feedsCubit,
+            // Use a unique key for each post to ensure proper reuse
+            child: PostCard(
+              key: ValueKey(_feedsCubit.posts[index].id),
+              post: _feedsCubit.posts[index],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _handleRefresh() async {
+    await _feedsCubit.refreshPosts();
   }
 
   Future<void> _navigateToPractice() async {
@@ -188,6 +224,26 @@ class _FeedsScreenState extends State<FeedsScreen> {
     }
   }
 
+  void _handleNavigation(int index) {
+    switch (index) {
+      case 0:
+        appRouter.goToHome();
+        break;
+      case 2:
+        appRouter.goToDictionary();
+        break;
+      case 3:
+        _navigateToPractice();
+        break;
+      case 4:
+        appRouter.goToLeaderboard();
+        break;
+      case 5:
+        appRouter.goToProfile();
+        break;
+    }
+  }
+
   void _showCreatePostModal(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -202,13 +258,12 @@ class _FeedsScreenState extends State<FeedsScreen> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder:
-          (context) => FeedsFilterModal(
-            onFiltersApplied: (filters) {
-              // Apply filters to the cubit
-              _feedsCubit.applyFilters(filters);
-            },
-          ),
+      builder: (context) => FeedsFilterModal(
+        onFiltersApplied: (filters) {
+          // Apply filters to the cubit
+          _feedsCubit.applyFilters(filters);
+        },
+      ),
     );
   }
 }
