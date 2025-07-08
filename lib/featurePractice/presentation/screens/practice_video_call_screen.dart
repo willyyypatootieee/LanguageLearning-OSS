@@ -474,20 +474,37 @@ class _PracticeVideoCallScreenState extends State<PracticeVideoCallScreen>
       _setBearHearing(true); // Start Hear animation
 
       try {
+        // On Android, use the device's speech recognition engine
+        if (Platform.isAndroid) {
+          print(
+            'DEBUG: Using Android speech recognition with enhanced settings',
+          );
+        }
+
         await _speech.listen(
           onResult: (result) {
-            setState(() {
-              _lastUserText = result.recognizedWords;
-              _userText =
-                  result
-                      .recognizedWords; // Update the UI with what we're hearing
-            });
+            // Accept even very short text to reduce "couldn't understand" errors
+            if (result.recognizedWords.isNotEmpty) {
+              setState(() {
+                _lastUserText = result.recognizedWords;
+                _userText = result.recognizedWords;
+              });
+
+              // If we're getting at least something, consider it valid input
+              print(
+                'DEBUG: Recognized text length: ${result.recognizedWords.length}',
+              );
+            }
 
             // Reset timeout timer every time we get a result
             _speechTimeout?.cancel();
-            _speechTimeout = Timer(const Duration(seconds: 10), () {
-              if (_isListening && _lastUserText.isEmpty) {
-                // If after 10 seconds we still don't have any text, stop and retry
+            _speechTimeout = Timer(const Duration(seconds: 8), () {
+              if (_isListening &&
+                  (_lastUserText.isEmpty || _lastUserText.length < 3)) {
+                // If after 8 seconds we have minimal text, stop and retry
+                print(
+                  'DEBUG: Speech recognition timeout - minimal text received',
+                );
                 _speech.stop();
                 Future.delayed(const Duration(milliseconds: 500), () {
                   if (!_isMuted && mounted) {

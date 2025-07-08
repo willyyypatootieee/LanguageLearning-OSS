@@ -423,24 +423,37 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
                 strokeWidth: 3,
                 displacement: 40,
                 child: CustomScrollView(
-                  physics: const AlwaysScrollableScrollPhysics(),
+                  // Add BouncingScrollPhysics for smoother scrolling and increase cacheExtent
+                  physics: const AlwaysScrollableScrollPhysics(
+                    parent: BouncingScrollPhysics(),
+                  ),
+                  // Increase cacheExtent for better performance
+                  cacheExtent: 1000,
                   slivers: [
-                    // Top 3 Bento Box
-                    SliverToBoxAdapter(child: BentoTop3Widget(top3Users: top3)),
-
-                    // Stats Overview
+                    // Top 3 Bento Box - Use RepaintBoundary for better isolation
                     SliverToBoxAdapter(
-                      child: BentoStatsWidget(allUsers: users),
+                      child: RepaintBoundary(
+                        child: BentoTop3Widget(top3Users: top3),
+                      ),
                     ),
 
-                    // Rank sections
+                    // Stats Overview - Use RepaintBoundary for better isolation
+                    SliverToBoxAdapter(
+                      child: RepaintBoundary(
+                        child: BentoStatsWidget(allUsers: users),
+                      ),
+                    ),
+
+                    // Rank sections - Build only if they have users
                     for (final rankType in ['Wood+', 'Wood', 'Unranked'])
                       if (grouped[rankType]!.isNotEmpty)
                         SliverToBoxAdapter(
-                          child: BentoRankSectionWidget(
-                            rankType: rankType,
-                            users: grouped[rankType]!,
-                            currentUsername: currentUser,
+                          child: RepaintBoundary(
+                            child: BentoRankSectionWidget(
+                              rankType: rankType,
+                              users: grouped[rankType]!,
+                              currentUsername: currentUser,
+                            ),
                           ),
                         ),
 

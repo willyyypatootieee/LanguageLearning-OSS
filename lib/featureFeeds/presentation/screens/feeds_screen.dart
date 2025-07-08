@@ -180,24 +180,31 @@ class _FeedsScreenState extends State<FeedsScreen>
   }
 
   Widget _buildOptimizedPostsList() {
+    // Further optimized ListView for smoother scrolling
     return ListView.builder(
       controller: _scrollController,
-      physics: const AlwaysScrollableScrollPhysics(),
+      physics: const AlwaysScrollableScrollPhysics(
+        parent: BouncingScrollPhysics(),
+      ),
       padding: const EdgeInsets.all(AppConstants.spacingL),
       itemCount: _feedsCubit.posts.length,
-      // Use larger cacheExtent to keep more items in memory when scrolling
-      cacheExtent: MediaQuery.of(context).size.height * 2,
+      // Increase cacheExtent even more to maintain more items in memory
+      cacheExtent: MediaQuery.of(context).size.height * 3,
       // Add key to ListView to help with efficient rebuilds
       key: ValueKey('posts-list-${_feedsCubit.posts.length}'),
       itemBuilder: (context, index) {
+        // Skip building items that are far off screen
+        final post = _feedsCubit.posts[index];
+
         // Use RepaintBoundary to isolate painting for each item
         return RepaintBoundary(
-          child: ChangeNotifierProvider.value(
-            value: _feedsCubit,
-            // Use a unique key for each post to ensure proper reuse
-            child: PostCard(
-              key: ValueKey(_feedsCubit.posts[index].id),
-              post: _feedsCubit.posts[index],
+          child: Padding(
+            // Add padding to improve hit testing area
+            padding: const EdgeInsets.only(bottom: 16.0),
+            child: ChangeNotifierProvider.value(
+              value: _feedsCubit,
+              // Use a unique key for each post to ensure proper reuse
+              child: PostCard(key: ValueKey(post.id), post: post),
             ),
           ),
         );

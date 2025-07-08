@@ -789,26 +789,30 @@ class BentoRankSectionWidget extends StatelessWidget {
             ),
           ),
 
-          // Users list
+          // Users list - apply performance optimizations
           ...users.asMap().entries.map((entry) {
             final index = entry.key;
             final user = entry.value;
             final isCurrentUser = user.username == currentUsername;
             final isLast = index == users.length - 1;
 
-            return _buildUserTile(
-              user,
-              index + 4, // +4 because top 3 are shown separately
-              isCurrentUser,
-              isLast,
-              rankColor,
+            // Use RepaintBoundary to isolate rendering and reduce lag
+            return RepaintBoundary(
+              child: _buildUserTile(
+                user,
+                index + 4, // +4 because top 3 are shown separately
+                isCurrentUser,
+                isLast,
+                rankColor,
+              ),
             );
-          }),
+          }).toList(), // Force evaluation to avoid repeated rebuilds
         ],
       ),
     );
   }
 
+  // Optimized user tile with better performance
   Widget _buildUserTile(
     LeaderboardUser user,
     int position,
@@ -819,6 +823,7 @@ class BentoRankSectionWidget extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       decoration: BoxDecoration(
+        borderRadius: const BorderRadius.all(Radius.circular(16)),
         gradient:
             isCurrentUser
                 ? LinearGradient(
@@ -830,8 +835,6 @@ class BentoRankSectionWidget extends StatelessWidget {
                   ],
                 )
                 : null,
-        color: isCurrentUser ? null : Colors.grey.shade50,
-        borderRadius: BorderRadius.circular(16),
         border:
             isCurrentUser
                 ? Border.all(

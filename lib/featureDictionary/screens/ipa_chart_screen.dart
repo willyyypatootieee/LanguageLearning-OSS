@@ -198,22 +198,33 @@ class _IPAChartScreenState extends State<IPAChartScreen>
   Widget _buildContent() {
     return ListView(
       controller: _scrollController,
-      physics: const AlwaysScrollableScrollPhysics(),
+      physics: const AlwaysScrollableScrollPhysics(
+        parent: BouncingScrollPhysics(),
+      ),
       padding: const EdgeInsets.only(left: 20, right: 20, bottom: 120),
-      cacheExtent: 1200, // Cache more content to reduce rebuilds when scrolling
+      cacheExtent:
+          2000, // Significantly increase cache to reduce rebuilds when scrolling
       children: [
         const SizedBox(height: 8),
-        _buildSectionHeader(
-          'Vowels',
-          Icons.record_voice_over,
-          AppColors.primary,
+        RepaintBoundary(
+          child: _buildSectionHeader(
+            'Vowels',
+            Icons.record_voice_over,
+            AppColors.primary,
+          ),
         ),
         const SizedBox(height: 16),
-        _buildVowelsGrid(),
+        RepaintBoundary(child: _buildVowelsGrid()),
         const SizedBox(height: 40),
-        _buildSectionHeader('Consonants', Icons.hearing, AppColors.accent),
+        RepaintBoundary(
+          child: _buildSectionHeader(
+            'Consonants',
+            Icons.hearing,
+            AppColors.accent,
+          ),
+        ),
         const SizedBox(height: 16),
-        _buildConsonantsGrid(),
+        RepaintBoundary(child: _buildConsonantsGrid()),
         const SizedBox(height: 20),
       ],
     );
