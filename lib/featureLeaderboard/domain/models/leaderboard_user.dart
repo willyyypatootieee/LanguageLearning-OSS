@@ -13,11 +13,25 @@ class LeaderboardUser {
   });
 
   factory LeaderboardUser.fromJson(Map<String, dynamic> json) {
+    // Handle potentially missing fields
+    final totalXpValue = json['total_xp'];
+    int totalPoint = 0;
+
+    if (totalXpValue is int) {
+      totalPoint = totalXpValue;
+    } else if (totalXpValue is String) {
+      try {
+        totalPoint = int.parse(totalXpValue);
+      } catch (e) {
+        print('Error parsing total_xp: $e');
+      }
+    }
+
     return LeaderboardUser(
-      id: json['id'] as String,
-      username: json['username'] as String,
-      totalPoint: json['total_xp'] as int,
-      currentRank: json['current_rank'] as String,
+      id: json['id'] as String? ?? '',
+      username: json['username'] as String? ?? 'Unknown User',
+      totalPoint: totalPoint,
+      currentRank: json['current_rank'] as String? ?? 'Unranked',
     );
   }
 

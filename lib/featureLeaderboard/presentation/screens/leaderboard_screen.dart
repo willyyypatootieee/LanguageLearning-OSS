@@ -51,27 +51,44 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
     });
   }
 
+  // Track last refresh time to prevent excessive refreshes
+  DateTime _lastRefreshTime = DateTime.now().subtract(
+    const Duration(minutes: 15),
+  );
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // Refresh data when dependencies change (e.g., when returning to this screen)
-    _refreshLeaderboard();
+    // Only refresh if it's been more than 5 minutes since last refresh
+    _refreshIfNeeded(forceRefresh: false);
   }
 
   @override
   void didUpdateWidget(LeaderboardScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // Refresh when the widget is updated (e.g., when navigating between tabs)
+    // Refresh when navigating to this tab, but respect the time limit
     if (widget.currentIndex == 3 && oldWidget.currentIndex != 3) {
-      _refreshLeaderboard();
+      _refreshIfNeeded(forceRefresh: false);
     }
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    // When app comes to foreground, refresh the leaderboard
+    // When app comes to foreground, refresh if needed
     if (state == AppLifecycleState.resumed && mounted) {
+      _refreshIfNeeded(forceRefresh: false);
+    }
+  }
+
+  // Helper method to refresh only if needed based on time
+  void _refreshIfNeeded({bool forceRefresh = false}) {
+    final now = DateTime.now();
+    final timeSinceLastRefresh = now.difference(_lastRefreshTime);
+
+    // Only refresh if forced or it's been more than 5 minutes
+    if (forceRefresh || timeSinceLastRefresh.inMinutes >= 5) {
       _refreshLeaderboard();
+      _lastRefreshTime = now;
     }
   }
 
@@ -82,11 +99,13 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
     super.dispose();
   }
 
-  void _refreshLeaderboard() {
-    // Force refresh the leaderboard data
+  void _refreshLeaderboard({bool forceRefresh = true}) {
+    // Update the leaderboard data, with option to force refresh
     if (mounted) {
       try {
-        context.read<LeaderboardCubit>().fetchLeaderboard(forceRefresh: true);
+        context.read<LeaderboardCubit>().fetchLeaderboard(
+          forceRefresh: forceRefresh,
+        );
       } catch (e) {
         print('Error refreshing leaderboard: $e');
       }

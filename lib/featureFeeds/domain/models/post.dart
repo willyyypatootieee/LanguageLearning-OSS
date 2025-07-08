@@ -106,20 +106,40 @@ class PostAuthor {
   });
 
   factory PostAuthor.fromJson(Map<String, dynamic> json) {
-    // Use the total_xp field directly from the API
+    // Handle potentially missing fields with null-safety
+    // This makes the parsing more resilient to API changes and incomplete data
     return PostAuthor(
-      id: json['id'] as String,
-      username: json['username'] as String,
+      id: json['id'] as String? ?? '',
+      username: json['username'] as String? ?? 'Unknown User',
       email: json['email'] as String?,
-      scoreEnglish: json['score_english'] as int? ?? 0,
-      streakDay: json['streak_day'] as int? ?? 0,
-      totalXp: json['total_xp'] as int? ?? 0,
+      // Safely handle cases where these fields might be missing in the API response
+      scoreEnglish: _parseIntSafely(json, 'score_english'),
+      streakDay: _parseIntSafely(json, 'streak_day'),
+      totalXp: _parseIntSafely(json, 'total_xp'),
       currentRank: json['current_rank'] as String? ?? 'Wood',
       createdAt:
           json['created_at'] != null
               ? DateTime.parse(json['created_at'] as String)
               : null,
     );
+  }
+
+  // Helper method to safely parse integer values
+  static int _parseIntSafely(Map<String, dynamic> json, String key) {
+    // If the field is missing or not an integer, return 0 as default
+    if (!json.containsKey(key)) return 0;
+
+    final value = json[key];
+    if (value is int) return value;
+    if (value is String) {
+      try {
+        return int.parse(value);
+      } catch (e) {
+        print('Error parsing $key as int: $e');
+        return 0;
+      }
+    }
+    return 0;
   }
 
   Map<String, dynamic> toJson() {

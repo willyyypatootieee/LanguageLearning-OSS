@@ -36,16 +36,21 @@ mixin PostManagement on ChangeNotifier {
       _getReactionsUsecase = usecase;
 
   Future<void> loadPosts({bool forceRefresh = false}) async {
+    // If we've loaded before and not forcing a refresh, use the cached state
     if (state.hasInitiallyLoaded && !forceRefresh) {
       return;
     }
 
     state = state.copyWith(isLoading: true, errorMessage: () => null);
+    notifyListeners(); // Notify immediately to show loading state
 
     try {
       if (_getPostsUsecase == null)
         throw Exception('GetPostsUsecase not initialized');
-      final posts = await _getPostsUsecase!();
+
+      // Call usecase with forceRefresh parameter to potentially use cached data
+      final posts = await _getPostsUsecase!(forceRefresh: forceRefresh);
+
       state = state.copyWith(
         originalPosts: posts,
         hasInitiallyLoaded: true,
@@ -98,6 +103,7 @@ mixin PostManagement on ChangeNotifier {
 
   /// Reloads posts with force refresh.
   /// This is used by the pull-to-refresh functionality in the feed.
+  /// Forces a network request to get fresh data and update the cache.
   Future<void> refreshPosts() async {
     await loadPosts(forceRefresh: true);
   }

@@ -6,6 +6,8 @@ import '../../../shared/shared_exports.dart';
 import '../../../router/router_exports.dart';
 import '../../../featurePractice/data/datasources/practice_local_datasource.dart';
 import '../../../featurePractice/data/repositories/practice_repository_impl.dart';
+import '../data/datasources/dictionary_local_datasource.dart';
+import '../data/repositories/dictionary_repository_impl.dart';
 
 // IPA Vowels (matching screenshot)
 final List<Map<String, String>> vowelIPA = [
@@ -49,20 +51,28 @@ class _IPAChartScreenState extends State<IPAChartScreen>
     with TickerProviderStateMixin, AutomaticKeepAliveClientMixin {
   late AnimationController _fadeController;
   late Animation<double> _fadeAnimation;
-  
+
   // Cache for the grid layouts to prevent rebuilds
   Widget? _vowelGrid;
   Widget? _consonantGrid;
-  
+
+  // Repository for caching dictionary data
+  late DictionaryRepositoryImpl _dictionaryRepository;
+
   // ScrollController to optimize scrolling
   final ScrollController _scrollController = ScrollController();
-  
+
   @override
   bool get wantKeepAlive => true;
 
   @override
   void initState() {
     super.initState();
+    // Initialize repository
+    _dictionaryRepository = DictionaryRepositoryImpl(
+      DictionaryLocalDataSource(),
+    );
+
     _fadeController = AnimationController(
       duration: const Duration(milliseconds: 1000), // Slightly faster animation
       vsync: this,
@@ -78,6 +88,17 @@ class _IPAChartScreenState extends State<IPAChartScreen>
         _fadeController.forward();
       }
     });
+
+    // Cache phonetic data for faster access
+    _cachePhoneticData();
+  }
+
+  /// Cache the phonetic data for faster access
+  Future<void> _cachePhoneticData() async {
+    // Combine vowels and consonants into a single dataset
+    final phoneticData = {'vowels': vowelIPA, 'consonants': consonantIPA};
+
+    await _dictionaryRepository.cachePhoneticData(phoneticData);
   }
 
   @override
@@ -107,7 +128,7 @@ class _IPAChartScreenState extends State<IPAChartScreen>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    
+
     return Scaffold(
       extendBody: true,
       body: FadeTransition(
@@ -125,11 +146,9 @@ class _IPAChartScreenState extends State<IPAChartScreen>
               children: [
                 // Custom App Bar
                 _buildAppBar(),
-                
+
                 // Main Content
-                Expanded(
-                  child: _buildContent(),
-                ),
+                Expanded(child: _buildContent()),
               ],
             ),
           ),
@@ -144,23 +163,19 @@ class _IPAChartScreenState extends State<IPAChartScreen>
       ),
     );
   }
-  
+
   Widget _buildAppBar() {
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 20,
-        vertical: 16,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       child: Row(
         children: [
           Expanded(
             child: Text(
               'IPA Sound Chart',
-              style: AppTheme.lightTheme.textTheme.headlineMedium
-                  ?.copyWith(
-                    fontWeight: FontWeight.w800,
-                    color: AppColors.gray800,
-                  ),
+              style: AppTheme.lightTheme.textTheme.headlineMedium?.copyWith(
+                fontWeight: FontWeight.w800,
+                color: AppColors.gray800,
+              ),
             ),
           ),
           // Add sound toggle button
@@ -168,15 +183,10 @@ class _IPAChartScreenState extends State<IPAChartScreen>
             decoration: BoxDecoration(
               color: AppColors.primary.withOpacity(0.1),
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: AppColors.primary.withOpacity(0.2),
-              ),
+              border: Border.all(color: AppColors.primary.withOpacity(0.2)),
             ),
             child: IconButton(
-              icon: const Icon(
-                Icons.volume_up,
-                color: AppColors.primary,
-              ),
+              icon: const Icon(Icons.volume_up, color: AppColors.primary),
               onPressed: _showHintSnackbar,
             ),
           ),
@@ -184,16 +194,12 @@ class _IPAChartScreenState extends State<IPAChartScreen>
       ),
     );
   }
-  
+
   Widget _buildContent() {
     return ListView(
       controller: _scrollController,
       physics: const AlwaysScrollableScrollPhysics(),
-      padding: const EdgeInsets.only(
-        left: 20,
-        right: 20,
-        bottom: 120,
-      ),
+      padding: const EdgeInsets.only(left: 20, right: 20, bottom: 120),
       cacheExtent: 1200, // Cache more content to reduce rebuilds when scrolling
       children: [
         const SizedBox(height: 8),
@@ -205,24 +211,20 @@ class _IPAChartScreenState extends State<IPAChartScreen>
         const SizedBox(height: 16),
         _buildVowelsGrid(),
         const SizedBox(height: 40),
-        _buildSectionHeader(
-          'Consonants',
-          Icons.hearing,
-          AppColors.accent,
-        ),
+        _buildSectionHeader('Consonants', Icons.hearing, AppColors.accent),
         const SizedBox(height: 16),
         _buildConsonantsGrid(),
         const SizedBox(height: 20),
       ],
     );
   }
-  
+
   Widget _buildVowelsGrid() {
     // Use cached grid if available
     _vowelGrid ??= _buildBentoGrid(vowelIPA, 'vowels');
     return _vowelGrid!;
   }
-  
+
   Widget _buildConsonantsGrid() {
     // Use cached grid if available
     _consonantGrid ??= _buildBentoGrid(consonantIPA, 'consonants');
@@ -298,14 +300,17 @@ class _IPAChartScreenState extends State<IPAChartScreen>
     );
   }
 
-  Widget _buildResponsiveGrid(List<Map<String, String>> ipaList, double maxWidth) {
+  Widget _buildResponsiveGrid(
+    List<Map<String, String>> ipaList,
+    double maxWidth,
+  ) {
     // Calculate how many columns can fit
     const buttonWidth = 110.0; // Medium button width
     const spacing = 8.0;
     int crossAxisCount = ((maxWidth - 16) / (buttonWidth + spacing))
         .floor()
         .clamp(3, 4); // Fixed at 3-4 columns
-    
+
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -321,10 +326,14 @@ class _IPAChartScreenState extends State<IPAChartScreen>
         // Wrap each button in RepaintBoundary to isolate repaints
         return RepaintBoundary(
           child: AnimatedContainer(
-            duration: Duration(milliseconds: 200 + (i * 30)), // Faster animations
+            duration: Duration(
+              milliseconds: 200 + (i * 30),
+            ), // Faster animations
             curve: Curves.easeInOut,
             child: IPASymbolButton(
-              key: ValueKey('${ipa['symbol']}_$i'), // Use stable key for better reuse
+              key: ValueKey(
+                '${ipa['symbol']}_$i',
+              ), // Use stable key for better reuse
               symbol: ipa['symbol']!,
               label: ipa['label']!,
               example: ipa['example']!,
@@ -336,21 +345,16 @@ class _IPAChartScreenState extends State<IPAChartScreen>
       },
     );
   }
-  
+
   void _showHintSnackbar() {
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: const Row(
             children: [
-              Icon(
-                Icons.info_outline,
-                color: Colors.white,
-              ),
+              Icon(Icons.info_outline, color: Colors.white),
               SizedBox(width: 8),
-              Text(
-                'Pilih Simbol untuk mendengar pengucapan',
-              ),
+              Text('Pilih Simbol untuk mendengar pengucapan'),
             ],
           ),
           backgroundColor: AppColors.primary,
@@ -363,7 +367,7 @@ class _IPAChartScreenState extends State<IPAChartScreen>
       );
     }
   }
-  
+
   void _handleNavigation(int index) {
     switch (index) {
       case 0:

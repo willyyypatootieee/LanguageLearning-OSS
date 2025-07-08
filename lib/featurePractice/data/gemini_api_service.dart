@@ -1,13 +1,15 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import '../domain/repositories/practice_repository.dart';
 
 class GeminiApiService {
   final String apiKey;
+  final PracticeRepository? practiceRepository;
   String _conversationHistory = '';
   final int _maxHistoryLength = 5; // Keep track of last 5 exchanges
   int _historyCount = 0;
 
-  GeminiApiService(this.apiKey);
+  GeminiApiService(this.apiKey, {this.practiceRepository});
 
   Future<String> getBearResponse(String userText) async {
     // Detect Indonesian (very basic, you can improve this)
@@ -17,6 +19,21 @@ class GeminiApiService {
     ).hasMatch(userText);
     if (isIndonesian) {
       return "I'm sorry, I don't understand Indonesian. Can we speak in English?";
+    }
+
+    // First check if we have a cached response
+    if (practiceRepository != null) {
+      final cachedResponse = await practiceRepository!.getCachedAIResponse(
+        userText,
+      );
+      if (cachedResponse != null) {
+        // Add to conversation history but return the cached response
+        _conversationHistory += 'User: $userText\n';
+        _conversationHistory += 'Dr. Hiro: $cachedResponse\n';
+        _historyCount++;
+        print('DEBUG: Using cached AI response for practice session');
+        return cachedResponse;
+      }
     }
 
     // Add the user's message to the conversation history
@@ -73,6 +90,12 @@ If the user asks about languages, give them encouragement and simple tips.
               .sublist(2)
               .join('\n'); // Remove oldest exchange
           _historyCount--;
+        }
+
+        // Cache the response for future use
+        if (practiceRepository != null) {
+          practiceRepository!.cacheAIResponse(userText, bearResponse);
+          print('DEBUG: Caching new AI response for future use');
         }
 
         return bearResponse;

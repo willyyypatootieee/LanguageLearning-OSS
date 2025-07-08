@@ -4,12 +4,14 @@ import 'package:dio/dio.dart';
 import 'package:experimental/featureLeaderboard/presentation/cubit/leaderboard_cubit.dart';
 import 'package:experimental/featureLeaderboard/presentation/screens/leaderboard_screen.dart';
 import 'package:experimental/featureLeaderboard/data/datasources/leaderboard_remote_datasource.dart';
+import 'package:experimental/featureLeaderboard/data/datasources/leaderboard_local_datasource.dart';
 import 'package:experimental/featureLeaderboard/data/repositories/leaderboard_repository_impl.dart';
 import 'package:experimental/featureLeaderboard/domain/usecases/get_leaderboard_users_usecase.dart';
 
 LeaderboardCubit? _leaderboardCubit;
 LeaderboardRepositoryImpl? _leaderboardRepository;
 LeaderboardRemoteDataSourceImpl? _leaderboardRemoteDataSource;
+LeaderboardLocalDataSource? _leaderboardLocalDataSource;
 Dio? _dio;
 
 class LeaderboardProvider extends StatefulWidget {
@@ -41,8 +43,10 @@ class _LeaderboardProviderState extends State<LeaderboardProvider>
     super.build(context);
     _dio ??= Dio();
     _leaderboardRemoteDataSource ??= LeaderboardRemoteDataSourceImpl(_dio!);
+    _leaderboardLocalDataSource ??= LeaderboardLocalDataSource();
     _leaderboardRepository ??= LeaderboardRepositoryImpl(
       _leaderboardRemoteDataSource!,
+      _leaderboardLocalDataSource!,
     );
     _leaderboardCubit ??= LeaderboardCubit(
       GetLeaderboardUsersUseCase(_leaderboardRepository!),

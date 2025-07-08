@@ -8,9 +8,10 @@ class GetPostsUsecase {
   GetPostsUsecase(this._repository);
 
   /// Execute the use case to get posts
-  Future<List<Post>> call() async {
+  /// If [forceRefresh] is true, it will ignore cache and fetch from the server
+  Future<List<Post>> call({bool forceRefresh = false}) async {
     try {
-      return await _repository.getPosts();
+      return await _repository.getPosts(forceRefresh: forceRefresh);
     } catch (e) {
       return [];
     }

@@ -11,14 +11,54 @@ class PostRepositoryImpl implements PostRepository {
   final PostLocalDataSource _localDataSource;
 
   PostRepositoryImpl(this._remoteDataSource, this._localDataSource);
-
   @override
-  Future<List<Post>> getPosts() async {
+  Future<List<Post>> getPosts({bool forceRefresh = false}) async {
     try {
-      // For GET requests, we only need admin auth
-      return await _remoteDataSource.getPosts();
+      // Check if we can use cached data
+      if (!forceRefresh) {
+        final isCacheValid = await _localDataSource.isCacheValid();
+
+        if (isCacheValid) {
+          final cachedPosts = await _localDataSource.getCachedPosts();
+          if (cachedPosts != null && cachedPosts.isNotEmpty) {
+            print('DEBUG: Using cached posts data');
+            print('DEBUG: Successfully parsed ${cachedPosts.length} posts');
+            return cachedPosts;
+          }
+        }
+      }
+
+      // If cache is invalid or we're forcing a refresh, get from remote
+      print('DEBUG: Fetching posts from remote');
+      final posts = await _remoteDataSource.getPosts();
+
+      // Additional debug logging to help diagnose parsing issues
+      print('DEBUG: Successfully parsed ${posts.length} posts');
+      if (posts.isNotEmpty) {
+        // Check for problematic fields that might cause issues
+        final firstPost = posts.first;
+        print('DEBUG: Post author totalXp: ${firstPost.author.totalXp}');
+        print('DEBUG: Post author username: ${firstPost.author.username}');
+        print(
+          'DEBUG: Post author currentRank: ${firstPost.author.currentRank}',
+        );
+      }
+
+      // Cache the new data
+      await _localDataSource.cachePosts(posts);
+
+      return posts;
     } catch (e) {
       print('DEBUG: Exception in repository getPosts: $e');
+
+      // Try to return cached data even if expired as fallback
+      final cachedPosts = await _localDataSource.getCachedPosts();
+      if (cachedPosts != null && cachedPosts.isNotEmpty) {
+        print('DEBUG: Returning expired cached posts due to error');
+        print('DEBUG: Cached posts count: ${cachedPosts.length}');
+        return cachedPosts;
+      }
+
       return [];
     }
   }

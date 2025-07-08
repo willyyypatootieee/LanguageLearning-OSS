@@ -12,7 +12,11 @@ class LeaderboardCubit extends Cubit<LeaderboardState> {
     : super(LeaderboardInitial());
 
   Future<void> fetchLeaderboard({bool forceRefresh = false}) async {
-    emit(LeaderboardLoading());
+    // Only show loading state if we're forcing a refresh or starting from initial state
+    if (state is LeaderboardInitial || forceRefresh) {
+      emit(LeaderboardLoading());
+    }
+
     try {
       final users = await getLeaderboardUsersUseCase(
         forceRefresh: forceRefresh,
@@ -20,7 +24,13 @@ class LeaderboardCubit extends Cubit<LeaderboardState> {
       final rankedUsers = _assignRanks(users);
       emit(LeaderboardLoaded(rankedUsers));
     } catch (e) {
-      emit(LeaderboardError(e.toString()));
+      // Only emit error if we don't already have data to show
+      if (!(state is LeaderboardLoaded)) {
+        emit(LeaderboardError(e.toString()));
+      } else {
+        // Log error but keep showing existing data
+        print('Error refreshing leaderboard: $e');
+      }
     }
   }
 

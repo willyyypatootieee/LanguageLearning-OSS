@@ -8,6 +8,9 @@ import '../../../core/constants/app_constants.dart';
 import '../../../router/router_exports.dart';
 import '../widgets/mic_waveform_placeholder.dart';
 import '../../data/gemini_api_service.dart';
+import '../../data/datasources/practice_local_datasource.dart';
+import '../../data/repositories/practice_repository_impl.dart';
+import '../../domain/repositories/practice_repository.dart';
 
 /// Video call-like screen for practicing with AI bear
 class PracticeVideoCallScreen extends StatefulWidget {
@@ -37,9 +40,15 @@ class _PracticeVideoCallScreenState extends State<PracticeVideoCallScreen>
   bool _isProcessing =
       false; // For tracking when we're waiting for Gemini response
 
+  // Repository for caching AI responses
+  late PracticeRepository _repository;
+
   @override
   void initState() {
     super.initState();
+    // Initialize repository for caching
+    _repository = PracticeRepositoryImpl(PracticeLocalDataSource());
+
     // Initialize other animations
     _fadeController = AnimationController(
       duration: AppConstants.animationNormal,
@@ -53,6 +62,9 @@ class _PracticeVideoCallScreenState extends State<PracticeVideoCallScreen>
     _speech = stt.SpeechToText();
     _tts = FlutterTts();
     _initTtsVoice();
+
+    // Initialize the repository
+    _repository = PracticeRepositoryImpl(PracticeLocalDataSource());
 
     // Add observer for app lifecycle changes to handle permission changes
     WidgetsBinding.instance.addObserver(this);
@@ -209,6 +221,18 @@ class _PracticeVideoCallScreenState extends State<PracticeVideoCallScreen>
     if (shouldEnd == true) {
       _speech.stop();
       _tts.stop();
+
+      // Add practice time (approx 5 minutes per session)
+      await _repository.addPracticeTime(5);
+
+      // Update streak
+      final currentStreak = await _repository.getPracticeStreak();
+      await _repository.updatePracticeStreak(currentStreak + 1);
+
+      // Log this as a practice session (estimate words learned)
+      int wordsLearned = (_lastUserText.split(' ').length ~/ 3).clamp(5, 20);
+      await _repository.logPracticeSession(5, wordsLearned);
+
       appRouter.pop();
     }
   }
@@ -361,8 +385,16 @@ class _PracticeVideoCallScreenState extends State<PracticeVideoCallScreen>
       _isProcessing = true;
     });
     _speech.stop();
-    _geminiService ??= GeminiApiService(_apiKey);
+    // Initialize GeminiApiService with repository for caching
+    _geminiService ??= GeminiApiService(
+      _apiKey,
+      practiceRepository: _repository,
+    );
     final response = await _geminiService!.getBearResponse(userText);
+
+    // Log practice session for history tracking
+    await _repository.logPracticeSession(1, userText.split(' ').length ~/ 4);
+
     setState(() {
       _bearResponse = response;
       _isProcessing = false;

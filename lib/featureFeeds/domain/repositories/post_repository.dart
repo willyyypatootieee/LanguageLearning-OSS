@@ -5,7 +5,8 @@ import '../models/reaction.dart';
 /// Abstract repository interface for posts
 abstract class PostRepository {
   /// Get posts feed from the user and their friends
-  Future<List<Post>> getPosts();
+  /// If [forceRefresh] is true, it will ignore cache and fetch from the server
+  Future<List<Post>> getPosts({bool forceRefresh = false});
 
   /// Create a new post
   Future<Post?> createPost(CreatePostRequest request);

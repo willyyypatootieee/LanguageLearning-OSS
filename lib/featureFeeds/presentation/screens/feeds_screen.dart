@@ -43,8 +43,8 @@ class _FeedsScreenState extends State<FeedsScreen>
     });
   }
 
-  Future<void> _loadPosts() async {
-    await _feedsCubit.loadPosts();
+  Future<void> _loadPosts({bool forceRefresh = false}) async {
+    await _feedsCubit.loadPosts(forceRefresh: forceRefresh);
   }
 
   Future<void> _loadFriendsData() async {
@@ -55,10 +55,11 @@ class _FeedsScreenState extends State<FeedsScreen>
   void _openFriendsManagement() {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => ChangeNotifierProvider.value(
-          value: _feedsCubit,
-          child: const FriendsManagementWidget(),
-        ),
+        builder:
+            (context) => ChangeNotifierProvider.value(
+              value: _feedsCubit,
+              child: const FriendsManagementWidget(),
+            ),
       ),
     );
   }
@@ -99,9 +100,7 @@ class _FeedsScreenState extends State<FeedsScreen>
           _buildUserSearchResults(),
 
           // Posts feed
-          Expanded(
-            child: _buildPostsFeed(),
-          ),
+          Expanded(child: _buildPostsFeed()),
         ],
       ),
       bottomNavigationBar: MainNavbar(
@@ -186,8 +185,10 @@ class _FeedsScreenState extends State<FeedsScreen>
       physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.all(AppConstants.spacingL),
       itemCount: _feedsCubit.posts.length,
-      // Use cacheExtent to keep items in memory when scrolling
-      cacheExtent: MediaQuery.of(context).size.height,
+      // Use larger cacheExtent to keep more items in memory when scrolling
+      cacheExtent: MediaQuery.of(context).size.height * 2,
+      // Add key to ListView to help with efficient rebuilds
+      key: ValueKey('posts-list-${_feedsCubit.posts.length}'),
       itemBuilder: (context, index) {
         // Use RepaintBoundary to isolate painting for each item
         return RepaintBoundary(
@@ -205,7 +206,9 @@ class _FeedsScreenState extends State<FeedsScreen>
   }
 
   Future<void> _handleRefresh() async {
+    // When user explicitly pulls to refresh, force a refresh of all data
     await _feedsCubit.refreshPosts();
+    await _loadFriendsData();
   }
 
   Future<void> _navigateToPractice() async {
@@ -258,12 +261,13 @@ class _FeedsScreenState extends State<FeedsScreen>
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => FeedsFilterModal(
-        onFiltersApplied: (filters) {
-          // Apply filters to the cubit
-          _feedsCubit.applyFilters(filters);
-        },
-      ),
+      builder:
+          (context) => FeedsFilterModal(
+            onFiltersApplied: (filters) {
+              // Apply filters to the cubit
+              _feedsCubit.applyFilters(filters);
+            },
+          ),
     );
   }
 }
