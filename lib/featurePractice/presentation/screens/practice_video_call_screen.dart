@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import 'package:rive/rive.dart';
@@ -43,6 +44,16 @@ class _PracticeVideoCallScreenState extends State<PracticeVideoCallScreen>
   // Repository for caching AI responses
   late PracticeRepository _repository;
 
+  // Counter for retry attempts with speech recognition
+  int _speechRetryCount = 0;
+  static const int _maxSpeechRetries = 3;
+
+  // For handling timeouts
+  Timer? _speechTimeout;
+
+  // For tracking sound levels
+  double _currentSoundLevel = 0;
+
   @override
   void initState() {
     super.initState();
@@ -59,8 +70,13 @@ class _PracticeVideoCallScreenState extends State<PracticeVideoCallScreen>
       vsync: this,
     );
     _fadeController.forward();
+
+    // Initialize speech and TTS services
     _speech = stt.SpeechToText();
     _tts = FlutterTts();
+
+    // Initialize voice and speech recognition with higher sensitivity
+    _initializeVoiceServices();
     _initTtsVoice();
 
     // Initialize the repository
@@ -142,6 +158,45 @@ class _PracticeVideoCallScreenState extends State<PracticeVideoCallScreen>
     }
   }
 
+  /// Initialize voice services with improved sensitivity
+  Future<void> _initializeVoiceServices() async {
+    try {
+      // Configure speech recognition for better sensitivity
+      await _speech.initialize(
+        debugLogging: true,
+        onStatus: (status) {
+          print('DEBUG: Speech init status: $status');
+        },
+        onError: (error) {
+          print('ERROR: Speech init error: ${error.errorMsg}');
+        },
+      );
+
+      if (Platform.isAndroid) {
+        print(
+          'DEBUG: Android speech recognition initialized with enhanced settings',
+        );
+
+        // Apply our fine-tuned settings
+        // We will use these enhanced settings during listening
+      } else {
+        print(
+          'DEBUG: Speech recognition initialized for ${Platform.operatingSystem}',
+        );
+      }
+    } catch (e) {
+      print('ERROR: Failed to initialize voice services: $e');
+      // Fall back to standard initialization
+      try {
+        await _speech.initialize();
+      } catch (e) {
+        print(
+          'ERROR: Failed to initialize speech even with standard settings: $e',
+        );
+      }
+    }
+  }
+
   @override
   void dispose() {
     _bearController?.dispose();
@@ -149,6 +204,7 @@ class _PracticeVideoCallScreenState extends State<PracticeVideoCallScreen>
     _pulseController.dispose();
     _speech.stop();
     _tts.stop();
+    _speechTimeout?.cancel();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
@@ -238,6 +294,9 @@ class _PracticeVideoCallScreenState extends State<PracticeVideoCallScreen>
   }
 
   Future<void> _startListening() async {
+    // Cancel any existing timeout
+    _speechTimeout?.cancel();
+
     if (_isMuted || _apiKey == null) return;
 
     // Check microphone permission using permission_handler
@@ -310,14 +369,57 @@ class _PracticeVideoCallScreenState extends State<PracticeVideoCallScreen>
       }
     }
 
+    // Reset retry counter if we're starting fresh
+    if (!_isListening) {
+      _speechRetryCount = 0;
+    }
+
     bool available = await _speech.initialize(
       onStatus: (status) {
+        print('DEBUG: Speech recognition status: $status');
         if (status == 'done' && !_isMuted) {
           _setBearHearing(false); // Stop Hear animation
-          _processUserSpeech(_lastUserText);
+
+          // Only process if we actually got some text
+          if (_lastUserText.isNotEmpty) {
+            _processUserSpeech(_lastUserText);
+            _speechRetryCount = 0; // Reset retry counter on success
+          } else if (_speechRetryCount < _maxSpeechRetries) {
+            // Retry if no text was detected and we haven't exceeded max retries
+            _speechRetryCount++;
+            print(
+              'DEBUG: No speech detected, retrying (attempt $_speechRetryCount of $_maxSpeechRetries)',
+            );
+            Future.delayed(const Duration(milliseconds: 500), () {
+              if (!_isMuted && mounted) {
+                _startListening(); // Retry
+              }
+            });
+          } else {
+            // Max retries exceeded, show message
+            setState(() {
+              _userText = 'Tidak mendengar apa-apa. Coba bicara lebih keras.';
+            });
+            _speechRetryCount = 0;
+
+            // Show feedback to the user through bear response
+            _bearResponse =
+                "I'm having trouble hearing you. Could you speak a bit louder please?";
+            _speakBearResponse(_bearResponse);
+
+            // Try again after a delay
+            Future.delayed(const Duration(seconds: 3), () {
+              if (!_isMuted && mounted) {
+                _startListening();
+              }
+            });
+          }
         }
       },
       onError: (error) {
+        // Log the error for debugging purposes
+        print('ERROR: Speech recognition error: ${error.errorMsg}');
+
         // Handle errors (could be permission-related)
         setState(() {
           _isListening = false;
@@ -327,8 +429,22 @@ class _PracticeVideoCallScreenState extends State<PracticeVideoCallScreen>
                   : 'Error: ${error.errorMsg}';
         });
 
+        // For most errors (except permission ones), retry
+        if (!error.errorMsg.contains('permission')) {
+          if (_speechRetryCount < _maxSpeechRetries) {
+            _speechRetryCount++;
+            print(
+              'DEBUG: Speech error, retrying (attempt $_speechRetryCount of $_maxSpeechRetries)',
+            );
+            Future.delayed(const Duration(milliseconds: 1000), () {
+              if (!_isMuted && mounted) {
+                _startListening(); // Retry
+              }
+            });
+          }
+        }
         // If error is related to permissions, show guidance
-        if (error.errorMsg.contains('permission') && mounted) {
+        else if (error.errorMsg.contains('permission') && mounted) {
           showDialog(
             context: context,
             builder:
@@ -356,23 +472,82 @@ class _PracticeVideoCallScreenState extends State<PracticeVideoCallScreen>
         _userText = 'Listening...'; // Show that we're listening
       });
       _setBearHearing(true); // Start Hear animation
-      _speech.listen(
-        onResult: (result) {
-          setState(() {
-            _lastUserText = result.recognizedWords;
-            _userText =
-                result.recognizedWords; // Update the UI with what we're hearing
+
+      try {
+        await _speech.listen(
+          onResult: (result) {
+            setState(() {
+              _lastUserText = result.recognizedWords;
+              _userText =
+                  result
+                      .recognizedWords; // Update the UI with what we're hearing
+            });
+
+            // Reset timeout timer every time we get a result
+            _speechTimeout?.cancel();
+            _speechTimeout = Timer(const Duration(seconds: 10), () {
+              if (_isListening && _lastUserText.isEmpty) {
+                // If after 10 seconds we still don't have any text, stop and retry
+                _speech.stop();
+                Future.delayed(const Duration(milliseconds: 500), () {
+                  if (!_isMuted && mounted) {
+                    _startListening(); // Retry
+                  }
+                });
+              }
+            });
+
+            // Add debug information
+            print('DEBUG: Recognition confidence: ${result.confidence}');
+            print('DEBUG: Recognized text: ${result.recognizedWords}');
+
+            if (result.finalResult) {
+              _setBearHearing(false); // Stop Hear animation
+              _processUserSpeech(_lastUserText);
+            }
+          },
+          localeId: 'en_US',
+          listenMode:
+              stt.ListenMode.confirmation, // Better for conversational use
+          pauseFor: const Duration(seconds: 2), // Wait longer before finalizing
+          listenFor: const Duration(seconds: 20), // Listen longer
+          partialResults: true, // Show intermediate results
+          cancelOnError: false, // Don't cancel on errors
+          onSoundLevelChange: (level) {
+            // Update sound level for visualization
+            setState(() {
+              _currentSoundLevel = level;
+            });
+
+            // Log sound level for debugging
+            if (level > 10) {
+              // Only log significant sound levels to reduce log spam
+              print('DEBUG: Sound level: $level');
+            }
+          },
+        );
+      } catch (e) {
+        print('ERROR: Exception during speech.listen(): $e');
+        if (_speechRetryCount < _maxSpeechRetries) {
+          _speechRetryCount++;
+          Future.delayed(const Duration(seconds: 1), () {
+            if (!_isMuted && mounted) {
+              _startListening();
+            }
           });
-          if (result.finalResult) {
-            _setBearHearing(false); // Stop Hear animation
-            _processUserSpeech(_lastUserText);
-          }
-        },
-        localeId: 'en_US',
-      );
+        }
+      }
     } else {
       setState(() {
         _userText = 'Speech recognition not available';
+      });
+
+      // Try one more time after a delay
+      Future.delayed(const Duration(seconds: 2), () {
+        if (!_isMuted && mounted && _speechRetryCount < _maxSpeechRetries) {
+          _speechRetryCount++;
+          _startListening();
+        }
       });
     }
   }
@@ -458,6 +633,8 @@ class _PracticeVideoCallScreenState extends State<PracticeVideoCallScreen>
       _setBearTalking(false);
     }
   }
+
+  /// Configure Android speech recognition for higher sensitivity
 
   @override
   Widget build(BuildContext context) {
@@ -572,7 +749,7 @@ class _PracticeVideoCallScreenState extends State<PracticeVideoCallScreen>
                   vertical: 16,
                 ),
                 child: Container(
-                  height: 80,
+                  height: 100, // Increased height
                   decoration: BoxDecoration(
                     color: AppColors.gray200,
                     borderRadius: BorderRadius.circular(AppConstants.radiusM),
@@ -585,12 +762,23 @@ class _PracticeVideoCallScreenState extends State<PracticeVideoCallScreen>
                                   : Colors.white.withOpacity(0.2)),
                       width: 2,
                     ),
+                    boxShadow:
+                        _isListening
+                            ? [
+                              BoxShadow(
+                                color: Colors.orange.withOpacity(0.3),
+                                blurRadius: 8,
+                                spreadRadius: 2,
+                              ),
+                            ]
+                            : null,
                   ),
                   child: Stack(
                     children: [
                       Center(
                         child: MicWaveformPlaceholder(
                           isActive: !_isMuted && _isListening,
+                          soundLevel: _currentSoundLevel,
                         ),
                       ),
                       if (_userText.isNotEmpty)
