@@ -586,6 +586,11 @@ class _BentoStatsWidgetState extends State<BentoStatsWidget>
       },
     );
   }
+
+
+
+
+
   Widget _buildStatCard(
     String title,
     String value,
