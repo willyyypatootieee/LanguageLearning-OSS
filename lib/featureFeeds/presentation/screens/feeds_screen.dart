@@ -8,7 +8,6 @@ import '../../../featurePractice/data/datasources/practice_local_datasource.dart
 import '../../../featurePractice/data/repositories/practice_repository_impl.dart';
 import '../cubit/feeds_cubit.dart';
 import '../widgets/feeds_widgets.dart';
-import '../widgets/components/friends_management_widget.dart';
 
 /// Main feeds screen
 class FeedsScreen extends StatefulWidget {

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:rive/rive.dart' as rive;
 import 'package:flutter/services.dart' show rootBundle;
-import '../../../core/constants/app_constants.dart';
 
 /// Fullscreen avatar page widget
 class FullscreenAvatarPage extends StatefulWidget {

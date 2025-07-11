@@ -37,8 +37,9 @@ mixin FriendManagement on ChangeNotifier {
     notifyListeners();
 
     try {
-      if (_getFriendsUsecase == null)
+      if (_getFriendsUsecase == null) {
         throw Exception('GetFriendsUsecase not initialized');
+      }
       final friends = await _getFriendsUsecase!();
       state = state.copyWith(friends: friends);
     } catch (e) {
@@ -54,8 +55,9 @@ mixin FriendManagement on ChangeNotifier {
     notifyListeners();
 
     try {
-      if (_getPendingFriendRequestsUsecase == null)
+      if (_getPendingFriendRequestsUsecase == null) {
         throw Exception('GetPendingFriendRequestsUsecase not initialized');
+      }
       final requests = await _getPendingFriendRequestsUsecase!();
       state = state.copyWith(pendingRequests: requests);
     } catch (e) {
@@ -68,8 +70,9 @@ mixin FriendManagement on ChangeNotifier {
 
   Future<bool> acceptFriendRequest(String requestId) async {
     try {
-      if (_acceptFriendRequestUsecase == null)
+      if (_acceptFriendRequestUsecase == null) {
         throw Exception('AcceptFriendRequestUsecase not initialized');
+      }
       await _acceptFriendRequestUsecase!(requestId);
 
       final updatedRequests =
@@ -88,8 +91,9 @@ mixin FriendManagement on ChangeNotifier {
 
   Future<bool> rejectFriendRequest(String requestId) async {
     try {
-      if (_rejectFriendRequestUsecase == null)
+      if (_rejectFriendRequestUsecase == null) {
         throw Exception('RejectFriendRequestUsecase not initialized');
+      }
       await _rejectFriendRequestUsecase!(requestId);
 
       final updatedRequests =
@@ -107,8 +111,9 @@ mixin FriendManagement on ChangeNotifier {
 
   Future<bool> removeFriend(String friendId) async {
     try {
-      if (_removeFriendUsecase == null)
+      if (_removeFriendUsecase == null) {
         throw Exception('RemoveFriendUsecase not initialized');
+      }
       await _removeFriendUsecase!(friendId);
 
       final updatedFriends =
@@ -145,8 +150,9 @@ mixin FriendManagement on ChangeNotifier {
 
   Future<bool> sendFriendRequest(String username) async {
     try {
-      if (_sendFriendRequestUsecase == null)
+      if (_sendFriendRequestUsecase == null) {
         throw Exception('SendFriendRequestUsecase not initialized');
+      }
       await _sendFriendRequestUsecase!(username);
 
       final updatedSearchResults =

@@ -806,7 +806,7 @@ class BentoRankSectionWidget extends StatelessWidget {
                 rankColor,
               ),
             );
-          }).toList(), // Force evaluation to avoid repeated rebuilds
+          }), // Force evaluation to avoid repeated rebuilds
         ],
       ),
     );

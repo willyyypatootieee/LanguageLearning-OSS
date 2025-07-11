@@ -25,7 +25,7 @@ class LeaderboardCubit extends Cubit<LeaderboardState> {
       emit(LeaderboardLoaded(rankedUsers));
     } catch (e) {
       // Only emit error if we don't already have data to show
-      if (!(state is LeaderboardLoaded)) {
+      if (state is! LeaderboardLoaded) {
         emit(LeaderboardError(e.toString()));
       } else {
         // Log error but keep showing existing data

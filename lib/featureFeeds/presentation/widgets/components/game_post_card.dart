@@ -389,7 +389,7 @@ class _GamePostCardState extends State<GamePostCard> with AutomaticKeepAliveClie
                     ),
                   ),
                 )
-                .toList(),
+                ,
           ],
         ),
       );

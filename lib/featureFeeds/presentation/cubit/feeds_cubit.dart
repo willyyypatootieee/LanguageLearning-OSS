@@ -1,10 +1,8 @@
 import 'package:flutter/foundation.dart';
 import '../../domain/models/post.dart';
-import '../../domain/models/post_request.dart';
 import '../../domain/models/user_search_result.dart';
 import '../../domain/models/friend.dart';
 import '../../domain/models/friend_request.dart';
-import '../../domain/models/reaction.dart';
 import '../../domain/usecases/get_posts_usecase.dart';
 import '../../domain/usecases/create_post_usecase.dart';
 import '../../domain/usecases/search_users_usecase.dart';

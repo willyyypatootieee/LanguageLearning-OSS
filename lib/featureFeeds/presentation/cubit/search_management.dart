@@ -20,8 +20,9 @@ mixin SearchManagement on ChangeNotifier {
     notifyListeners();
 
     try {
-      if (_searchUsersUsecase == null)
+      if (_searchUsersUsecase == null) {
         throw Exception('SearchUsersUsecase not initialized');
+      }
       final results = await _searchUsersUsecase!(query.trim());
       state = state.copyWith(userSearchResults: results);
     } catch (e) {

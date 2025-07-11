@@ -45,8 +45,9 @@ mixin PostManagement on ChangeNotifier {
     notifyListeners(); // Notify immediately to show loading state
 
     try {
-      if (_getPostsUsecase == null)
+      if (_getPostsUsecase == null) {
         throw Exception('GetPostsUsecase not initialized');
+      }
 
       // Call usecase with forceRefresh parameter to potentially use cached data
       final posts = await _getPostsUsecase!(forceRefresh: forceRefresh);
@@ -81,8 +82,9 @@ mixin PostManagement on ChangeNotifier {
     notifyListeners();
 
     try {
-      if (_createPostUsecase == null)
+      if (_createPostUsecase == null) {
         throw Exception('CreatePostUsecase not initialized');
+      }
       final request = CreatePostRequest(
         content: content.trim(),
         imageUrl: imageUrl,

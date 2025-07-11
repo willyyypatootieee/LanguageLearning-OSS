@@ -30,7 +30,7 @@ class _PracticeVideoCallScreenState extends State<PracticeVideoCallScreen>
 
   bool _isMuted = false;
   // API key - in production, this should be stored securely, not hardcoded
-  final String? _apiKey = 'AIzaSyCmhRfnswYYEibUkCgrmfd8XQYeK_6z5PM';
+  final String _apiKey = 'AIzaSyCmhRfnswYYEibUkCgrmfd8XQYeK_6z5PM';
   late stt.SpeechToText _speech;
   late FlutterTts _tts;
   bool _isListening = false;
