@@ -679,7 +679,7 @@ class _BentoStatsWidgetState extends State<BentoStatsWidget>
   }
 }
 
-/// Modern rank section widget with bento style
+/// Modern rank section widget with bento box style
 class BentoRankSectionWidget extends StatelessWidget {
   final String rankType;
   final List<LeaderboardUser> users;
