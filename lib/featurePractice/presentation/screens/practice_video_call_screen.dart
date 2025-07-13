@@ -297,7 +297,7 @@ class _PracticeVideoCallScreenState extends State<PracticeVideoCallScreen>
     // Cancel any existing timeout
     _speechTimeout?.cancel();
 
-    if (_isMuted || _apiKey == null) return;
+    if (_isMuted) return;
 
     // Check microphone permission using permission_handler
     if (Platform.isAndroid || Platform.isIOS) {
@@ -570,7 +570,7 @@ class _PracticeVideoCallScreenState extends State<PracticeVideoCallScreen>
   }
 
   Future<void> _processUserSpeech(String userText) async {
-    if (userText.trim().isEmpty || _apiKey == null) return;
+    if (userText.trim().isEmpty) return;
     setState(() {
       _isListening = false;
       _userText = userText;

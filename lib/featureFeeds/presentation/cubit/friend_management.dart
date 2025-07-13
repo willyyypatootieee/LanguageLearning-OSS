@@ -1,5 +1,4 @@
 import 'package:flutter/foundation.dart';
-import '../../domain/models/friend_request.dart';
 import '../../domain/models/user_search_result.dart';
 import '../../domain/usecases/accept_friend_request_usecase.dart';
 import '../../domain/usecases/get_friends_usecase.dart';
